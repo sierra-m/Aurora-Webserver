@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Balloon Flight {uid}, Modem Name {modemName} on {date}</name>
+    <description>The path of the balloon's flight</description>
+    <Style id="AscentStyle">
+      <LineStyle>
+        <color>7fffff6f</color>
+        <width>4</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>3fccffff</color>
+      </PolyStyle>
+    </Style>
+    <Style id="DescentStyle">
+      <LineStyle>
+        <color>7F00FF00</color>
+        <width>4</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>3F00FF00</color>
+      </PolyStyle>
+    </Style>
+    <Placemark>
+      <name>Balloon Ascent</name>
+      <styleUrl>#AscentStyle</styleUrl>
+      <LineString>
+        <extrude>1</extrude>
+        <tessellate>1</tessellate>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>
+          {ascentCoords}
+        </coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Balloon Descent</name>
+      <styleUrl>#DescentStyle</styleUrl>
+      <LineString>
+        <extrude>1</extrude>
+        <tessellate>1</tessellate>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>
+          {descentCoords}
+        </coordinates>
+      </LineString>
+    </Placemark>
+    
+    <Placemark>
+      <name>Launch Point</name>
+      <Point>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>{startLong},{startLat},{startAlt}</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Turn/Burst Point</name>
+      <Point>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>{midLong},{midLat},{midAlt}</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Landing Point</name>
+      <Point>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>{endLong},{endLat},{endAlt}</coordinates>
+      </Point>
+    </Placemark>
+
+</Document>
+</kml>
