@@ -29,19 +29,30 @@ import { FlightPoint } from "../util/flightpoint";
 import {standardizeUID} from "../util/uid";
 import * as config from "../config"
 import {DatabaseError} from "pg";
+import type ModemList from "../util/modems.ts";
 
 
-const router = express.Router();
-router.modemList = undefined;  // type: ModemList
+export default class AssignRoute {
+  router: express.Router;
+  modemList: ModemList;
 
-// Creates a new point in the database for a given flight
-const insertPoint = async (flightPoint: FlightPoint, uid: string) => {
-  const formattedDatetime = flightPoint.datetime.format('YYYY-MM-DD HH:mm:ss');
-  return await query(
-      ('INSERT INTO public."flights"' +
-       '(uid, datetime, latitude, longitude, altitude, vertical_velocity, ground_speed, satellites, input_pins, output_pins) ' +
-       'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)'),
-      [
+  constructor(modemList: ModemList) {
+    this.router = express.Router();
+    this.modemList = modemList;
+
+    this.router.post('/', this.handleAssign);
+    this.router.get('/', async (req, res, next) => {
+      res.sendStatus(400);
+    });
+  }
+
+  async insertPoint (flightPoint: FlightPoint, uid: string) {
+    const formattedDatetime = flightPoint.datetime.format('YYYY-MM-DD HH:mm:ss');
+    await query(
+        ('INSERT INTO public."flights"' +
+            '(uid, datetime, latitude, longitude, altitude, vertical_velocity, ground_speed, satellites, input_pins, output_pins) ' +
+            'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)'),
+        [
           uid,
           formattedDatetime,
           flightPoint.latitude,
@@ -52,108 +63,66 @@ const insertPoint = async (flightPoint: FlightPoint, uid: string) => {
           flightPoint.satellites,
           flightPoint.input_pins,
           flightPoint.output_pins
-      ]
-  );
-};
+        ]
+    );
+  };
 
-/**
- * todo: redo this file entirely. well, maybe not entirely, but def move some things into functions
- */
+  async handleAssign (req: express.Request, res: express.Response) {
+    if ('point' in req.body) {
 
-router.post('/', async (req, res) => {
-  if ('point' in req.body) {
+      const flightPoint = new FlightPoint(req.body.point);
 
-    const flightPoint = new FlightPoint(req.body.point);
-
-    if (flightPoint.altitude < config.MIN_ALTITUDE) {
-      res.status(400).json({
-        status: 'error',
-        data: `Altitude invalid: below ${config.MIN_ALTITUDE}m, flight point rejected`
-      });
-      console.log(`Rejected point: altitude too low`);
-      return;
-    }
-    if (flightPoint.altitude > config.MAX_ALTITUDE) {
-      res.status(400).json({
-        status: 'error',
-        data: `Altitude invalid: above ${config.MAX_ALTITUDE}m, flight point rejected`
-      });
-      console.log(`Rejected point: altitude too high`);
-      return;
-    }
-
-    // TODO: implement protocol buffer
-    // const bad_fields = flightPoint.checkInvalidFields();
-    // if (bad_fields.length > 0) {
-    //   await res.status(403).json({
-    //     status: 'error',
-    //     data: `Flight point fields are incorrectly formatted: ${bad_fields}`
-    //   });
-    //   console.log(`Rejected point: bad fields: ${bad_fields}`);
-    //   return;
-    // }
-
-    // Check IMEI is in allow list
-    if (!router.modemList.has(flightPoint.imei)) {
-      res.status(403).json({
-        status: 'error',
-        data: `Modem IMEI ${flightPoint.imei} not in allowed list, datapoint rejected`
-      });
-      console.log(`Rejected point: bad imei: ${flightPoint.imei}`);
-      return;
-    }
-
-    // Check if flight entry exists for this point from the last day (in UTC) specifically. This is
-    // a variable time window starting from 00:00:00 and ending at the timestamp of the point.
-    const startDate = flightPoint.datetime.startOf('day').format('YYYY-MM-DD HH:mm:ss');
-    let result = await query<FlightRegistryQuery>(
-        `SELECT * FROM public."flight-registry" WHERE imei=$1 AND start_date=$2`,
-        [flightPoint.imei, startDate]);
-
-    if (result.length > 0) {
-      try {
-        await insertPoint(flightPoint, result[0].uid);
-        res.json({
-          status: 'success',
-          type: 'today',
-          flight: result[0].uid
+      if (flightPoint.altitude < config.MIN_ALTITUDE) {
+        res.status(400).json({
+          status: 'error',
+          data: `Altitude invalid: below ${config.MIN_ALTITUDE}m, flight point rejected`
         });
-      } catch (e) {
-        if (e instanceof DatabaseError && e.code === "23505") {
-          res.status(400).json({
-            status: 'error',
-            data: 'flight point violates unique constraint, rejected'
-          });
-        } else {
-          res.status(500).json({
-            status: 'error',
-            data: `internal server error when inserting flight point for case 'today'`
-          });
-          console.log(e);
-          console.log('Today error');
-        }
+        console.log(`Rejected point: altitude too low`);
+        return;
       }
-    } else {
-      // If there are no points from today in the registry, we check if there are any points in the last X number
-      // of hours, defined by `CONTIG_FLIGHT_DELTA_HRS`. This allows points spanning across the UTC 24-hour
-      // wraparound to be appended to the end of a flight which started the previous day. Once the delta between
-      // incoming flight points exceeds `CONTIG_FLIGHT_DELTA_HRS`, a new flight will be created, with the start date
-      // recorded as 'today'
+      if (flightPoint.altitude > config.MAX_ALTITUDE) {
+        res.status(400).json({
+          status: 'error',
+          data: `Altitude invalid: above ${config.MAX_ALTITUDE}m, flight point rejected`
+        });
+        console.log(`Rejected point: altitude too high`);
+        return;
+      }
 
-      const hoursAgo = dayjs.utc().subtract(config.CONTIG_FLIGHT_DELTA_HRS, 'hours').format('YYYY-MM-DD HH:mm:ss');
-      let result = await query<{uid: string}>(
-          `SELECT uid FROM public."flight-registry" WHERE imei=$1 AND uid IN ` +
-          `(SELECT DISTINCT ON (uid) uid FROM public."flights" WHERE datetime>=$2)`,
-          [flightPoint.imei, hoursAgo]
-      );
+      // TODO: implement protocol buffer
+      // const bad_fields = flightPoint.checkInvalidFields();
+      // if (bad_fields.length > 0) {
+      //   await res.status(403).json({
+      //     status: 'error',
+      //     data: `Flight point fields are incorrectly formatted: ${bad_fields}`
+      //   });
+      //   console.log(`Rejected point: bad fields: ${bad_fields}`);
+      //   return;
+      // }
 
-      // If we find a matching flight, append this flight point to it
+      // Check IMEI is in allow list
+      if (!this.modemList.has(flightPoint.imei)) {
+        res.status(403).json({
+          status: 'error',
+          data: `Modem IMEI ${flightPoint.imei} not in allowed list, datapoint rejected`
+        });
+        console.log(`Rejected point: bad imei: ${flightPoint.imei}`);
+        return;
+      }
+
+      // Check if flight entry exists for this point from the last day (in UTC) specifically. This is
+      // a variable time window starting from 00:00:00 and ending at the timestamp of the point.
+      const startDate = flightPoint.datetime.startOf('day').format('YYYY-MM-DD HH:mm:ss');
+      let result = await query<FlightRegistryQuery>(
+          `SELECT * FROM public."flight-registry" WHERE imei=$1 AND start_date=$2`,
+          [flightPoint.imei, startDate]);
+
       if (result.length > 0) {
         try {
-          await insertPoint(flightPoint, result[0].uid);
+          await this.insertPoint(flightPoint, result[0].uid);
           res.json({
             status: 'success',
-            type: 'recent',
+            type: 'today',
             flight: result[0].uid
           });
         } catch (e) {
@@ -165,52 +134,84 @@ router.post('/', async (req, res) => {
           } else {
             res.status(500).json({
               status: 'error',
-              data: `internal server error when inserting flight point for case 'recent' for uid ${result[0].uid}`
+              data: `internal server error when inserting flight point for case 'today'`
             });
             console.log(e);
-            console.log('Recent error');
+            console.log('Today error');
           }
         }
-        return;  // Explicit return to avoid flight creation
-      }
-      // Recent not found for point. Program flow continues to create
-      console.log(`IMEI ${flightPoint.imei} new flight creation.`);
-      try {
-        const result = await query(
-            `INSERT INTO public."flight-registry" (start_date, imei) VALUES ($1, $2) RETURNING uid`,
-            [flightPoint.datetime.format('YYYY-MM-DD'), flightPoint.imei]
+      } else {
+        // If there are no points from today in the registry, we check if there are any points in the last X number
+        // of hours, defined by `CONTIG_FLIGHT_DELTA_HRS`. This allows points spanning across the UTC 24-hour
+        // wraparound to be appended to the end of a flight which started the previous day. Once the delta between
+        // incoming flight points exceeds `CONTIG_FLIGHT_DELTA_HRS`, a new flight will be created, with the start date
+        // recorded as 'today'
+
+        const hoursAgo = dayjs.utc().subtract(config.CONTIG_FLIGHT_DELTA_HRS, 'hours').format('YYYY-MM-DD HH:mm:ss');
+        let result = await query<{uid: string}>(
+            `SELECT uid FROM public."flight-registry" WHERE imei=$1 AND uid IN ` +
+            `(SELECT DISTINCT ON (uid) uid FROM public."flights" WHERE datetime>=$2)`,
+            [flightPoint.imei, hoursAgo]
         );
-        await insertPoint(flightPoint, result[0].uid);
-        // TODO: change this to 201 CREATED
-        await res.json({
-          status: 'success',
-          type: 'created',
-          flight: result[0].uid
-        });
-      } catch (e) {
-        if ("code" in e && e.code === "23505") {
-          await res.status(400).json({
-            status: 'error',
-            data: 'flight point violates unique constraint, rejected'
+
+        // If we find a matching flight, append this flight point to it
+        if (result.length > 0) {
+          try {
+            await this.insertPoint(flightPoint, result[0].uid);
+            res.json({
+              status: 'success',
+              type: 'recent',
+              flight: result[0].uid
+            });
+          } catch (e) {
+            if (e instanceof DatabaseError && e.code === "23505") {
+              res.status(400).json({
+                status: 'error',
+                data: 'flight point violates unique constraint, rejected'
+              });
+            } else {
+              res.status(500).json({
+                status: 'error',
+                data: `internal server error when inserting flight point for case 'recent' for uid ${result[0].uid}`
+              });
+              console.log(e);
+              console.log('Recent error');
+            }
+          }
+          return;  // Explicit return to avoid flight creation
+        }
+        // Recent not found for point. Program flow continues to create
+        console.log(`IMEI ${flightPoint.imei} new flight creation.`);
+        try {
+          const result = await query<{uid: string}>(
+              `INSERT INTO public."flight-registry" (start_date, imei) VALUES ($1, $2) RETURNING uid`,
+              [flightPoint.datetime.format('YYYY-MM-DD'), flightPoint.imei]
+          );
+          await this.insertPoint(flightPoint, result[0].uid);
+          // TODO: change this to 201 CREATED
+          res.json({
+            status: 'success',
+            type: 'created',
+            flight: result[0].uid
           });
-        } else {
-          await res.status(500).json({
-            status: 'error',
-            data: `internal server error when inserting flight point for case 'created' for imei ${flightPoint.imei}`
-          });
-          console.log(e);
-          console.log('Created error');
+        } catch (e) {
+          if (e instanceof DatabaseError && e.code === "23505") {
+            res.status(400).json({
+              status: 'error',
+              data: 'flight point violates unique constraint, rejected'
+            });
+          } else {
+            res.status(500).json({
+              status: 'error',
+              data: `internal server error when inserting flight point for case 'created' for imei ${flightPoint.imei}`
+            });
+            console.log(e);
+            console.log('Created error');
+          }
         }
       }
+    } else {
+      res.sendStatus(400);
     }
-  } else {
-    res.sendStatus(400);
   }
-});
-
-// Does not support GET reqs
-router.get('/', async (req, res, next) => {
-  res.sendStatus(400);
-});
-
-export default router
+}
