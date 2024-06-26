@@ -24,19 +24,19 @@
 
 import fs from 'fs';
 import { parse } from 'csv-parse/sync';
-import {query, ModemQuery} from './pg';
+import {query, type ModemQuery} from './pg';
 import * as config from '../config'
-import {M} from "vite/dist/node/types.d-aGj9QkWt";
+
 
 class ModemValidationError extends Error {
-    constructor(message) {
+    constructor(message: string) {
         super(message);
         this.name = "ModemValidationError";
     }
 }
 
 class ModemLoadError extends Error {
-    constructor(message) {
+    constructor(message: string) {
         super(message);
         this.name = "ModemLoadError";
     }
@@ -47,16 +47,30 @@ const processCsvFile = (filepath: string): Array<Array<string>> => {
     return parse(content);
 };
 
-interface Modem {
-    imei: number,
-    org: string,
-    name: string
-}
-
 interface RedactedModem {
     partialImei: string,
     org: string,
     name: string
+}
+
+class Modem {
+    imei: number;
+    org: string;
+    name: string;
+
+    constructor(imei: number, org: string, name: string) {
+        this.imei = imei;
+        this.org = org;
+        this.name = name;
+    }
+
+    getRedacted (): RedactedModem {
+        return {
+            partialImei: this.imei.toString().slice(-config.EXPOSED_IMEI_DIGITS),
+            org: this.org,
+            name: this.name
+        }
+    }
 }
 
 
@@ -70,7 +84,7 @@ const formatRecord = (record: Array<string>, index: number): Modem => {
     if (name === "") {
         throw new ModemValidationError(`Modem name cannot be blank for row index ${index}`);
     }
-    return {imei, org, name};
+    return new Modem(imei, org, name);
 }
 
 
@@ -82,7 +96,7 @@ const checkUniqueNames = (names: Array<string>) => {
                 name: name
             };
         })
-        .reduce((result, b) => {
+        .reduce((result: {[key: string]: number}, b) => {
             result[b.name] = (result[b.name] || 0) + b.count;
 
             return result;
@@ -117,7 +131,7 @@ const loadModemsFromDb = async () => {
 export default class ModemList {
     modems: Map<number,any> = new Map();
 
-    async loadModems (filepath) {
+    async loadModems (filepath: string) {
         try {
             // Pull csv as array of records
             const records = processCsvFile(filepath);
@@ -155,15 +169,15 @@ export default class ModemList {
         }
     }
 
-    has (imei) {
+    has (imei: number) {
         return this.modems.has(imei);
     }
 
-    get (imei): Modem {
+    get (imei: number): Modem | undefined {
         return this.modems.get(imei);
     }
 
-    getByName (name: string): Modem {
+    getByName (name: string): Modem | undefined {
         for (let modem of this.modems.values()) {
             if (modem.name === name) {
                 return modem;
@@ -171,21 +185,12 @@ export default class ModemList {
         }
     }
 
-    getByOrg (org): Array<Modem> {
+    getByOrg (org: string): Array<Modem> {
         return [...this.modems.values()].filter((modem) => (modem.org === org));
     }
 
-    getRedacted (imei): RedactedModem {
-        const modem = this.get(imei);
-        return {
-            partialImei: modem.imei.toString().slice(-config.EXPOSED_IMEI_DIGITS),
-            org: modem.org,
-            name: modem.name
-        }
-    }
-
     getRedactedSet (): Array<RedactedModem> {
-        return [...this.modems.keys()].map(this.getRedacted);
+        return [...this.modems.values()].map(x => x.getRedacted());
     }
 
     toString () {
@@ -197,4 +202,4 @@ export default class ModemList {
     }
 }
 
-export {Modem, RedactedModem};
+export {Modem, type RedactedModem};
