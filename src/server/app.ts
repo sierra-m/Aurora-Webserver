@@ -35,7 +35,7 @@ import ModemList from "./util/modems";
 // Routes for various endpoints
 import metaRouter from './routes/meta'
 import flightRouter from './routes/flight'
-import assignRouter from './routes/assign'
+import AssignRoute from './routes/assign'
 import updateRouter from './routes/update'
 import lastRouter from './routes/last'
 
@@ -46,7 +46,7 @@ async function buildApp (){
 
     const modemList = new ModemList();
     await modemList.loadModems(modemsFilepath);
-    assignRouter.modemList = modemList;
+    const assignRoute = new AssignRoute(modemList);
     metaRouter.modemList = modemList;
     flightRouter.modemList = modemList;
 
@@ -66,13 +66,9 @@ async function buildApp (){
 
     /**
      * Checks whether request contains a valid API key param
-     * @param req
-     * @param res
-     * @param next
-     * @returns {Promise<void>}
      */
-    const authRouter = async (req, res, next) => {
-        if (req.query.key) {
+    const authRouter = async (req: express.Request, res: express.Response, next: express.NextFunction): Promise<void> => {
+        if (req?.query?.key != null && typeof req.query.key === 'string') {
             const result = await query(`SELECT * FROM public."auth" WHERE token=$1`, [req.query.key]);
             if (result.length > 0) {
                 next();
@@ -88,7 +84,7 @@ async function buildApp (){
 
     app.use('/api/meta', metaRouter);
     app.use('/api/flight', flightRouter);
-    app.use('/api/assign', authRouter, assignRouter);
+    app.use('/api/assign', authRouter, assignRoute.router);
     app.use('/api/update', updateRouter);
     app.use('/api/last', authRouter, lastRouter);
 
@@ -110,10 +106,17 @@ async function buildApp (){
         if (useProduction) {
             res.redirect('/404');
         } else {
-            // TODO: figure out this nonsense (probably use react)
-            //next(createError(404));
+            res.sendStatus(404);
         }
     });
+
+    app.use(async (err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+        if (useProduction) {
+            res.status(500).json({'error': 'Oops! Something went wrong. Try again?'});
+        } else {
+            res.status(500).json(err);
+        }
+    })
 
     return app;
 }
