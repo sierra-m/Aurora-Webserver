@@ -70,7 +70,7 @@ interface FlightsQuery {
  * @param values Array of values to insert, for param insertion
  * @returns {Promise<array>} The resulting rows as an array
  */
-const query = async <Type>(command: string, values: Array<string | number>): Promise<Array<Type>> => {
+const query = async <Type>(command: string, values?: Array<string | number>): Promise<Array<Type>> => {
   let client = await pgPool.connect();
   let result;
 
