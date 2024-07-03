@@ -27,7 +27,7 @@ import {type FlightRegistryQuery, query} from '../util/pg'
 import * as dayjs from "dayjs";
 import * as config from '../config'
 import {getFlightByUID} from '../util/uid'
-import type ModemList from "../util/modems.ts";
+import ModemList, {type RedactedModem} from "../util/modems.ts";
 
 
 export default class MetaRoute {
@@ -154,7 +154,14 @@ export default class MetaRoute {
             const condition_set = formatted.join(' AND ');
             const values =  conditions.map((cond) => (cond.value));
 
-            const result = await query(
+            interface FlightSearchQuery {
+                uid: string,
+                datetime: string,
+                latitude: number,
+                longitude: number,
+                imei: number
+            }
+            const result = await query<FlightSearchQuery>(
                 `SELECT DISTINCT ON (f.uid) f.uid, f.datetime, f.latitude, f.longitude, r.imei ` +
                 `FROM public."flights" f INNER JOIN public."flight-registry" r ON f.uid = r.uid ` +
                 `WHERE ${condition_set} ORDER BY f.uid, f.datetime ASC`,
@@ -163,7 +170,7 @@ export default class MetaRoute {
 
             const redactedResult = result.map((item) => ({
                 uid: item.uid,
-                modem: this.modemList.getRedacted(parseInt(item.imei)),
+                modem: this.modemList.get(item.imei)?.getRedacted(),
                 startPoint: {
                     dt: item.datetime,
                     lat: item.latitude,
@@ -171,17 +178,25 @@ export default class MetaRoute {
                 }
             }));
 
+            for (const result of redactedResult) {
+                if (result.modem == null) {
+                    res.status(500).json({err: `Internal server error`});
+                    console.log(`Error: modem for uid ${result.uid}, datetime ${result.startPoint.dt} does not exist in modem list!`);
+                    return;
+                }
+            }
+
             redactedResult.sort((a, b) => {
-                if (a.modem.name < b.modem.name) {
+                if (a.modem!.name < b.modem!.name) {
                     return -1;
                 }
-                if (a.modem.name > b.modem.name) {
+                if (a.modem!.name > b.modem!.name) {
                     return 1;
                 }
                 return 0;
             });
 
-            await res.status(200).json({
+            res.status(200).json({
                 found: redactedResult.length,
                 results: redactedResult
             });
@@ -194,10 +209,12 @@ export default class MetaRoute {
     async handleActive (req: express.Request, res: express.Response, next: express.NextFunction) {
         try {
             // Construct time delta of 12 hours ago, format for db query
-            const hoursAgo = moment.utc().subtract(12, 'hours').format('YYYY-MM-DD HH:mm:ss');
+            const hoursAgo = dayjs.utc().subtract(12, 'hours').format('YYYY-MM-DD HH:mm:ss');
             // Selects distinct UIDs but picks the latest datetime of each UID
             // NOTE: This endpoint takes no user input, so direct query substitution is permitted
-            let result = await query(`SELECT DISTINCT ON (uid) uid, datetime FROM public."flights" WHERE datetime>='${hoursAgo}' ORDER BY uid ASC, datetime DESC`);
+            let result = await query<{uid: string, datetime: string}>(
+                `SELECT DISTINCT ON (uid) uid, datetime FROM public."flights" WHERE datetime>='${hoursAgo}' ORDER BY uid ASC, datetime DESC`
+            );
 
             if (result.length > 0) {
                 //console.log(`Active flight tuples: ${result.length}`);
@@ -207,19 +224,37 @@ export default class MetaRoute {
 
                 // Search for partial points from the list of uids
                 // NOTE: This endpoint takes no user input, so direct query substitution is permitted
-                result = await query(`SELECT uid, datetime, latitude, longitude, altitude FROM public."flights" WHERE (uid, datetime) in (${point_identifiers}) ORDER BY datetime DESC`);
+                interface RecentActiveFlightsQuery {
+                    uid: string,
+                    datetime: string,
+                    latitude: number,
+                    longitude:  number,
+                    altitude: number,
+                    modem?: RedactedModem,
+                    start_date?: string
+                }
+                const recentResult = await query<RecentActiveFlightsQuery>(
+                    `SELECT uid, datetime, latitude, longitude, altitude FROM public."flights" ` +
+                    `WHERE (uid, datetime) in (${point_identifiers}) ORDER BY datetime DESC`
+                );
 
-                for (let partial of result) {
-                    const {imei, start_date} = await getFlightByUID(partial.uid);
-                    partial.modem = this.modemList.getRedacted(imei);
+                for (let partial of recentResult) {
+                    const found = await getFlightByUID(partial.uid);
+                    if (!found) {
+                        res.status(500).json({err: `Internal server error`});
+                        console.log(`No {start_date, imei} pair found for uid ${partial.uid}`);
+                        return;
+                    }
+                    const {imei, start_date} = found;
+                    partial.modem = this.modemList.get(imei)!.getRedacted();
                     partial.start_date = start_date;
                 }
-                await res.json({
+                res.json({
                     status: 'active',
                     points: result
                 })
             } else {
-                await res.json({status: 'none'})
+                res.json({status: 'none'})
             }
         } catch (e) {
             console.log(e);
