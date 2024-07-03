@@ -21,7 +21,7 @@
 * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
 */
-import {query, FlightRegistryQuery} from './pg'
+import {query, type FlightRegistryQuery} from './pg'
 import * as dayjs from "dayjs";
 
 
@@ -44,11 +44,11 @@ const standardizeUID = (uid: string) => {
 }
 
 
-const compressUID = (uid) => {
+const compressUID = (uid: string) => {
     return Buffer.from(uid.replaceAll('-', ''), 'hex').toString('base64url');
 }
 
-const getFlightByUID = async (uid: string): Promise<FlightRegistryQuery | null> => {
+const getFlightByUID = async (uid: string): Promise<FlightRegistryQuery | undefined> => {
     if (uid) {
         let result = await query<FlightRegistryQuery>(
             'SELECT * FROM public."flight-registry" WHERE uid=$1',
@@ -61,7 +61,7 @@ const getFlightByUID = async (uid: string): Promise<FlightRegistryQuery | null> 
 }
 
 
-const getUIDByFlight = async (imei: number, startDate: dayjs.Dayjs): Promise<string | null> => {
+const getUIDByFlight = async (imei: number, startDate: dayjs.Dayjs): Promise<string | undefined> => {
     const isoDate = startDate.format('YYYY-MM-DD HH:mm:ss');
     let result = await query<{uid: string}>(
         'SELECT uid FROM public."flight-registry" WHERE imei=$1 AND start_date=$2',
