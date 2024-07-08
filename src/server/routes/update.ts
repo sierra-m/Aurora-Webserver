@@ -23,99 +23,112 @@
 */
 
 import express from 'express'
-import format from 'string-format'
-import {query} from '../util/pg'
-import {extractIMEI} from '../snowflake'
-import moment from 'moment'
+import {type FlightsQuery, query} from '../util/pg'
+import * as dayjs from "dayjs";
+import * as utc from "dayjs/plugin/utc";
 import ElevationAPI from '../util/elevation'
 import {standardizeUID} from '../util/uid';
 
-const router = express.Router();
-
-format.extend(String.prototype, {});
+dayjs.extend(utc);
 
 const elevationAPI = new ElevationAPI();
 
-/**
- * Aurora client update method
- * ===========================
- * Motivation: The client needs a way to request
- * new data points from the server to stay up-to-date.
- *
- * Process: Client posts to `/update` endpoint with
- * the most recent uid and datetime it has. Server
- * selects any data points later than this and
- * sends them back via json as a list. Server also
- * attaches current pin states and queries Google
- * elevation API for elevation of most recent point
- * if < 3000m.
- *
- * Request
- * -------
- * POST :: JSON {
- *   "uid": {{ string }},  // UUIDv4
- *   "datetime": {{ number }}  // Unix
- * }
- *
- * Response
- * --------
- * JSON {
- *   "update": {{ bool }},  // indicates success
- *   "result": {{ list[FlightPoint] }},
- *   "ground_elevation": {{ number }}
- * }
- */
-router.post('/', async (req, res, next) => {
-  try {
-    if ('uid' in req.body && 'datetime' in req.body) {
-      let uid = standardizeUID(req.body.uid);
-      if (!uid) {
-        await res.status(400).json({err: `UID improperly formatted`});
-        return;
-      }
-      if (!Number.isInteger(req.body.datetime)) {
-        await res.status(400).json({err: `Datetime must be in UNIX format`});
-        return;
-      }
-      // Convert Unix to String
-      let lastTime = moment.utc(req.body.datetime, 'X').format('YYYY-MM-DD HH:mm:ss');
+export default class UpdateRoute {
+  router: express.Router;
 
-      let result = await query(
-          `SELECT * FROM public."flights" WHERE uid=$1 AND datetime>$2`,
-          [uid, lastTime]
-      );
+  constructor () {
+    this.router = express.Router();
 
-      // Convert timestamps from String to Unix
-      for (let row of result) {
-        row.datetime = moment.utc(row.datetime, 'YYYY-MM-DD HH:mm:ss').unix();
-      }
-
-      // Create partial return packet
-      let content = {
-        update: result.length > 0,
-        result: result
-      };
-
-      try {
-        if (result.length > 0) {
-          const point = result[result.length - 1];
-          // TODO: enable when website is stable
-          // if (point.altitude < 3000 && point.vertical_velocity < 0) {
-          //   content.ground_elevation = await elevationAPI.request(point.latitude, point.longitude);
-          // }
-        }
-      } catch (e) {
-        console.log(`Update endpoint error: ${e}`);
-      }
-
-      await res.json(content);
-    } else {
-      await res.status(400).json({err: "Bad request"});
-    }
-  } catch (e) {
-    console.log(e);
-    next(e);
+    this.router.post('/', this.handleUpdate)
   }
-});
 
-export default router
+  /**
+   * Aurora client update method
+   * ===========================
+   * Motivation: The client needs a way to request
+   * new data points from the server to stay up-to-date.
+   *
+   * Process: Client posts to `/update` endpoint with
+   * the most recent uid and datetime it has. Server
+   * selects any data points later than this and
+   * sends them back via json as a list. Server also
+   * attaches current pin states and queries Google
+   * elevation API for elevation of most recent point
+   * if < 3000m.
+   *
+   * Request
+   * -------
+   * POST :: JSON {
+   *   "uid": {{ string }},  // UUIDv4
+   *   "datetime": {{ number }}  // Unix
+   * }
+   *
+   * Response
+   * --------
+   * JSON {
+   *   "update": {{ bool }},  // indicates success
+   *   "result": {{ list[FlightPoint] }},
+   *   "ground_elevation": {{ number }}
+   * }
+   */
+  async handleUpdate (req: express.Request, res: express.Response, next: express.NextFunction) {
+    try {
+      if (req.body?.uid != null && req.body?.datetime != null) {
+        let uid = standardizeUID(req.body.uid);
+        if (!uid) {
+          res.status(400).json({err: `UID improperly formatted`});
+          return;
+        }
+        if (!Number.isInteger(req.body.datetime)) {
+          res.status(400).json({err: `Datetime must be in UNIX format`});
+          return;
+        }
+        // Convert Unix to String
+        let lastTime = dayjs.utc(req.body.datetime, 'X').format('YYYY-MM-DD HH:mm:ss');
+
+        let result = await query<FlightsQuery>(
+            `SELECT * FROM public."flights" WHERE uid=$1 AND datetime>$2`,
+            [uid, lastTime]
+        );
+
+        const formattedResult = result.map(row => ({
+          datetime: dayjs.utc(row.datetime, 'YYYY-MM-DD HH:mm:ss').unix(),
+          uid: row.uid,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          altitude: row.altitude,
+          vertical_velocity: row.vertical_velocity,
+          ground_speed: row.ground_speed,
+          satellites: row.satellites,
+          input_pins: row.input_pins,
+          output_pins: row.output_pins
+        }));
+
+        // Create partial return packet
+        let content = {
+          update: formattedResult.length > 0,
+          result: formattedResult
+        };
+
+        try {
+          if (formattedResult.length > 0) {
+            const point = formattedResult[formattedResult.length - 1];
+            // TODO: enable when website is stable
+            // if (point.altitude < 3000 && point.vertical_velocity < 0) {
+            //   content.ground_elevation = await elevationAPI.request(point.latitude, point.longitude);
+            // }
+          }
+        } catch (e) {
+          console.log(`Update endpoint error: ${e}`);
+        }
+
+        res.json(content);
+      } else {
+        res.status(400).json({err: "Bad request"});
+      }
+    } catch (e) {
+      console.log(e);
+      next(e);
+    }
+  }
+}
