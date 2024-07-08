@@ -29,14 +29,13 @@ import * as express from 'express'
 import {query} from './util/pg'
 import * as logger from 'morgan'
 import helmet from 'helmet'
-//import parseUrl from 'parseurl'
 import ModemList from "./util/modems";
 
 // Routes for various endpoints
 import MetaRoute from './routes/meta'
-import flightRouter from './routes/flight'
+import FlightRoute from './routes/flight'
 import AssignRoute from './routes/assign'
-import updateRouter from './routes/update'
+import UpdateRoute from './routes/update'
 import lastRouter from './routes/last'
 
 async function buildApp (){
@@ -53,7 +52,8 @@ async function buildApp (){
     }
     const assignRoute = new AssignRoute(modemList);
     const metaRoute = new MetaRoute(modemList);
-    flightRouter.modemList = modemList;
+    const flightRoute = new FlightRoute(modemList);
+    const updateRoute = new UpdateRoute();
 
     const app = express();
 
@@ -88,9 +88,9 @@ async function buildApp (){
     };
 
     app.use('/api/meta', metaRoute.router);
-    app.use('/api/flight', flightRouter);
+    app.use('/api/flight', flightRoute.router);
     app.use('/api/assign', authRouter, assignRoute.router);
-    app.use('/api/update', updateRouter);
+    app.use('/api/update', updateRoute.router);
     app.use('/api/last', authRouter, lastRouter);
 
     // React App
