@@ -22,38 +22,54 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
+import type {FlightsQuery} from "./pg.ts";
+
+interface FlightStats {
+  avgCoords: {
+    lat: number;
+    lng: number;
+  }
+  avgGroundSpeed: number;
+  maxGroundSpeed: number;
+  maxVerticalSpeed: number;
+  maxAltitude: number;
+  minAltitude: number;
+}
+
 export default class Stats {
 
-  static build (data) {
-    let avg_lat = 0;
-    let avg_long = 0;
-    let avg_ground = 0;
-    let max_alt = 0;
-    let min_alt = 100000;
-    let fastest_ground = 0;
-    let fastest_vertical = 0;
+  static build (data: Array<FlightsQuery>): FlightStats {
+    let avgLat = 0;
+    let avgLng = 0;
+    let avgGround = 0;
+    let maxAlt = 0;
+    let minAlt = 100000;
+    let fastestGround = 0;
+    let fastestVertical = 0;
 
     for (let row of data) {
-      avg_lat += row.latitude;
-      avg_long += row.longitude;
-      avg_ground += row.ground_speed;
+      avgLat += row.latitude;
+      avgLng += row.longitude;
+      avgGround += row.ground_speed;
 
-      if (row.altitude > max_alt) max_alt = row.altitude;
-      if (row.altitude < min_alt) min_alt = row.altitude;
-      if (row.ground_speed > fastest_ground) fastest_ground = row.ground_speed;
-      if (Math.abs(row.vertical_velocity) > fastest_vertical) fastest_vertical = row.vertical_velocity;
+      if (row.altitude > maxAlt) maxAlt = row.altitude;
+      if (row.altitude < minAlt) minAlt = row.altitude;
+      if (row.ground_speed > fastestGround) fastestGround = row.ground_speed;
+      if (Math.abs(row.vertical_velocity) > fastestVertical) fastestVertical = row.vertical_velocity;
     }
 
     return {
-      avg_coords: {
-        lat: avg_lat / data.length,
-        long: avg_long / data.length
+      avgCoords: {
+        lat: avgLat / data.length,
+        lng: avgLng / data.length
       },
-      avg_ground: (avg_ground / data.length).toFixed(2),
-      max_ground: fastest_ground,
-      max_vertical: fastest_vertical,
-      max_altitude: max_alt,
-      min_altitude: min_alt
+      avgGroundSpeed: (avgGround / data.length),
+      maxGroundSpeed: fastestGround,
+      maxVerticalSpeed: fastestVertical,
+      maxAltitude: maxAlt,
+      minAltitude: minAlt
     }
   }
 }
+
+export {type FlightStats}
