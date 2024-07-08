@@ -40,7 +40,7 @@ export default class UpdateRoute {
   constructor () {
     this.router = express.Router();
 
-    this.router.post('/', this.handleUpdate)
+    this.router.post('/', this.handleUpdate.bind(this))
   }
 
   /**

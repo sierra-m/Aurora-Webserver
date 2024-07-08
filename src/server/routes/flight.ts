@@ -144,7 +144,7 @@ export default class FlightRoute {
     this.router = express.Router();
     this.modemList = modemList;
 
-    this.router.get('/', this.handleFlight)
+    this.router.get('/', this.handleFlight.bind(this))
   }
 
   async handleFlight (req: express.Request, res: express.Response, next: express.NextFunction) {

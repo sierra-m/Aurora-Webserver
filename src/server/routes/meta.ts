@@ -42,10 +42,10 @@ export default class MetaRoute {
         this.router = express.Router();
         this.modemList = modemList;
 
-        this.router.get('/modems', this.handleModems);
-        this.router.get('/flights', this.handleFlights);
-        this.router.get('/search', this.handleSearch);
-        this.router.get('/active', this.handleActive);
+        this.router.get('/modems', this.handleModems.bind(this));
+        this.router.get('/flights', this.handleFlights.bind(this));
+        this.router.get('/search', this.handleSearch.bind(this));
+        this.router.get('/active', this.handleActive.bind(this));
     }
 
     async handleModems (req: express.Request, res: express.Response, next: express.NextFunction) {

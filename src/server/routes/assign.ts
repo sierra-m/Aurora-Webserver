@@ -42,7 +42,7 @@ export default class AssignRoute {
     this.router = express.Router();
     this.modemList = modemList;
 
-    this.router.post('/', this.handleAssign);
+    this.router.post('/', this.handleAssign.bind(this));
     this.router.get('/', async (req, res, next) => {
       res.sendStatus(400);
     });

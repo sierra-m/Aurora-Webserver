@@ -42,7 +42,7 @@ export default class LastRoute {
   constructor () {
     this.router = express.Router();
 
-    this.router.get('/', this.handleLast);
+    this.router.get('/', this.handleLast.bind(this));
   }
 
   async handleLast (req: express.Request, res: express.Response, next: express.NextFunction) {
