@@ -23,6 +23,7 @@
 */
 
 import type {Modem} from "./modems.ts";
+import type {FlightsQuery} from "./pg.ts";
 
 const fs = require('fs').promises;
 
@@ -35,7 +36,7 @@ export default class KmlEncoder {
    * @param maxAltitude
    * @returns {Promise<String>}
    */
-  static async generate (modem: Modem, date: string, data, maxAltitude) {
+  static async generate (modem: Modem, date: string, data: Array<FlightsQuery>, maxAltitude: number) {
     let file: string = await fs.readFile('./src/res/balloon_flight.kml.tmpt', "utf8");
 
     let ascendingData: string = '';
@@ -68,9 +69,9 @@ export default class KmlEncoder {
       startLat: firstPoint.latitude,
       startAlt: firstPoint.altitude,
 
-      midLong: maxPoint.longitude,
-      midLat: maxPoint.latitude,
-      midAlt: maxPoint.altitude,
+      midLong: maxPoint!.longitude,
+      midLat: maxPoint!.latitude,
+      midAlt: maxPoint!.altitude,
 
       endLong: lastPoint.longitude,
       endLat: lastPoint.latitude,
@@ -78,7 +79,8 @@ export default class KmlEncoder {
     };
 
     for (const key in fileData) {
-      file = file.replaceAll(`{${key}}`, fileData[key]);
+      const val = `${(fileData as Record<string, string | number>)[key]}`;
+      file = file.replaceAll(`{${key}}`, val);
     }
 
     return file;
