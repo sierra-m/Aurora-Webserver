@@ -28,12 +28,16 @@ import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
 
+function convertToUtc (str: string) {
+  return dayjs.utc(str).format();
+}
+
 // Create a new pg connection pool
 const pgPool = new pg.Pool();
 
 // Fix the date and datetime parsers to not auto-format local time
 pg.types.setTypeParser(1082, (str: string) => str);
-pg.types.setTypeParser(1114, (str: string) => dayjs(str).format());
+pg.types.setTypeParser(1114, convertToUtc.bind(this));
 // fix bigint and bigserial converting to int
 pg.types.setTypeParser(20, parseInt);
 
