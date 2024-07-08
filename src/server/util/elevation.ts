@@ -22,12 +22,20 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-import * as axios from "axios";
+import axios from "axios";
 
 import {GOOGLE_MAPS_KEY} from '../config.ts'
 
 const fiveHours = 5 * 60 * 60;
 const cacheSize = 100;
+
+interface CachedElevation {
+  coord: {
+    lat: number,
+    lng: number
+  }
+  elv: number
+}
 
 /**
  * A simple wrapper around the Google elevation API that
@@ -42,7 +50,7 @@ const cacheSize = 100;
  * entries out.
  */
 export default class ElevationAPI {
-  cache = [];
+  cache: Array<CachedElevation> = [];
 
   async request (latitude: number, longitude: number) {
     // Check for coords in cache
@@ -58,7 +66,7 @@ export default class ElevationAPI {
     if (res.data.results.length > 0) {
       const newPacket = {
         coord: {lat: latitude, lng: longitude},
-        elv: data.results[0].elevation
+        elv: res.data.results[0].elevation
       };
       this.cache.push(newPacket);
       if (this.cache.length > cacheSize) this.cache.shift();
