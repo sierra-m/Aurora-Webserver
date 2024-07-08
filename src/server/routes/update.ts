@@ -24,7 +24,7 @@
 
 import express from 'express'
 import {type FlightsQuery, query} from '../util/pg'
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import ElevationAPI from '../util/elevation'
 import {standardizeUID} from '../util/uid';

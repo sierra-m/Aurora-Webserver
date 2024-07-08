@@ -24,7 +24,7 @@
 
 import * as express from "express";
 import {type FlightRegistryQuery, query} from "../util/pg";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { FlightPoint } from "../util/flightpoint";
 import * as config from "../config"

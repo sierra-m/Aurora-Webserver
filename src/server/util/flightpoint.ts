@@ -22,7 +22,7 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
