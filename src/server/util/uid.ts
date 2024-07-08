@@ -22,7 +22,7 @@
 * DEALINGS IN THE SOFTWARE.
 */
 import {query, type FlightRegistryQuery} from './pg'
-import dayjs from "dayjs";
+import * as dayjs from "dayjs";
 import * as utc from "dayjs/plugin/utc";
 
 

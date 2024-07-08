@@ -24,7 +24,7 @@
 
 import * as express from 'express'
 import {type FlightRegistryQuery, query} from '../util/pg'
-import dayjs from "dayjs";
+import * as dayjs from "dayjs";
 import * as utc from "dayjs/plugin/utc";
 import * as config from '../config'
 import {getFlightByUID} from '../util/uid'
