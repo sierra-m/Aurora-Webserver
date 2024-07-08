@@ -29,7 +29,6 @@ import utc from "dayjs/plugin/utc";
 import * as config from '../config'
 import {getFlightByUID} from '../util/uid'
 import ModemList, {type RedactedModem} from "../util/modems.ts";
-import {ACTIVE_FLIGHT_DELTA_HRS} from "../config";
 
 
 dayjs.extend(utc);
@@ -52,6 +51,7 @@ export default class MetaRoute {
         try {
             const modems = this.modemList.getRedactedSet();
             res.json(modems);
+            console.log(JSON.stringify(dayjs.utc()));
         } catch (e) {
             console.log(e);
             next(e);
