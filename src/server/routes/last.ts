@@ -23,32 +23,49 @@
 */
 
 import express from 'express'
-import format from 'string-format'
-import {query} from '../util/pg'
-import moment from 'moment'
+import {type FlightRegistryQuery, query} from '../util/pg'
+import dayjs from "dayjs";
+import * as utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
 
 const router = express.Router();
 
-format.extend(String.prototype, {});
+interface LastParameters {
+  imei?: string
+}
+
+export default class LastRoute {
+  router: express.Router;
+
+  constructor () {
+    this.router = express.Router();
+
+    this.router.get('/', this.handleLast);
+  }
+
+  async handleLast (req: express.Request, res: express.Response, next: express.NextFunction) {
+    const lastQuery: LastParameters = req.query;
+    if (lastQuery?.imei != null) {
+      const hoursAgo = dayjs.utc().subtract(2, 'hours').format('YYYY-MM-DD HH:mm:ss');
+      const partial = lastQuery.imei.toString().substring(8);
+      const result = await query<FlightRegistryQuery>(
+          `SELECT * FROM public."flight-registry" WHERE (uid::bit(64) & x'0000000007ffffff')::bigint=$1::bigint, datetime>$2 ORDER BY datetime DESC`,
+          [partial, hoursAgo]
+      );
+      if (result.length > 0) {
+        res.json(result[0]);
+      } else {
+        res.status(404);
+        res.send(`No recent points found for IMEI ${req.query.imei}`);
+      }
+    } else {
+      res.status(400);
+      res.send('Please supply an imei')
+    }
+  }
+}
 
 router.get('/', async (req, res, next) => {
-  if ('imei' in req.query) {
-    const hoursAgo = moment.utc().subtract(2, 'hours').format('YYYY-MM-DD HH:mm:ss');
-    const partial = req.query.imei.toString().substring(8);
-    const result = await query(
-        `SELECT * FROM public."flight-registry" WHERE (uid::bit(64) & x'0000000007ffffff')::bigint=$1::bigint, datetime>$2 ORDER BY datetime DESC`,
-        [partial, hoursAgo]
-    );
-    if (result.length > 0) {
-      res.json(result[0]);
-    } else {
-      res.status(404);
-      res.send(`No recent points found for IMEI ${req.query.imei}`);
-    }
-  } else {
-    res.status(400);
-    res.send('Please supply an imei')
-  }
-});
 
-export default router
+});
