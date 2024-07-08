@@ -33,7 +33,7 @@ import helmet from 'helmet'
 import ModemList from "./util/modems";
 
 // Routes for various endpoints
-import metaRouter from './routes/meta'
+import MetaRoute from './routes/meta'
 import flightRouter from './routes/flight'
 import AssignRoute from './routes/assign'
 import updateRouter from './routes/update'
@@ -46,8 +46,13 @@ async function buildApp (){
 
     const modemList = new ModemList();
     await modemList.loadModems(modemsFilepath);
+    // Check we actually loaded the modems
+    if (modemList.size === 0) {
+        console.error("No modems loaded! Cannot start webserver");
+        process.exit(1);
+    }
     const assignRoute = new AssignRoute(modemList);
-    metaRouter.modemList = modemList;
+    const metaRoute = new MetaRoute(modemList);
     flightRouter.modemList = modemList;
 
     const app = express();
@@ -82,7 +87,7 @@ async function buildApp (){
         }
     };
 
-    app.use('/api/meta', metaRouter);
+    app.use('/api/meta', metaRoute.router);
     app.use('/api/flight', flightRouter);
     app.use('/api/assign', authRouter, assignRoute.router);
     app.use('/api/update', updateRouter);
