@@ -131,9 +131,12 @@ const loadModemsFromDb = async () => {
 export default class ModemList {
     modems: Map<number,any> = new Map();
 
-    async loadModems (filepath: string) {
+    async loadModems (filepath: string | undefined) {
         try {
             // Pull csv as array of records
+            if (!filepath) {
+                throw new ModemLoadError('No file path provided');
+            }
             const records = processCsvFile(filepath);
             if (records.length === 0) {
                 throw new ModemValidationError("No records loaded from CSV");
@@ -183,6 +186,10 @@ export default class ModemList {
                 return modem;
             }
         }
+    }
+
+    get size () {
+        return this.modems.size;
     }
 
     getByOrg (org: string): Array<Modem> {
