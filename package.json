@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "axios": "^1.7.2",
-    "commander": "^12.1.0",
     "csv-parse": "^5.5.6",
     "dayjs": "^1.11.11",
     "express": "^4.19.2",
