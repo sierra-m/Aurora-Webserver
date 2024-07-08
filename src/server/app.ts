@@ -36,7 +36,7 @@ import MetaRoute from './routes/meta'
 import FlightRoute from './routes/flight'
 import AssignRoute from './routes/assign'
 import UpdateRoute from './routes/update'
-import lastRouter from './routes/last'
+import LastRoute from './routes/last'
 
 async function buildApp (){
 
@@ -54,6 +54,7 @@ async function buildApp (){
     const metaRoute = new MetaRoute(modemList);
     const flightRoute = new FlightRoute(modemList);
     const updateRoute = new UpdateRoute();
+    const lastRoute = new LastRoute();
 
     const app = express();
 
@@ -91,7 +92,7 @@ async function buildApp (){
     app.use('/api/flight', flightRoute.router);
     app.use('/api/assign', authRouter, assignRoute.router);
     app.use('/api/update', updateRoute.router);
-    app.use('/api/last', authRouter, lastRouter);
+    app.use('/api/last', authRouter, lastRoute.router);
 
     // React App
     if (useProduction) {

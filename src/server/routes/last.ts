@@ -27,6 +27,7 @@ import {type FlightRegistryQuery, query} from '../util/pg'
 import dayjs from "dayjs";
 import * as utc from "dayjs/plugin/utc";
 
+
 dayjs.extend(utc);
 
 const router = express.Router();
