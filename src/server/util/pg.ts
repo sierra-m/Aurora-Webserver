@@ -23,7 +23,10 @@
 */
 
 import pg from 'pg'
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
+import * as utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
 
 // Create a new pg connection pool
 const pgPool = new pg.Pool();
@@ -85,7 +88,7 @@ const query = async <Type>(command: string, values?: Array<string | number | Arr
     await client.query('ROLLBACK');
     throw e;
   } finally {
-    await client.release();
+    client.release();
   }
   return result.rows;
 };

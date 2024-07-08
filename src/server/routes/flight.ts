@@ -24,13 +24,16 @@
 
 import express from 'express'
 import {type FlightsQuery, query} from '../util/pg'
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
+import * as utc from "dayjs/plugin/utc";
 import Stats, {type FlightStats} from '../util/stats'
 import KMLEncoder from '../util/kml'
 import * as config from '../config'
 import {standardizeUID, getFlightByUID, getUIDByFlight} from '../util/uid';
 import ModemList, {type RedactedModem} from "../util/modems.ts";
 
+
+dayjs.extend(utc);
 
 interface JsvDataFormat {
   fields: Array<string>;

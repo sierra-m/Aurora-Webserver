@@ -22,8 +22,11 @@
 * DEALINGS IN THE SOFTWARE.
 */
 import {query, type FlightRegistryQuery} from './pg'
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
+import * as utc from "dayjs/plugin/utc";
 
+
+dayjs.extend(utc);
 
 const validateUID = (uid: string) => {
     return uid.match(/[0-9a-f]{8}\-[0-9a-f]{4}\-4[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f]{12}/i);

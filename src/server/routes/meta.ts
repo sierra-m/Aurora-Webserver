@@ -24,11 +24,15 @@
 
 import * as express from 'express'
 import {type FlightRegistryQuery, query} from '../util/pg'
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
+import * as utc from "dayjs/plugin/utc";
 import * as config from '../config'
 import {getFlightByUID} from '../util/uid'
 import ModemList, {type RedactedModem} from "../util/modems.ts";
+import {ACTIVE_FLIGHT_DELTA_HRS} from "../config";
 
+
+dayjs.extend(utc);
 
 export default class MetaRoute {
     router: express.Router;
@@ -209,7 +213,7 @@ export default class MetaRoute {
     async handleActive (req: express.Request, res: express.Response, next: express.NextFunction) {
         try {
             // Construct time delta of 12 hours ago, format for db query
-            const hoursAgo = dayjs.utc().subtract(12, 'hours').format('YYYY-MM-DD HH:mm:ss');
+            const hoursAgo = dayjs.utc().subtract(config.ACTIVE_FLIGHT_DELTA_HRS, 'hours').format('YYYY-MM-DD HH:mm:ss');
             // Selects distinct UIDs but picks the latest datetime of each UID
             // NOTE: This endpoint takes no user input, so direct query substitution is permitted
             let result = await query<{uid: string, datetime: string}>(

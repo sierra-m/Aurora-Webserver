@@ -24,13 +24,15 @@
 
 import * as express from "express";
 import {type FlightRegistryQuery, query} from "../util/pg";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
+import * as utc from "dayjs/plugin/utc";
 import { FlightPoint } from "../util/flightpoint";
-import {standardizeUID} from "../util/uid";
 import * as config from "../config"
 import {DatabaseError} from "pg";
 import type ModemList from "../util/modems.ts";
 
+
+dayjs.extend(utc);
 
 export default class AssignRoute {
   router: express.Router;
