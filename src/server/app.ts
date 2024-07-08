@@ -23,11 +23,11 @@
 */
 
 //import createError from 'http-errors'
-import * as express from 'express'
+import express from 'express'
 //import path from 'path'
 //import cookieParser from 'cookie-parser'
 import {query} from './util/pg'
-import * as logger from 'morgan'
+import logger from 'morgan'
 import helmet from 'helmet'
 import ModemList from "./util/modems";
 
