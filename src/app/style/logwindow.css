@@ -1,0 +1,21 @@
+.component-rounded {
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.log-container {
+    width: 90%;
+    max-width: 90%;
+}
+
+.log-card {
+    height: 15rem;
+    max-height: 15rem;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.react-select > div {
+    margin: -1px;
+}

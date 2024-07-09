@@ -1,0 +1,26 @@
+.icon-bar {
+    width: 15px;
+    height: 15px;
+}
+
+.icon-balloon {
+    width: 15px;
+    height: 15px;
+}
+
+.map-rounded {
+    border: 1px solid black;
+    -webkit-border-radius: 5px !important;
+    -moz-border-radius: 5px !important;
+    border-radius: 5px !important;
+}
+
+.custom-curve-window {
+    max-height: 20rem;
+    overflow-y: auto;
+}
+
+.stats-view {
+    max-height: 10rem;
+    overflow-y: auto;
+}

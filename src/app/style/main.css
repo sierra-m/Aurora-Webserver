@@ -1,0 +1,13 @@
+
+#trackingJumbo {
+    margin-top: -90px;
+    position: relative;
+    z-index: 1000;
+    background-color: #fafbff;
+    border: 2px solid #cacae2;
+}
+
+.outlined {
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+}

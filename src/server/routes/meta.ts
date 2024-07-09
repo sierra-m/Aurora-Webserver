@@ -51,7 +51,6 @@ export default class MetaRoute {
         try {
             const modems = this.modemList.getRedactedSet();
             res.json(modems);
-            console.log(JSON.stringify(dayjs.utc()));
         } catch (e) {
             console.log(e);
             next(e);
