@@ -35,17 +35,26 @@ import ModemList, {type RedactedModem} from "../util/modems.ts";
 
 dayjs.extend(utc);
 
+type Vector = [number, number];
+
 interface JsvDataFormat {
   fields: Array<string>;
-  data: Array<Array<string | number>>;
+  data: Array<Array<string | number | Vector>>;
 }
 
 interface JsvFormat {
+  uid: string;
   fields: Array<string>;
-  data: Array<Array<string | number>>;
+  data: Array<Array<string | number | Vector>>;
   modem: RedactedModem;
   stats: FlightStats;
 }
+
+const fieldNamesMap = new Map(
+    [
+        ['datetime', 'timestamp']
+    ]
+)
 
 /**
  * Data is retrieved from postgres as an array of
@@ -73,29 +82,49 @@ interface JsvFormat {
  * The `datetime` property is also converted to a unix integer
  */
 const reformatData = async (data: Array<FlightsQuery>): Promise<JsvDataFormat | undefined> => {
-  const output = {
-    fields: [],
-    data: []
-  };
+
   // Data must have at least one point
-  if (data[0] === null || data[0] === undefined) return;
+  if (data.length < 1 || data[0] == null) return;
 
   const unixTimestamps = data.map(point => dayjs.utc(point.datetime, 'YYYY-MM-DD HH:mm:ss').unix());
 
-  const jsvData = [];
+  const jsvFields = [
+      'timestamp',
+      'latitude',
+      'longitude',
+      'altitude',
+      'verticalVelocity',
+      'groundSpeed',
+      'satellites',
+      'inputPins',
+      'outputPins',
+      'velocityVector'
+  ];
 
-  // Build point-to-point velocities
-  for (let i = 0; i < data.length - 1; i++) {
-    const nextPoint = data[i + 1];
-    const thisPoint = data[i];
-    const offsetLat = nextPoint.latitude - thisPoint.latitude;
-    const offsetLong = nextPoint.longitude - thisPoint.longitude;
-    const offsetSecs = unixTimestamps[i + 1] - unixTimestamps[i];
-    // build the vector in degrees per second
-    const velocity_vector = (i == 0) ? [0, 0] : [offsetLat / offsetSecs, offsetLong / offsetSecs];
-    jsvData.push([...Object.values(data[i]), velocity_vector]);
-  }
-  const jsvFields = [...Object.keys(data[0]), 'velocity_vector'];
+  const jsvData = data.map((point: FlightsQuery, index: number) => {
+    let velocityVector: Vector;
+    if (index < data.length - 1) {
+      const nextPoint = data[index + 1];
+      const offsetLat = nextPoint.latitude - point.latitude;
+      const offsetLong = nextPoint.longitude - point.longitude;
+      const offsetSecs = unixTimestamps[index + 1] - unixTimestamps[index];
+      velocityVector = [offsetLat / offsetSecs, offsetLong / offsetSecs];
+    } else {
+      velocityVector = [0, 0];
+    }
+    return [
+        unixTimestamps[index],
+        point.latitude,
+        point.longitude,
+        point.altitude,
+        point.vertical_velocity,
+        point.ground_speed,
+        point.satellites,
+        point.input_pins,
+        point.output_pins,
+        velocityVector
+    ]
+  });
 
   return {
     fields: jsvFields,
@@ -112,6 +141,7 @@ const jsvFormatter = async (data: Array<FlightsQuery>, modem: RedactedModem): Pr
   const jsvData = await reformatData(data);
   if (jsvData) {
     return {
+      uid: data[0].uid,
       fields: jsvData.fields,
       data: jsvData.data,
       modem: modem,
@@ -234,3 +264,5 @@ export default class FlightRoute {
     }
   }
 }
+
+export { type JsvFormat, type Vector }
