@@ -23,15 +23,18 @@
 */
 
 // eslint-disable-next-line
-import { Flight, FlightPoint } from './flight'
+import {Flight, FlightPoint, type Position} from './flight'
 import { weightedAverage } from "./helpers"
+import type {Vector} from "../../server/routes/flight.ts";
 
 const ALTITUDE_BLOCK = 150;
 const MAX_SPEED = 6.0386e-4;  // degrees/s, close to 150 mph
 
 
-class Vector {
-  constructor (vector) {
+class AdvancedVector {
+  data: Vector;
+
+  constructor (vector: Vector) {
     this.data = vector;
   }
 
@@ -43,24 +46,24 @@ class Vector {
     return this.data[1];
   }
 
-  add = (vector) => {
-    return new Vector([this.data[0] + vector.xPos, this.data[1] + vector.yPos])
+  add = (vector: AdvancedVector) => {
+    return new AdvancedVector([this.data[0] + vector.xPos, this.data[1] + vector.yPos])
   };
 
-  map = (func) => {
-    return new Vector(this.data.map(func))
+  map = (func: (x: number) => number) => {
+    return new AdvancedVector(this.data.map(func) as Vector)
   };
 
-  dot = (vector) => {
+  dot = (vector: AdvancedVector) => {
     return this.xPos * vector.xPos + this.yPos + vector.yPos;
   };
 
-  avg = (vector) => {
-    return new Vector([(this.xPos + vector.xPos) / 2, (this.yPos + vector.yPos) / 2])
+  avg = (vector: AdvancedVector) => {
+    return new AdvancedVector([(this.xPos + vector.xPos) / 2, (this.yPos + vector.yPos) / 2])
   };
 
-  weightedAvg = (toAdd, count) => {
-    return new Vector([weightedAverage(this.xPos, count, toAdd.xPos), weightedAverage(this.yPos, count, toAdd.yPos)])
+  weightedAvg = (toAdd: AdvancedVector, count: number) => {
+    return new AdvancedVector([weightedAverage(this.xPos, count, toAdd.xPos), weightedAverage(this.yPos, count, toAdd.yPos)])
   };
 
   toString () {
@@ -72,35 +75,55 @@ class Vector {
   }
 }
 
-const getBlock = (altitude) => altitude - (altitude % ALTITUDE_BLOCK);
-const velocitiesValid = (flightPoint) => (
-  Math.abs(flightPoint.velocity_vector[0]) <= MAX_SPEED && Math.abs(flightPoint.velocity_vector[1] <= MAX_SPEED)
+/**
+ * Returns the floor value of a particular block
+ * Example:
+ *   If `ALTITUDE_BLOCK == 150`:
+ *   ```
+ *   > getBlock(149)
+ *   0
+ *   > getBlock(150)
+ *   150
+ *   ```
+ */
+const getBlock = (altitude: number) => altitude - (altitude % ALTITUDE_BLOCK);
+
+const velocitiesValid = (flightPoint: FlightPoint) => (
+  (Math.abs(flightPoint.velocityVector[0]) <= MAX_SPEED) && (Math.abs(flightPoint.velocityVector[1]) <= MAX_SPEED)
 );
 
+type AltitudeModel = {[key: number]: Vector}
+type GetVelocityFunc = (altitude: number) => number;
+
 export default class LandingPrediction {
-  constructor (flight, func) {
+  flight: Flight;
+  altitudeModel: AltitudeModel;
+  velocityFunc: GetVelocityFunc;
+  lastVelocityCount: number;
+  lowestBlock: number | undefined;
+
+  constructor (flight: Flight, func: GetVelocityFunc) {
     /** @type Flight */
     this.flight = flight;
-    this.altitudes = {};
+    this.altitudeModel = {};
     this.velocityFunc = func;
 
     this.lastVelocityCount = 0;
   }
 
-  load = (flight) => {
+  load = (flight: Flight) => {
     this.flight = flight
   };
 
-  setVelocityFunc = (func) => {
+  setVelocityFunc = (func: GetVelocityFunc) => {
     this.velocityFunc = func
   };
 
   /**
    * Builds a wind layer vector modal in blocks of, say, 200 meters.
    * A layer block is considered to belong to its lowest value, so
-   * for example, the 5000 block on a 200 meter scale would represent
+   * for example, the 5000 block on a 200-meter scale would represent
    * the altitudes 5000m to 5199m.
-   * @returns {Promise<void>}
    */
   buildAltitudeProfile = async () => {
     const firstPoint = this.flight.firstPoint();
@@ -108,11 +131,10 @@ export default class LandingPrediction {
     await this.fixBlocks(firstPoint.altitude, null, true);
   };
 
-  buildProfile = async (lowIndex, highIndex) => {
+  buildProfile = async (lowIndex: number, highIndex: number) => {
     let currentBlock = getBlock(this.flight.get(lowIndex).altitude);
     let velocityCount = this.lastVelocityCount;
 
-    /** @type FlightPoint */
     for await (let flightPoint of this.flight.iterateOn(lowIndex, highIndex)) {
       // Use only flight points with reasonable velocities
       if (velocitiesValid(flightPoint)) {
@@ -123,16 +145,16 @@ export default class LandingPrediction {
         }
 
         // if there are is an average already here, average new flight point with this
-        if (this.altitudes.hasOwnProperty(block)) {
+        if (this.altitudeModel.hasOwnProperty(block)) {
           // Convert lists to `Vector`s for computation
-          const existing = new Vector(this.altitudes[block]);
-          const additional = new Vector(flightPoint.velocity_vector);
+          const existing = new AdvancedVector(this.altitudeModel[block]);
+          const additional = new AdvancedVector(flightPoint.velocityVector);
 
-          this.altitudes[block] = existing.weightedAvg(additional, velocityCount).toList();
+          this.altitudeModel[block] = existing.weightedAvg(additional, velocityCount).toList();
           velocityCount += 1;
         } else {
           // add first velocity
-          this.altitudes[block] = flightPoint.velocity_vector;
+          this.altitudeModel[block] = flightPoint.velocityVector;
           velocityCount = 1;
         }
       }
@@ -143,21 +165,17 @@ export default class LandingPrediction {
   /**
    * Interpolate velocities for empty blocks
    * As block total is not tracked, pass `null` to `highAltitude` for the end of the blocks
-   * @param altitudeStart
-   * @param altitudeEnd
-   * @param setLowest
-   * @returns {Promise<void>}
    */
-  fixBlocks = async (altitudeStart, altitudeEnd, setLowest) => {
-    // Strip the keys of `this.altitudes` and sort them
-    const blocks = Object.keys(this.altitudes).map(x => parseInt(x)).sort((a, b) => {
+  fixBlocks = async (altitudeStart: number, altitudeEnd: number | null, setLowest?: boolean) => {
+    // Strip the keys of `this.altitudeModel` and sort them
+    const blocks = Object.keys(this.altitudeModel).map(x => parseInt(x)).sort((a, b) => {
       if (a < b) return -1;
       if (a > b) return 1;
       return 0;
     });
 
     let highestBlock;
-    if (!altitudeEnd) {
+    if (altitudeEnd == null) {
       highestBlock = blocks[blocks.length - 1]
     } else {
       highestBlock = getBlock(altitudeEnd)
@@ -176,39 +194,35 @@ export default class LandingPrediction {
     * These helper functions find the next highest or lowest existing block to
     * account for this.
     **/
-    const findNextHighest = (currentBlock) => {
+    const findNextHighest = (currentBlock: number) => {
       for (let i = currentBlock + ALTITUDE_BLOCK; i < highestBlock; i += ALTITUDE_BLOCK) {
-        if (this.altitudes.hasOwnProperty(i)) return i;
+        if (this.altitudeModel.hasOwnProperty(i)) return i;
       }
       return highestBlock;
     };
 
-    const findNextLowest = (currentBlock) => {
+    const findNextLowest = (currentBlock: number) => {
       for (let i = currentBlock - ALTITUDE_BLOCK; i > lowestBlock; i -= ALTITUDE_BLOCK) {
-        if (this.altitudes.hasOwnProperty(i)) return i;
+        if (this.altitudeModel.hasOwnProperty(i)) return i;
       }
       return lowestBlock;
     };
 
-    // Iterate on set (lowestBlock, highestBlock) as endpoints are assumed to exist
+    // Iterate on set (lowestBlock, highestBlock) (exclusive) as endpoints are assumed to exist
     for (let block = lowestBlock + ALTITUDE_BLOCK; block < highestBlock; block += ALTITUDE_BLOCK) {
-      //if (block === 1800) console.log("We're on 1800 again");
-      if (!(block in this.altitudes)) {
-        //if (block === 1800) console.log("1800 is not in altitudes");
+      if (!(block in this.altitudeModel)) {
         const above = findNextHighest(block);
         const below = findNextLowest(block);
-        /*console.log(`Above is ${above} and the altitudes value is ${this.altitudes[above]}`);
-        console.log(`Below is ${below} and the altitudes value is ${this.altitudes[below]}`);*/
 
-        const aboveVelocity = new Vector(this.altitudes[above]);
-        const belowVelocity = new Vector(this.altitudes[below]);
-        this.altitudes[block] = aboveVelocity.avg(belowVelocity).toList();
+        const aboveVelocity = new AdvancedVector(this.altitudeModel[above]);
+        const belowVelocity = new AdvancedVector(this.altitudeModel[below]);
+        this.altitudeModel[block] = aboveVelocity.avg(belowVelocity).toList();
       }
     }
 
   };
 
-  updateAltitudeProfile = async (indexA, indexB) => {
+  updateAltitudeProfile = async (indexA: number, indexB: number) => {
     await this.buildProfile(indexA, this.flight.data.length);
 
     // index a and b are not necessarily ordered but assumed ends of update range
@@ -217,15 +231,14 @@ export default class LandingPrediction {
     await this.fixBlocks(lowPoint.altitude, highPoint.altitude);
   };
 
-  /**
-   *
-   * @param {FlightPoint} flightPoint
-   */
-  calculateLanding = (flightPoint) => {
-    let start = new Vector([flightPoint.latitude, flightPoint.longitude]);
+  calculateLanding = (flightPoint: FlightPoint): Position => {
+    let start = new AdvancedVector([flightPoint.latitude, flightPoint.longitude]);
     //let testCount = false;
     const maxBlock = getBlock(flightPoint.altitude);
     // Inclusive-Inclusive
+    if (this.lowestBlock == null) {
+      throw new Error("Lowest block not set: build altitude model first!");
+    }
     for (let block = this.lowestBlock; block <= maxBlock; block += ALTITUDE_BLOCK) {
       // Velocity direction not important, assumed negative
       let terminalSpeed = Math.abs(this.velocityFunc(block));
@@ -234,23 +247,12 @@ export default class LandingPrediction {
       // seconds == (s/m) * m == (m/s)^-1 * m
       const blockDuration = Math.pow(terminalSpeed, -1) * ALTITUDE_BLOCK;
 
-      const blockVelocity = new Vector(this.altitudes[block]);
+      const blockVelocity = new AdvancedVector(this.altitudeModel[block]);
       /*if (blockVelocity['data'] === undefined) {
         console.log(`blockVelocity data is undefined. Block vector for block ${block} is ${this.altitudes[block]}`)
         console.log(`(block in this.altitudes): ${block in this.altitudes}`)
       }*/
       const displacement = blockVelocity.map(x => x * blockDuration);
-      /*if (isNaN(displacement.data[0]) && !testCount) {
-        testCount = true;
-        console.log(`NaN detected. Terminal Velocity: ${terminalSpeed}`);
-        console.log('Displacement:');
-        console.log(displacement);
-        console.log('Block Velocity:');
-        console.log(blockVelocity);
-        console.log('Block Duration:');
-        console.log(blockDuration);
-        console.log(`BLOCK: ${block}`);
-      }*/
       start = start.add(displacement);
     }
     //console.log(start);
@@ -262,5 +264,3 @@ export default class LandingPrediction {
     }
   }
 }
-
-export { Vector }
