@@ -35,26 +35,43 @@ import ModemList, {type RedactedModem} from "../util/modems.ts";
 
 dayjs.extend(utc);
 
-type Vector = [number, number];
+type Vector = [lat: number, lng: number];
 
-interface JsvDataFormat {
-  fields: Array<string>;
-  data: Array<Array<string | number | Vector>>;
-}
+type JsvFieldTypes = [
+  timestamp: number,
+  latitude: number,
+  longitude: number,
+  altitude: number,
+  verticalVelocity: number,
+  groundSpeed: number,
+  satellites: number,
+  inputPins: number,
+  outputPins: number,
+  velocityVector: Vector
+];
 
 interface JsvFormat {
   uid: string;
   fields: Array<string>;
-  data: Array<Array<string | number | Vector>>;
+  data: Array<JsvFieldTypes>;
   modem: RedactedModem;
   stats: FlightStats;
 }
 
-const fieldNamesMap = new Map(
-    [
-        ['datetime', 'timestamp']
-    ]
-)
+type JsvDataFormat = Pick<JsvFormat, 'data'>
+
+const jsvFields = [
+  'timestamp',
+  'latitude',
+  'longitude',
+  'altitude',
+  'verticalVelocity',
+  'groundSpeed',
+  'satellites',
+  'inputPins',
+  'outputPins',
+  'velocityVector'
+];
 
 /**
  * Data is retrieved from postgres as an array of
@@ -88,19 +105,6 @@ const reformatData = async (data: Array<FlightsQuery>): Promise<JsvDataFormat | 
 
   const unixTimestamps = data.map(point => dayjs.utc(point.datetime, 'YYYY-MM-DD HH:mm:ss').unix());
 
-  const jsvFields = [
-      'timestamp',
-      'latitude',
-      'longitude',
-      'altitude',
-      'verticalVelocity',
-      'groundSpeed',
-      'satellites',
-      'inputPins',
-      'outputPins',
-      'velocityVector'
-  ];
-
   const jsvData = data.map((point: FlightsQuery, index: number) => {
     let velocityVector: Vector;
     if (index < data.length - 1) {
@@ -123,11 +127,10 @@ const reformatData = async (data: Array<FlightsQuery>): Promise<JsvDataFormat | 
         point.input_pins,
         point.output_pins,
         velocityVector
-    ]
+    ] as JsvFieldTypes;
   });
 
   return {
-    fields: jsvFields,
     data: jsvData
   };
 };
@@ -142,7 +145,7 @@ const jsvFormatter = async (data: Array<FlightsQuery>, modem: RedactedModem): Pr
   if (jsvData) {
     return {
       uid: data[0].uid,
-      fields: jsvData.fields,
+      fields: jsvFields,
       data: jsvData.data,
       modem: modem,
       stats: stats
@@ -265,4 +268,4 @@ export default class FlightRoute {
   }
 }
 
-export { type JsvFormat, type Vector }
+export { type JsvFormat, type Vector, type JsvFieldTypes, jsvFields }
