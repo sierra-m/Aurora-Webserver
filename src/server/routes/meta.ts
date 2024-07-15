@@ -33,6 +33,47 @@ import ModemList, {type RedactedModem} from "../util/modems.ts";
 
 dayjs.extend(utc);
 
+export interface SearchRecord {
+    uid: string;
+    modem: RedactedModem;
+    startPoint: {
+        dt: string;
+        lat: number;
+        lng: number;
+    }
+}
+
+export interface SearchResponse {
+    found: number;
+    results: Array<SearchRecord>;
+}
+
+// Type returned by the database query
+interface ActiveFlightsQuery {
+    uid: string;
+    datetime: string;
+    latitude: number;
+    longitude:  number;
+    altitude: number;
+}
+
+// Type with extra context that we will return
+export interface ActiveFlightRecord {
+    uid: string;
+    datetime: string;
+    latitude: number;
+    longitude: number;
+    altitude: number;
+    modem: RedactedModem;
+    startDate: string;
+}
+
+// Full response
+export interface RecentActiveFlightsResponse {
+    status: string;
+    points?: Array<ActiveFlightRecord>;
+}
+
 export default class MetaRoute {
     router: express.Router;
     modemList: ModemList;
@@ -171,9 +212,9 @@ export default class MetaRoute {
                 values
             );
 
-            const redactedResult = result.map((item) => ({
+            const redactedResult: Array<SearchRecord> = result.map((item) => ({
                 uid: item.uid,
-                modem: this.modemList.get(item.imei)?.getRedacted(),
+                modem: this.modemList.get(item.imei)!.getRedacted(),
                 startPoint: {
                     dt: item.datetime,
                     lat: item.latitude,
@@ -202,7 +243,7 @@ export default class MetaRoute {
             res.status(200).json({
                 found: redactedResult.length,
                 results: redactedResult
-            });
+            } as SearchResponse);
         } catch (e) {
             console.log(e);
             next(e);
@@ -227,37 +268,35 @@ export default class MetaRoute {
 
                 // Search for partial points from the list of uids
                 // NOTE: This endpoint takes no user input, so direct query substitution is permitted
-                interface RecentActiveFlightsQuery {
-                    uid: string,
-                    datetime: string,
-                    latitude: number,
-                    longitude:  number,
-                    altitude: number,
-                    modem?: RedactedModem,
-                    start_date?: string
-                }
-                const recentResult = await query<RecentActiveFlightsQuery>(
+
+                const recentResult = await query<ActiveFlightsQuery>(
                     `SELECT uid, datetime, latitude, longitude, altitude FROM public."flights" ` +
                     `WHERE (uid, datetime) in (${point_identifiers}) ORDER BY datetime DESC`
                 );
 
-                for (let partial of recentResult) {
+                const activeFlights: Array<ActiveFlightRecord> = await Promise.all(recentResult.map(async (partial): Promise<ActiveFlightRecord> => {
                     const found = await getFlightByUID(partial.uid);
                     if (!found) {
-                        res.status(500).json({err: `Internal server error`});
-                        console.log(`No {start_date, imei} pair found for uid ${partial.uid}`);
-                        return;
+                        throw new Error(`No {start_date, imei} pair found for uid ${partial.uid}`);
                     }
                     const {imei, start_date} = found;
-                    partial.modem = this.modemList.get(imei)!.getRedacted();
-                    partial.start_date = start_date;
-                }
+                    return {
+                        uid: partial.uid,
+                        datetime: partial.datetime,
+                        latitude: partial.latitude,
+                        longitude: partial.longitude,
+                        altitude: partial.altitude,
+                        modem: this.modemList.get(imei)!.getRedacted(),
+                        startDate: start_date
+                    }
+                }));
+
                 res.json({
                     status: 'active',
-                    points: result
-                })
+                    points: activeFlights
+                } as RecentActiveFlightsResponse)
             } else {
-                res.json({status: 'none'})
+                res.json({status: 'none'} as RecentActiveFlightsResponse)
             }
         } catch (e) {
             console.log(e);
