@@ -51,6 +51,7 @@ const compressUID = (uid: string) => {
     return Buffer.from(uid.replaceAll('-', ''), 'hex').toString('base64url');
 }
 
+// Returns flight registry query for uid. Note: start_date is a string in UTC format (YYYY-MM-DDTHH:MM:SSZ)
 const getFlightByUID = async (uid: string): Promise<FlightRegistryQuery | undefined> => {
     if (uid) {
         let result = await query<FlightRegistryQuery>(
