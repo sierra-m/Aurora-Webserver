@@ -33,7 +33,7 @@ import type {FlightStats} from "../../server/util/stats.ts";
 
 dayjs.extend(utc);
 
-interface FlightPointCoords {
+export interface FlightPointCoords {
   lat: number,
   lng: number,
   alt: number
@@ -44,7 +44,7 @@ const getSafe = (key: string, data: JsvFieldTypes, fieldType: string, def: any) 
   return (typeof item === fieldType) ? item : def;
 }
 
-class FlightPoint {
+export class FlightPoint {
   uid: string;
   timestamp: number;
   datetime: dayjs.Dayjs | undefined;
@@ -93,14 +93,19 @@ class FlightPoint {
   }
 }
 
-interface PinStatesData {
+export interface PinStatesData {
   input: number;
   output: number;
   timestamp: number;
   altitude: number;
 }
 
-class Flight {
+export interface Position {
+  lat: number;
+  lng: number;
+}
+
+export class Flight {
   fields: Array<string>;
   data: Array<JsvFieldTypes>;
 
@@ -241,7 +246,7 @@ class Flight {
   coords () {
     const lat_col = this.fields.indexOf('latitude');
     const lng_col = this.fields.indexOf('longitude');
-    return this.data.reduce((filtered: Array<{lat: number, lng: number}>, row) => {
+    return this.data.reduce((filtered: Array<Position>, row) => {
       if (this.pointValid(row)) {
         filtered.push({
           lat: row[lat_col] as number,
@@ -326,5 +331,3 @@ class Flight {
     }
   }
 }
-
-export { Flight, FlightPoint };
