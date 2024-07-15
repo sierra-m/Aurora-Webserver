@@ -22,65 +22,32 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-class ObjectIterator {
-  constructor (thing, sorter) {
-    this.thing = thing;
-    this.sorter = sorter;
-  }
-
-  *[Symbol.iterator]() {
-    let sorted = null;
-    if (this.sorter) {
-      sorted = Object.keys(this.thing).sort(this.sorter);
-    } else {
-      sorted = Object.keys(this.thing).sort();
-    }
-    for (let key of sorted) {
-      yield this.thing[key]
-    }
-  }
-}
-
-
-/**
- * Displays altitude in `M m (F ft)` format
- * @param number
- * @returns {*}
- */
-const dispMetersFeetBr = (number) => (
-  `${number} m\n(${(number * 3.28084).toFixed(2)} ft)`
+// Displays value in `M m \n(F ft)` format
+export const dispMetersFeetBr = (value: number) => (
+  `${value} m\n(${(value * 3.28084).toFixed(2)} ft)`
 );
 
-/**
- * Displays altitude in `M m (F ft)` format
- * @param number
- * @returns {*}
- */
-const dispMetersFeet = (number) => (
-  `${number} m (${(number * 3.28084).toFixed(2)} ft)`
+// Displays value in `M m (F ft)` format
+export const dispMetersFeet = (value: number) => (
+  `${value} m (${(value * 3.28084).toFixed(2)} ft)`
 );
 
-const mpsToFps = (number) => (
-  `${number} m/s (${(number * 3.28084).toFixed(2)} ft/s)`
+// Displays value in `M m/s (F ft/s)` format
+export const mpsToFps = (value: number) => (
+  `${value} m/s (${(value * 3.28084).toFixed(2)} ft/s)`
 );
 
-const kphToMph = (number) => (
-  `${number} kph (${(number * 0.621371).toFixed(2)} mph)`
+// Displays value in `K kph (M mph)` format
+export const kphToMph = (value: number) => (
+  `${value} kph (${(value * 0.621371).toFixed(2)} mph)`
 );
 
-/**
- * Calculates the weighted average
- * @param current
- * @param count
- * @param toAdd
- * @returns {number}
- */
-const weightedAverage = (current, count, toAdd) => {
+// Calculates the weighted average
+export const weightedAverage = (current: number, count: number, toAdd: number) => {
   return current * count / (count + 1) + toAdd / (count + 1);
 };
 
-const roundToTwo = (num) => {
-  return Math.round(num * 100) / 100;
+// Rounds value to two digits
+export const roundToTwo = (value: number) => {
+  return Math.round(value * 100) / 100;
 };
-
-export {ObjectIterator, dispMetersFeetBr, dispMetersFeet, weightedAverage, roundToTwo, mpsToFps, kphToMph}
