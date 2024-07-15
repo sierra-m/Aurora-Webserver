@@ -31,7 +31,7 @@ interface FlightStats {
   }
   avgGroundSpeed: number;
   maxGroundSpeed: number;
-  maxVerticalSpeed: number;
+  maxVerticalVel: number;
   maxAltitude: number;
   minAltitude: number;
 }
@@ -65,7 +65,7 @@ export default class Stats {
       },
       avgGroundSpeed: (avgGround / data.length),
       maxGroundSpeed: fastestGround,
-      maxVerticalSpeed: fastestVertical,
+      maxVerticalVel: fastestVertical,
       maxAltitude: maxAlt,
       minAltitude: minAlt
     }
