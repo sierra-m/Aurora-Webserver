@@ -182,7 +182,7 @@ const SelectedFlightData = ({
   )
 };
 
-const ActiveFlight = ({uid, compressed_uid, start_date, modem, datetime, callback}) => {
+const ActiveFlightCard = ({uid, compressed_uid, start_date, modem, datetime, callback}) => {
   return (
     <a style={{cursor: 'pointer'}} onClick={callback}>
       <Card className="card-item quick-shadow">
@@ -200,4 +200,4 @@ const ActiveFlight = ({uid, compressed_uid, start_date, modem, datetime, callbac
   )
 };
 
-export { SelectedFlightData, ActiveFlight }
+export { SelectedFlightData, ActiveFlightCard }
