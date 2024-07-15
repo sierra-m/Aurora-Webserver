@@ -23,9 +23,10 @@
 */
 
 import React, {Component} from 'react'
-import {withScriptjs, withGoogleMap, GoogleMap, Marker, InfoWindow, Polyline, Circle, OverlayView} from "react-google-maps"
-import {GOOGLE_MAPS_KEY} from '../api_keys'
+import {GoogleMap, Marker, InfoWindow, Polyline, Circle, useJsApiLoader} from "@react-google-maps/api"
+import {GOOGLE_MAPS_KEY} from '../config'
 import Image from 'react-bootstrap/Image'
+
 
 import greenBalloon from '../images/greenBalloon.png'
 import parachuteIcon from '../images/parachuteIcon45.png'
@@ -33,6 +34,11 @@ import greenIcon from '../images/greenIcon.png'
 import orangeIcon from '../images/orangeIcon.png'
 
 import {chooseRandomIcon} from "../util/balloonIcons";
+import type {Position, FlightPointCoords} from "../util/flight.ts";
+import {FlightPoint} from "../util/flight.ts";
+import {dispMetersFeet} from "../util/helpers.ts";
+import type {Vector} from "../../server/routes/flight.ts";
+import type {ActiveFlight, FlightsByDate} from "./Tracking.tsx";
 
 
 const balloonColors = [
@@ -48,50 +54,29 @@ const balloonColors = [
   '#4B0082'
 ];
 
-const format = require('string-format');
-format.extend(String.prototype, {});
-
 // Insert imported API key for security
-const googleMapsAPI_URL = 'https://maps.googleapis.com/maps/api/js?v=3&key={}&libraries=geometry,drawing,places'.format(GOOGLE_MAPS_KEY);
+const googleMapsAPI_URL = `https://maps.googleapis.com/maps/api/js?v=3&key=${GOOGLE_MAPS_KEY}&libraries=geometry,drawing,places`;
 
-/**
- * Displays altitude in `M m (F ft)` format
- * @param number
- * @returns {*}
- */
-const dispMetersFeet = (number) => (
-  '{} m ({} ft)'.format(number, (number * 3.28084).toFixed(2))
-);
+const calcGroupSelect = (uid: string, digits: number, groupSize: number) => (parseInt(uid.slice(-digits), 16) % groupSize);
 
-const calcGroupSelect = (uid, digits, groupSize) => (parseInt(uid.slice(-digits), 16) % groupSize);
+const chooseRandomColor = (uid: string) => (balloonColors[calcGroupSelect(uid, 1, balloonColors.length)]);
 
-const chooseRandomColor = (uid) => (balloonColors[calcGroupSelect(uid, 1, balloonColors.length)]);
+type CloseMarkerFunc = () => void;
 
-class InfoMarker extends React.PureComponent {
+
+
+interface InfoMarkerProps {
+  updateLastWindowClose: (closer: CloseMarkerFunc) => void;
+  position: Position;
+  altitude: string; // this is pre-formatted
+  icon: string | google.maps.Icon | google.maps.Symbol;
+  zIndex: number;
+}
+
+function InfoMarker (props: InfoMarkerProps): React.ReactElement {
   /*
   *   `Marker` with integrated `InfoWindow` displaying
   *   geospatial position.
-  *
-  *   Properties
-  *   ----------
-  *   altitude: point altitude in meters
-  *   position { lat, lng }: point position in coords
-  *   icon: marker icon url
-  */
-
-  /*
-  *   STATE
-  *   -----
-  *   isInfoShown: `boolean`
-  *   |   controls `InfoWindow` visibility
-  */
-  state = {
-    isInfoShown: false
-  };
-
-  /*
-  *   Info Windows
-  *   ------------
   *   Each info window visibility is managed by `isInfoShown`. To
   *   implement behaviour allowing only one window open at a time,
   *   the parent passes function `updateLastWindowClose()` to the InfoMarker
@@ -100,52 +85,60 @@ class InfoMarker extends React.PureComponent {
   *   currently open window and stores the new close function.
   */
 
-  /*
-  *   [ Marker Click Callback ]
-  *
-  *   When marker is clicked, opens the info window and
-  *   updates parent with close function to close last info window
-  */
-  onMarkerClicked = () => {
-    this.setState({isInfoShown: true});
-    this.props.updateLastWindowClose(this.closeInfoWindow)
-  };
+  const [isInfoShown, setIsInfoShown] = React.useState(false);
 
   /*
   *   [ Info Window Closer ]
-  *
   *   Used by both info window onCloseClick() and parent
   */
-  closeInfoWindow = () => {
-    this.setState({isInfoShown: false})
+  const closeInfoWindow = () => {
+    setIsInfoShown(false);
+  };
+
+  /*
+  *   [ Marker Click Callback ]
+  *   When marker is clicked, opens the info window and
+  *   updates parent with close function to close last info window
+  */
+  const onMarkerClicked = () => {
+    setIsInfoShown(true);
+    props.updateLastWindowClose(closeInfoWindow)
   };
 
   /*
   *   [ Info Window Close Callback ]
-  *
   *   Closes the info window when "X" is clicked
   */
-  handleWindowClose = () => {
-    this.closeInfoWindow();
+  const handleWindowClose = () => {
+    closeInfoWindow();
   };
 
-  render() {
-    return (
-      <Marker position={this.props.position} onClick={this.onMarkerClicked} icon={this.props.icon} zIndex={this.props.zIndex}>
-        {this.state.isInfoShown && <InfoWindow onCloseClick={this.handleWindowClose}>
-          <p>
-            <strong>Latitude:</strong> {this.props.position.lat}<br/>
-            <strong>Longitude:</strong> {this.props.position.lng}<br/>
-            <strong>Altitude:</strong> {this.props.altitude}
-          </p>
-        </InfoWindow>}
-      </Marker>
-    )
-  }
+  return (
+    <Marker position={props.position} onClick={onMarkerClicked} icon={props.icon} zIndex={props.zIndex}>
+      {isInfoShown && <InfoWindow onCloseClick={handleWindowClose}>
+        <p>
+          <strong>Latitude:</strong> {props.position.lat}<br/>
+          <strong>Longitude:</strong> {props.position.lng}<br/>
+          <strong>Altitude:</strong> {props.altitude}
+        </p>
+      </InfoWindow>}
+    </Marker>
+  );
 }
 
+interface TrackerMapProps {
+  defaultCenter: Position | null;
+  coordinates: Array<Position> | null;
+  startPosition: FlightPointCoords | null;
+  endPosition: FlightPointCoords | null;
+  selectedPoint: FlightPoint | null;
+  landingZone: Position | null;
+  selectPoint: (index: number) => void;
+  activeFlights: Array<ActiveFlight>;
+  modemsByDateList: Array<FlightsByDate>;
+}
 
-class BaseMap extends Component {
+export default function TrackerMap (props: TrackerMapProps) {
   /*
   *   Serves as core map handler, manages and renders
   *   markers
@@ -164,10 +157,25 @@ class BaseMap extends Component {
   *   |   closes last opened `InfoWindow`
   *
   */
-  state = {
-    markers: null,
-    lastWindowCloser: null
-  };
+
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: GOOGLE_MAPS_KEY as string
+  })
+
+  const [map, setMap] = React.useState<google.maps.Map | null>(null);
+
+  const [lastWindowCloser, setLastWindowCloser] = React.useState<(CloseMarkerFunc) | null>(null);
+
+  const onLoad = React.useCallback(function callback(map: google.maps.Map) {
+    map.panTo(props.defaultCenter || {lat: 39.833333, lng: -98.583333});
+
+    setMap(map); // save created map in local hook object
+  }, [])
+
+  const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
+    setMap(null)
+  }, [])
 
   /*
   *   [ Closes Last Opened InfoWindow ]
@@ -175,144 +183,148 @@ class BaseMap extends Component {
   *   Calls last InfoWindow closing function if
   *   present and updates state variable to new one
   */
-  handleLastWindowClose = (closer) => {
-    if (this.state.lastWindowCloser !== null) {
-      this.state.lastWindowCloser();
+  const handleLastWindowClose = React.useCallback((closer: CloseMarkerFunc) => {
+    if (lastWindowCloser !== null) {
+      lastWindowCloser();
     }
-    this.setState({ lastWindowCloser: closer })
-  };
+    setLastWindowCloser(closer);
+  }, []);
 
-  coordAngle = (from, to) => {
+  const coordAngle = (from: Position, to: Position) => {
     return Math.atan2(to.lat - from.lat, to.lng - from.lng)
   };
 
-  coordDistance = (a, b) => {
+  const coordDistance = (a: Position, b: Position) => {
     return Math.sqrt((a.lat - b.lat)**2 + (a.lng - b.lng)**2)
   };
 
-  selectPoint = (event) => {
+  const selectPoint = (event: google.maps.MapMouseEvent) => {
+    if (event.latLng == null) {
+      return;
+    }
+    if (props.coordinates == null) {
+      console.error(`Tracker Map: selectPoint - coordinates do not exist`)
+      return;
+    }
     let selected = {
       lat: event.latLng.lat(),
       lng: event.latLng.lng()
     };
     let minDist = 10;  // 10 degrees is like 1000km
     let minIndex = 0;
-    for (let i = 0; i < this.props.coordinates.length; i++) {
-      let dist = this.coordDistance(this.props.coordinates[i], selected);
+    for (let i = 0; i < props.coordinates.length; i++) {
+      let dist = coordDistance(props.coordinates[i], selected);
       if (dist < minDist) {
         minDist = dist;
         minIndex = i;
       }
     }
-    this.props.selectPosition(minIndex);
+    props.selectPoint(minIndex);
   };
 
-  render() {
-    return (
-      <GoogleMap
-        defaultZoom={4}
-        zoom={(this.props.defaultCenter && 11) || 4}
-        ref={(map) => map &&
-            map.panTo(this.props.defaultCenter|| {lat: 39.833333, lng: -98.583333})}
-      >
-        {this.props.startPosition &&
-        <InfoMarker position={this.props.startPosition} altitude={dispMetersFeet(this.props.startPosition.alt)}
-                    icon={greenIcon} updateLastWindowClose={this.handleLastWindowClose} zIndex={2}
-        />
-        }
+  return (
+    <GoogleMap
+      // TODO: is this needed?
+      //defaultZoom={4}
+      zoom={(props.defaultCenter && 11) || 4}
+      onLoad={onLoad}
+      onUnmount={onUnmount}
+      mapContainerStyle={{height: '85vh', maxHeight: '530px'}}
+      {...props}
+    >
+      {props.startPosition &&
+      <InfoMarker position={props.startPosition} altitude={dispMetersFeet(props.startPosition.alt)}
+                  icon={greenIcon} updateLastWindowClose={handleLastWindowClose} zIndex={2}
+      />
+      }
 
-        {this.props.coordinates &&
-        <Polyline
-          path={this.props.coordinates}
-          geodesic={true}
-          options={{
-            strokeColor: "#3cb2e2",
-            strokeOpacity: 1.0,
-            strokeWeight: 4
+      {props.coordinates &&
+      <Polyline
+        path={props.coordinates}
+        options={{
+          strokeColor: "#3cb2e2",
+          strokeOpacity: 1.0,
+          strokeWeight: 4,
+          // TODO: review what exactly this does to the line
+          geodesic: true
+        }}
+        onClick={selectPoint}
+      />
+      }
+
+      {props.endPosition &&
+      <InfoMarker position={props.endPosition} altitude={dispMetersFeet(props.endPosition.alt)}
+                  icon={orangeIcon} updateLastWindowClose={handleLastWindowClose}  zIndex={1}
+      />
+      }
+      {props.selectedPoint &&
+        <InfoMarker
+          position={props.selectedPoint.coords()}
+          altitude={dispMetersFeet(props.selectedPoint.altitude)}
+          icon={{
+            url: chooseRandomIcon(props.selectedPoint.uid),
+            scaledSize: new google.maps.Size(34, 48)
           }}
-          onClick={this.selectPoint}
+          updateLastWindowClose={handleLastWindowClose}
+          zIndex={3}
         />
-        }
-
-        {this.props.endPosition &&
-        <InfoMarker position={this.props.endPosition} altitude={dispMetersFeet(this.props.endPosition.alt)}
-                    icon={orangeIcon} updateLastWindowClose={this.handleLastWindowClose}  zIndex={1}
+      }
+      {(props.activeFlights.length > 0 && !props.selectedPoint && props.modemsByDateList.length === 0) &&
+        props.activeFlights.map(partial => (
+        <Marker
+          position={{lat: partial.latitude, lng: partial.longitude}}
+          icon={{
+            url: chooseRandomIcon(partial.uid),
+            scaledSize: new google.maps.Size(34, 48)
+          }}
+          onClick={partial.callback}
         />
-        }
-        {this.props.selectedPosition &&
-          <InfoMarker
-            position={this.props.selectedPosition.coords()}
-            altitude={dispMetersFeet(this.props.selectedPosition.altitude)}
-            icon={{
-              url: chooseRandomIcon(this.props.selectedPosition.uid),
-              scaledSize: {width: 34, height: 48}
-            }}
-            updateLastWindowClose={this.handleLastWindowClose}
-            zIndex={3}
-          />
-        }
-        {(this.props.activeFlights.length > 0 && !this.props.selectedPosition && this.props.modemsByDateList.length === 0) &&
-          this.props.activeFlights.map(partial => (
+      ))}
+      {
+        (props.modemsByDateList.length > 0 && !props.selectedPoint) &&
+        props.modemsByDateList.map((flight) => (
           <Marker
-            position={{lat: partial.latitude, lng: partial.longitude}}
+            position={{lat: flight.startPoint.lat, lng: flight.startPoint.lng}}
             icon={{
-              url: chooseRandomIcon(partial.uid),
-              scaledSize: {width: 34, height: 48}
+              url: chooseRandomIcon(flight.uid),
+              scaledSize: new google.maps.Size(34, 48)
             }}
-            onClick={partial.callback}
+            onClick={flight.callback}
           />
-        ))}
-        {
-          (this.props.modemsByDateList.length > 0 && !this.props.selectedPosition) &&
-          this.props.modemsByDateList.map((flight) => (
-            <Marker
-              position={{lat: flight.startPoint.lat, lng: flight.startPoint.lng}}
-              icon={{
-                url: chooseRandomIcon(flight.uid),
-                scaledSize: {width: 34, height: 48}
-              }}
-              onClick={flight.callback}
-            />
-          ))
-        }
-        {this.props.landingZone &&
-        <Circle
-          center={this.props.landingZone}
-          radius={4025 /* meters = 5 miles */}
-          options={{
-            strokeColor: "#ff42b1"
-          }}
-        />
-        }
-        {this.props.landingZone &&
-        <InfoMarker position={this.props.landingZone} altitude={dispMetersFeet(this.props.landingZone.alt)}
-                    icon={parachuteIcon} updateLastWindowClose={this.handleLastWindowClose} zIndex={1}
-        />
-        }
-      </GoogleMap>
-    )
-  }
+        ))
+      }
+      {props.landingZone &&
+      <Circle
+        center={new google.maps.LatLng(props.landingZone.lat, props.landingZone.lng)}
+        radius={4025 /* meters = 5 miles */}
+        options={{
+          strokeColor: "#ff42b1"
+        }}
+      />
+      }
+      {props.landingZone &&  // TODO: fix altitude
+      <InfoMarker position={props.landingZone} altitude={'---'}
+                  icon={parachuteIcon} updateLastWindowClose={handleLastWindowClose} zIndex={1}
+      />
+      }
+    </GoogleMap>
+  )
 }
 
-/*
-*   Wrappers necessary to correctly load Google Maps
-*/
-const WrappedMap = withScriptjs(withGoogleMap(BaseMap));
-
+// TODO: review if any of these format options are still needed
 /*
 *   Wrapper for `WrappedMap` with inserted props
 */
-export default class TrackerMap extends React.Component {
-
-  render() {
-    return (
-      <WrappedMap
-        googleMapURL={googleMapsAPI_URL}
-        loadingElement={<div style={{height: '100%'}}/>}
-        containerElement={<div style={{height: '85vh', maxHeight: '530px'}}/>}
-        mapElement={<div style={{height: '100%'}}/>}
-        {...this.props}
-      />
-    )
-  };
-}
+// export default class TrackerMap extends React.Component {
+//
+//   render() {
+//     return (
+//       <WrappedMap
+//         loadingElement={<div style={{height: '100%'}}/>}
+//         containerElement={<div style={{height: '85vh', maxHeight: '530px'}}/>}
+//         mapElement={<div style={{height: '100%'}}/>}
+//         {...this.props}
+//       />
+//     )
+//   };
+// }

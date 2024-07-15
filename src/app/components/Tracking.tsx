@@ -39,13 +39,16 @@ import Alert from 'react-bootstrap/Alert'
 import queryString from 'query-string';
 
 import Select from 'react-select'
-import moment from 'moment'
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
 
 import TrackerMap from './TrackerMap'
 import AltitudeChart from './AltitudeChart'
 import LandingPrediction from '../util/landing'
 import LogWindow, {LogItem} from './LogWindow'
-import { SelectedFlightData, ActiveFlight } from "./Containers";
+import { SelectedFlightData, ActiveFlightCard } from "./Containers";
 import FlightSelect from "./FlightSelect";
 
 import { Flight } from '../util/flight'
@@ -57,6 +60,13 @@ import clockIcon from '../images/clockIcon.png'
 import chartIcon from '../images/chartIcon.png'
 
 import {Buffer} from "buffer";
+import type {
+  ActiveFlightRecord,
+  RecentActiveFlightsResponse,
+  SearchRecord,
+  SearchResponse
+} from "../../server/routes/meta.ts";
+import type {RedactedModem} from "../../server/util/modems.ts";
 
 const logTime = () => moment().format('HH:mm:ss');
 
@@ -85,14 +95,23 @@ const standardizeUID = (uid) => {
   }
 }
 
-const compressUID = (uid) => {
+const compressUID = (uid: string) => {
   let asBase64 = Buffer.from(uid.replaceAll('-', ''), 'hex').toString('base64');
   // Buffer in node v12 does not support url-safe b64 encoding, so we need to manually format this
   // as per https://datatracker.ietf.org/doc/html/rfc4648#section-5
   return asBase64.replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
 }
 
+export interface ActiveFlight extends Omit<ActiveFlightRecord, 'datetime' | 'startDate'>{
+  datetime: dayjs.Dayjs;
+  startDate: dayjs.Dayjs;
+  compressedUid: string;
+  callback: () => void;
+}
 
+export interface FlightsByDate extends SearchRecord {
+  callback: () => Promise<void>;
+}
 
 class Tracking extends Component {
   constructor (props) {
@@ -167,7 +186,7 @@ class Tracking extends Component {
   parachuteDiameter;
   dragCoefficient;
 
-  calculateVelocity = (altitude) => {
+  calculateVelocity = (altitude: number) => {
     const mass = (this.payloadMass !== undefined && this.payloadMass.value) || 0.001;
     const diameter = (this.parachuteDiameter !== undefined && this.parachuteDiameter.value) || 0.001;
     const drag = (this.dragCoefficient !== undefined && this.dragCoefficient.value) || 0.1;
@@ -212,21 +231,22 @@ class Tracking extends Component {
     }
   };
 
-  fetchModemsByDate = async (date) => {
+  fetchModemsByDate = async (date: string) => {
     try {
       const res = await fetch(`/api/meta/search?date=${date}`);
-      const data = await res.json();
+      const data: SearchResponse = await res.json();
       if (res.status !== 200) {
         console.log(`Error modems by date: ${data}`);
       }
       if (data.found > 0) {
         // Set callbacks for map display
-        for (const result of data.results) {
-          result.callback = async () => {
+        const flightsByDate: Array<FlightsByDate> = data.results.map((result: SearchRecord) => {
+          const flight: FlightsByDate = {...result, callback: async () => {
             await this.fetchFlight(result.uid);
-          }
-        }
-        this.setState({modemsByDateList: data.results});
+          }};
+          return flight;
+        });
+        this.setState({modemsByDateList: flightsByDate});
         return true;
       }
       return false;
@@ -364,7 +384,7 @@ class Tracking extends Component {
 
   fetchActive = async () => {
     const res = await fetch('/api/meta/active');
-    const data = await res.json();
+    const data: RecentActiveFlightsResponse = await res.json();
     if (res.status !== 200) {
       console.log(`Error fetching active flights: ${data}`)
       return;
@@ -372,15 +392,26 @@ class Tracking extends Component {
 
     if (data.status === 'active') {
       console.log('Active flight(s)');
-      for (let partialPoint of data.points) {
-        partialPoint.datetime = moment.utc(partialPoint.datetime, 'YYYY-MM-DD[T]HH:mm:ss[Z]');
-        partialPoint.start_date = moment.utc(partialPoint.start_date, 'YYYY-MM-DD[T]HH:mm:ss[Z]');
-        partialPoint.compressed_uid = compressUID(partialPoint.uid);
-        partialPoint.callback = () => {
-          this.fetchFlight(partialPoint.uid);
-        }
+      if (data.points == null) {
+        console.error(`fetchActive: data.points does not exist!`);
+        return;
       }
-      await this.setState({activeFlights: data.points});
+      const activeFlights: Array<ActiveFlight> = data.points.map((partialPoint) => {
+        return {
+          uid: partialPoint.uid,
+          datetime: dayjs.utc(partialPoint.datetime, 'YYYY-MM-DD[T]HH:mm:ss[Z]'),
+          latitude: partialPoint.latitude,
+          longitude: partialPoint.longitude,
+          altitude: partialPoint.altitude,
+          modem: partialPoint.modem,
+          startDate: dayjs.utc(partialPoint.startDate, 'YYYY-MM-DD'),
+          compressedUid: compressUID(partialPoint.uid),
+          callback: () => {
+            this.fetchFlight(partialPoint.uid);
+          }
+        } as ActiveFlight;
+      });
+      this.setState({activeFlights: activeFlights});
     }
   };
 
@@ -418,7 +449,7 @@ class Tracking extends Component {
     console.log('Velocity Profile: {}'.format(change))
   };
 
-  setSelectedPosition = (index) => {
+  setSelectedPosition = (index: number) => {
     if (this.state.currentFlight) {
       const point = this.state.currentFlight.get(index);
       //console.log(`Velocity at ${point.altitude} m is ${this.calculateVelocity(point.altitude)}`);
