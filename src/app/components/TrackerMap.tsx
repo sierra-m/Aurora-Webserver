@@ -22,11 +22,9 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-import React, {Component} from 'react'
+import React from 'react'
 import {GoogleMap, Marker, InfoWindow, Polyline, Circle, useJsApiLoader} from "@react-google-maps/api"
 import {GOOGLE_MAPS_KEY} from '../config'
-import Image from 'react-bootstrap/Image'
-
 
 import greenBalloon from '../images/greenBalloon.png'
 import parachuteIcon from '../images/parachuteIcon45.png'
@@ -37,7 +35,6 @@ import {chooseRandomIcon} from "../util/balloonIcons";
 import type {Position, FlightPointCoords} from "../util/flight.ts";
 import {FlightPoint} from "../util/flight.ts";
 import {dispMetersFeet} from "../util/helpers.ts";
-import type {Vector} from "../../server/routes/flight.ts";
 import type {ActiveFlight, FlightsByDate} from "./Tracking.tsx";
 
 
@@ -64,6 +61,14 @@ const chooseRandomColor = (uid: string) => (balloonColors[calcGroupSelect(uid, 1
 type CloseMarkerFunc = () => void;
 
 
+const coordAngle = (from: Position, to: Position) => {
+  return Math.atan2(to.lat - from.lat, to.lng - from.lng)
+};
+
+const coordDistance = (a: Position, b: Position) => {
+  return Math.sqrt((a.lat - b.lat)**2 + (a.lng - b.lng)**2)
+};
+
 
 interface InfoMarkerProps {
   updateLastWindowClose: (closer: CloseMarkerFunc) => void;
@@ -73,7 +78,7 @@ interface InfoMarkerProps {
   zIndex: number;
 }
 
-function InfoMarker (props: InfoMarkerProps): React.ReactElement {
+const InfoMarker = React.memo((props: InfoMarkerProps) => {
   /*
   *   `Marker` with integrated `InfoWindow` displaying
   *   geospatial position.
@@ -91,27 +96,27 @@ function InfoMarker (props: InfoMarkerProps): React.ReactElement {
   *   [ Info Window Closer ]
   *   Used by both info window onCloseClick() and parent
   */
-  const closeInfoWindow = () => {
+  const closeInfoWindow = React.useCallback(() => {
     setIsInfoShown(false);
-  };
+  }, []);
 
   /*
   *   [ Marker Click Callback ]
   *   When marker is clicked, opens the info window and
   *   updates parent with close function to close last info window
   */
-  const onMarkerClicked = () => {
+  const onMarkerClicked = React.useCallback(() => {
     setIsInfoShown(true);
     props.updateLastWindowClose(closeInfoWindow)
-  };
+  }, [props.updateLastWindowClose]);
 
   /*
   *   [ Info Window Close Callback ]
   *   Closes the info window when "X" is clicked
   */
-  const handleWindowClose = () => {
+  const handleWindowClose = React.useCallback(() => {
     closeInfoWindow();
-  };
+  }, []);
 
   return (
     <Marker position={props.position} onClick={onMarkerClicked} icon={props.icon} zIndex={props.zIndex}>
@@ -124,7 +129,7 @@ function InfoMarker (props: InfoMarkerProps): React.ReactElement {
       </InfoWindow>}
     </Marker>
   );
-}
+})
 
 interface TrackerMapProps {
   defaultCenter: Position | null;
@@ -138,48 +143,33 @@ interface TrackerMapProps {
   modemsByDateList: Array<FlightsByDate>;
 }
 
-export default function TrackerMap (props: TrackerMapProps) {
-  /*
-  *   Serves as core map handler, manages and renders
-  *   markers
-  *
-  *   Properties
-  *   ----------
-  *   None
-  */
-
-  /*
-  *   STATE
-  *   -----
-  *   markers: `list[ :class:InfoMarker ]`
-  *   |   list of `InfoMarker`s to render
-  *   lastWindowCloser: `function`
-  *   |   closes last opened `InfoWindow`
-  *
-  */
+function TrackerMap (props: TrackerMapProps) {
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: GOOGLE_MAPS_KEY as string
   })
 
+  // local map object created in render
   const [map, setMap] = React.useState<google.maps.Map | null>(null);
 
+  // holds close function for last opened info window
   const [lastWindowCloser, setLastWindowCloser] = React.useState<(CloseMarkerFunc) | null>(null);
 
+  // Map load callback
   const onLoad = React.useCallback(function callback(map: google.maps.Map) {
     map.panTo(props.defaultCenter || {lat: 39.833333, lng: -98.583333});
 
     setMap(map); // save created map in local hook object
-  }, [])
+  }, [props.defaultCenter])
 
+  // Map unmount callback
   const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
     setMap(null)
   }, [])
 
   /*
   *   [ Closes Last Opened InfoWindow ]
-  *
   *   Calls last InfoWindow closing function if
   *   present and updates state variable to new one
   */
@@ -188,17 +178,10 @@ export default function TrackerMap (props: TrackerMapProps) {
       lastWindowCloser();
     }
     setLastWindowCloser(closer);
-  }, []);
+  }, [lastWindowCloser]);
 
-  const coordAngle = (from: Position, to: Position) => {
-    return Math.atan2(to.lat - from.lat, to.lng - from.lng)
-  };
-
-  const coordDistance = (a: Position, b: Position) => {
-    return Math.sqrt((a.lat - b.lat)**2 + (a.lng - b.lng)**2)
-  };
-
-  const selectPoint = (event: google.maps.MapMouseEvent) => {
+  // Handles translating a selection of the polyline to a selection of a flight point
+  const selectPoint = React.useCallback((event: google.maps.MapMouseEvent) => {
     if (event.latLng == null) {
       return;
     }
@@ -220,7 +203,7 @@ export default function TrackerMap (props: TrackerMapProps) {
       }
     }
     props.selectPoint(minIndex);
-  };
+  }, [props.coordinates, props.selectPoint]);
 
   return (
     <GoogleMap
@@ -310,6 +293,8 @@ export default function TrackerMap (props: TrackerMapProps) {
     </GoogleMap>
   )
 }
+
+export default React.memo(TrackerMap);
 
 // TODO: review if any of these format options are still needed
 /*
