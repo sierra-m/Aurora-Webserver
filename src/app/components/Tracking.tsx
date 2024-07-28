@@ -713,7 +713,7 @@ class Tracking extends Component {
                         dataName={'Balloon Altitude'}
                         data={this.state.currentFlight && this.state.currentFlight.altitudes()}
                         key={this.state.chartRedrawKey}
-                        labels={this.state.currentFlight && this.state.currentFlight.datetimes()}
+                        labels={this.state.currentFlight && this.state.currentFlight.formattedDatetimes()}
                         selectPosition={this.setSelectedPosition}
                         animation={this.state.chartAnimation}
                         style={{height: '18rem', maxHeight: '18rem'}}
