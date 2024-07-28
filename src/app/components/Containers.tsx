@@ -24,6 +24,7 @@
 
 import Card from 'react-bootstrap/Card'
 import Form from 'react-bootstrap/Form'
+import type {FormControl} from "react-bootstrap";
 import Button from 'react-bootstrap/Button'
 import Table from 'react-bootstrap/Table'
 import InputGroup from 'react-bootstrap/InputGroup'
@@ -32,70 +33,83 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup'
 import Dropdown from 'react-bootstrap/Dropdown'
 import DropdownButton from 'react-bootstrap/DropdownButton'
 import React from 'react'
-import moment from 'moment'
+import dayjs from "dayjs";
+import duration from 'dayjs/plugin/duration';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { dispMetersFeetBr, dispMetersFeet, mpsToFps, kphToMph } from '../util/helpers'
 import '../style/containers.css'
 import Badge from "react-bootstrap/Badge";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import type {RedactedModem} from "../../server/util/modems.ts";
 
 
-const SelectedFlightData = ({
-    modem,
-    date,
-    datetime,
-    duration,
-    lat,
-    long,
-    vertical,
-    ground,
-    max_altitude,
-    min_altitude,
-    avg_ground,
-    max_ground,
-    max_vertical,
-    altitude,
-    elevation,
-    downloadFlight,
-    isActive
-  }) => {
-  const state = {
-    locationControl: null
-  };
+dayjs.extend(duration);
+dayjs.extend(relativeTime);
 
-  const copyLocation = () => {
-    if (state.locationControl) {
-      state.locationControl.select();
-      document.execCommand('copy')
-    }
-  };
-
-  const openGoogleMaps = (lat, lng) => {
+const openGoogleMaps = (lat: number, lng: number) => {
     window.open(`https://maps.google.com/?q=${lat},${lng}`);
-  }
+}
+
+export interface SelectedFlightDataProps {
+    modem: RedactedModem;
+    formattedDate: string;
+    formattedDatetime: string;
+    duration: string;
+    maxAltitude: number;
+    minAltitude: number;
+    avgGroundSpeed: number;
+    maxGroundSpeed: number;
+    maxVerticalVelocity: number;
+    latitude: number;
+    longitude: number;
+    altitude: number;
+    verticalVelocity: number;
+    groundSpeed: number;
+    elevation: number;
+    downloadFlight: (format: string) => void;
+    isActive: boolean;
+}
+
+export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) => {
+
+  const locationControlRef = React.useRef<HTMLInputElement & typeof FormControl>(null);
+
+  const copyLocation = React.useCallback(() => {
+      if (locationControlRef.current) {
+          locationControlRef.current.select();
+          document.execCommand('copy')
+      }
+  }, []);
+
+  const selectDownload = React.useCallback((eventKey: string | null, e: React.SyntheticEvent<unknown>) => {
+    if (eventKey) {
+      props.downloadFlight(eventKey);
+    }
+  }, [props.downloadFlight])
 
   return (
     <div>
-      {isActive &&
-        <Badge variant={'success'}>Active Flight</Badge>}
-      {!isActive &&
-        <Badge variant={'primary'}>Past Flight</Badge>}
+      {props.isActive &&
+        <Badge bg={'success'}>Active Flight</Badge>}
+      {!props.isActive &&
+        <Badge bg={'primary'}>Past Flight</Badge>}
       <Card.Text className={'pt-1'}>
         <Table borderless>
           <tr>
             <td className={'pt-0 pb-1'}><strong>Modem:</strong></td>
-            <td className={'pt-0 pb-1'} align={'right'}>{modem.name}</td>
+            <td className={'pt-0 pb-1'} align={'right'}>{props.modem.name}</td>
           </tr>
           <tr>
             <td className={'pt-0 pb-1'}><strong>IMEI:</strong></td>
-            <td className={'pt-0 pb-1'} align={'right'}>{'*'.repeat(10) + modem.partialImei}</td>
+            <td className={'pt-0 pb-1'} align={'right'}>{'*'.repeat(10) + props.modem.partialImei}</td>
           </tr>
           <tr>
             <td className={'pt-0 pb-1'}><strong>Date:</strong></td>
-            <td className={'pt-0 pb-1'} align={'right'}>{date}</td>
+            <td className={'pt-0 pb-1'} align={'right'}>{props.formattedDate}</td>
           </tr>
           <tr>
             <td className={'pt-0 pb-1'}><strong>Org:</strong></td>
-            <td className={'pt-0 pb-1'} align={'right'}>{modem.org}</td>
+            <td className={'pt-0 pb-1'} align={'right'}>{props.modem.org}</td>
           </tr>
         </Table>
       </Card.Text>
@@ -110,42 +124,46 @@ const SelectedFlightData = ({
             <Form.Control
               type={'input'}
               readOnly={true}
-              value={'{}, {}'.format(lat.toFixed(4), long.toFixed(4))}
-              ref={(control) => state.locationControl = control}
+              value={`${props.latitude.toFixed(4)}, ${props.longitude.toFixed(4)}`}
+              ref={locationControlRef}
             />
-            <InputGroup.Append>
-              <Button onClick={copyLocation}>
-                Copy
-              </Button>
-            </InputGroup.Append>
+            <Button onClick={copyLocation}>
+              Copy
+            </Button>
           </InputGroup>
         </Form.Group>
-        <Button size={'sm'} variant={'outline-success'} onClick={() => openGoogleMaps(lat, long)}>
+        <Button size={'sm'} variant={'outline-success'} onClick={() => openGoogleMaps(props.latitude, props.longitude)}>
           Open in Google Maps
           <i className="bi bi-box-arrow-up-right pl-1"></i>
         </Button>
       </Form>
-      <Card.Text className={'my-1'} style={{fontSize: '10pt'}}><strong>Altitude:</strong> {dispMetersFeet(altitude)}
+      <Card.Text className={'my-1'} style={{fontSize: '10pt'}}><strong>Altitude:</strong> {dispMetersFeet(props.altitude)}
       </Card.Text>
-      <Card.Text className={'my-0'} style={{fontSize: '10pt'}}><strong>Time:</strong> {datetime}</Card.Text>
-      <Card.Text className={'mt-0 mb-1 text-secondary'} style={{fontSize: '10pt'}}>({duration} from start)</Card.Text>
+      <Card.Text className={'my-0'} style={{fontSize: '10pt'}}><strong>Date/Time:</strong> {props.formattedDatetime}</Card.Text>
+      <Card.Text className={'mt-0 mb-1 text-secondary'} style={{fontSize: '10pt'}}>({props.duration} from start)</Card.Text>
       <Card.Text className={'mb-1 mt-0'} style={{fontSize: '10pt'}}><strong>Vertical
-        velocity:</strong> {mpsToFps(vertical)}</Card.Text>
-      <Card.Text className={'mb-1 mt-0'} style={{fontSize: '10pt'}}><strong>Ground speed:</strong> {kphToMph(ground)}
+        velocity:</strong> {mpsToFps(props.verticalVelocity)}</Card.Text>
+      <Card.Text className={'mb-1 mt-0'} style={{fontSize: '10pt'}}><strong>Ground speed:</strong> {kphToMph(props.groundSpeed)}
       </Card.Text>
-      {elevation &&
+      {props.elevation &&
       [
         <Card.Text className={'mb-1 mt-0'} style={{fontSize: '10pt'}}><strong>Ground
-          elevation:</strong> {dispMetersFeet(elevation)}</Card.Text>,
+          elevation:</strong> {dispMetersFeet(props.elevation)}</Card.Text>,
         <Card.Text className={'mb-1 mt-0'} style={{fontSize: '10pt'}}>
-          {moment.duration((Math.abs(vertical) ** -1) * Math.abs(altitude - elevation), 'seconds').humanize()} until
+          {dayjs.duration((Math.abs(props.verticalVelocity) ** -1) * Math.abs(props.altitude - props.elevation), 'seconds').humanize()} until
           touchdown.
         </Card.Text>
       ]
       }
       <ButtonGroup className={'mt-1'}>
-        <Button variant="outline-primary" onClick={() => downloadFlight('csv')}>Download Flight</Button>
-        <DropdownButton variant="outline-primary" as={ButtonGroup} title="" id="download-nested-dropdown" onSelect={downloadFlight}>
+        <Button
+          variant="outline-primary"
+          onClick={React.useCallback(
+            () => props.downloadFlight('csv'),
+              [props.downloadFlight]
+          )}
+        >Download Flight</Button>
+        <DropdownButton variant="outline-primary" as={ButtonGroup} title="" id="download-nested-dropdown" onSelect={selectDownload}>
           <Dropdown.Item eventKey="csv">CSV</Dropdown.Item>
           <Dropdown.Item eventKey="kml">KML</Dropdown.Item>
         </DropdownButton>
@@ -156,23 +174,23 @@ const SelectedFlightData = ({
           <tbody style={{fontSize: '10pt'}}>
           <tr>
             <td><strong>Max Altitude:</strong></td>
-            <td>{dispMetersFeetBr(max_altitude)}</td>
+            <td>{dispMetersFeetBr(props.maxAltitude)}</td>
           </tr>
           <tr>
             <td><strong>Min Altitude:</strong></td>
-            <td>{dispMetersFeetBr(min_altitude)}</td>
+            <td>{dispMetersFeetBr(props.minAltitude)}</td>
           </tr>
           <tr>
             <td><strong>Average Ground Speed:</strong></td>
-            <td>{avg_ground + ' kph'}</td>
+            <td>{`${props.avgGroundSpeed} kph`}</td>
           </tr>
           <tr>
             <td><strong>Max Ground Speed:</strong></td>
-            <td>{max_ground + ' kph'}</td>
+            <td>{`${props.maxGroundSpeed} kph`}</td>
           </tr>
           <tr>
             <td><strong>Max Vertical Speed:</strong></td>
-            <td>{Math.abs(max_vertical) + ' m/s'}</td>
+            <td>{`${Math.abs(props.maxVerticalVelocity)} m/s`}</td>
           </tr>
           </tbody>
         </Table>
@@ -180,24 +198,32 @@ const SelectedFlightData = ({
 
     </div>
   )
-};
+});
 
-const ActiveFlightCard = ({uid, compressed_uid, start_date, modem, datetime, callback}) => {
+
+export interface ActiveFlightCardProps {
+  uid: string;
+  compressedUid: string;
+  startDate: dayjs.Dayjs;
+  modem: RedactedModem;
+  lastDatetime: dayjs.Dayjs;
+  callback: () => void;
+}
+
+export const ActiveFlightCard = React.memo((props: ActiveFlightCardProps) => {
   return (
-    <a style={{cursor: 'pointer'}} onClick={callback}>
+    <a style={{cursor: 'pointer'}} onClick={props.callback}>
       <Card className="card-item quick-shadow">
         <Card.Body>
-          <Card.Title>Modem: {`${modem.name} (${modem.partialImei})`}</Card.Title>
-          <Card.Subtitle>Org: {modem.org}</Card.Subtitle>
+          <Card.Title>Modem: {`${props.modem.name} (${props.modem.partialImei})`}</Card.Title>
+          <Card.Subtitle>Org: {props.modem.org}</Card.Subtitle>
           <Card.Text>
-            UID: {compressed_uid}<br/>
-            Start Date: {start_date.format('MMMM Do[,] YYYY')} UTC<br/>
-            Last Updated: {datetime.format('YYYY-MM-DD HH:mm:ss')} UTC ({datetime.fromNow()})
+            UID: {props.compressedUid}<br/>
+            Start Date: {props.startDate.format('MMMM Do[,] YYYY')} UTC<br/>
+            Last Updated: {props.lastDatetime.format('YYYY-MM-DD HH:mm:ss')} UTC ({props.lastDatetime.fromNow()})
           </Card.Text>
         </Card.Body>
       </Card>
     </a>
   )
-};
-
-export { SelectedFlightData, ActiveFlightCard }
+});
