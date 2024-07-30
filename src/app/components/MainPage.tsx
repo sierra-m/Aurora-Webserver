@@ -26,10 +26,9 @@ import React, { Component } from 'react'
 import '../style/main.css'
 import '../custom.scss'
 import Container from 'react-bootstrap/Container'
-import Jumbotron from 'react-bootstrap/Jumbotron'
 import Button from 'react-bootstrap/Button'
 import Image from 'react-bootstrap/Image'
-import { LinkContainer } from 'react-router-bootstrap'
+import {LinkContainer} from "react-router-bootstrap";
 
 import borealisGroup from '../images/borealisGroup.jpg'
 import horizon from '../images/horizon.jpg'
@@ -39,18 +38,16 @@ import borealisAcronym from '../images/borealisAcronym.png'
 import Row from 'react-bootstrap/Row'
 import Column from 'react-bootstrap/Col'
 import Card from 'react-bootstrap/Card'
-import SimpleParallax from './Parallax'
-import { Parallax, Background } from 'react-parallax';
-import {Parallax as SpringParallax, ParallaxLayer} from 'react-spring/renderprops-addons'
 
 export default class MainPage extends Component {
   render () {
     return (
       <div id={'main-page'}>
-        {/*<SimpleParallax image={borealisGroup} height={'90vh'}>
+        {/* TODO: re-add parallax if it's necessary/works */}
+        <div style={{ height: '90vh' }}>
           <Row className={'h-100 justify-content-center mx-0'}>
             <Column xs={12} sm={12} md={8} lg={6} xl={6} className={'my-auto'}>
-              <Jumbotron className={'mx-0'} style={{backgroundColor: 'rgba(255, 255, 255, 0.90)'}}>
+              <div className={'mx-0 jumbotron'} style={{backgroundColor: 'rgba(255, 255, 255, 0.90)'}}>
                 <h1>Time to Fly!</h1>
                 <p>Check out the new Borealis Flight Tracker</p>
                 <p>
@@ -58,32 +55,10 @@ export default class MainPage extends Component {
                     <Button variant={'primary'} href={'/tracking'}>Start Tracking</Button>
                   </LinkContainer>
                 </p>
-              </Jumbotron>
+              </div>
             </Column>
           </Row>
-        </SimpleParallax>*/}
-        <Parallax
-          blur={0}
-          bgImage={borealisGroup}
-          bgImageAlt='Borealis 2019 Interns'
-          strength={500}
-        >
-          <div style={{ height: '90vh' }}>
-            <Row className={'h-100 justify-content-center mx-0'}>
-              <Column xs={12} sm={12} md={8} lg={6} xl={6} className={'my-auto'}>
-                <Jumbotron className={'mx-0'} style={{backgroundColor: 'rgba(255, 255, 255, 0.90)'}}>
-                  <h1>Time to Fly!</h1>
-                  <p>Check out the new Borealis Flight Tracker</p>
-                  <p>
-                    <LinkContainer to={'/tracking'}>
-                      <Button variant={'primary'} href={'/tracking'}>Start Tracking</Button>
-                    </LinkContainer>
-                  </p>
-                </Jumbotron>
-              </Column>
-            </Row>
-          </div>
-        </Parallax>
+        </div>
         <Container>
           <Row className={'justify-content-center my-3'}>
             <Column xs={10} sm={10} md={8} lg={4} xl={4} className={'px-auto'}>
@@ -96,28 +71,13 @@ export default class MainPage extends Component {
             </Column>
           </Row>
         </Container>
-        {/*<SimpleParallax image={horizon} height={'90vh'} minHeight={'500px'}>
-          <Container fluid style={{paddingTop: '5vh'}}>
-            <Row>
-              <Column sm={12} md={{span: 10, offset: 1}} lg={{span: 8, offset: 2}}>
-                <h2 className={'text-white display-2'}>Reaching New Heights</h2>
-                <h2 className={'text-white'}>One of the most cost-effective high-altitude testing platforms around</h2>
-              </Column>
-            </Row>
+        {/* TODO: parallax here as well */}
+        <div style={{ height: '90vh', minHeight: '500px'}}>
+          <Container style={{paddingTop: '5vh'}}>
+            <h2 className={'text-white display-2'}>Reaching New Heights</h2>
+            <h2 className={'text-white'}>One of the most cost-effective high-altitude testing platforms around</h2>
           </Container>
-        </SimpleParallax>*/}
-        <Parallax
-          bgImage={horizon}
-          bgImageAlt="Earth from 100,000 feet - 2019 Borealis Flight"
-          strength={-200}
-        >
-          <div style={{ height: '90vh', minHeight: '500px'}}>
-            <Container style={{paddingTop: '5vh'}}>
-              <h2 className={'text-white display-2'}>Reaching New Heights</h2>
-              <h2 className={'text-white'}>One of the most cost-effective high-altitude testing platforms around</h2>
-            </Container>
-          </div>
-        </Parallax>
+        </div>
         <Container fluid className={'text-center'}>
           <h3 className={'display-3 my-2'}>Who are we?</h3>
         </Container>
