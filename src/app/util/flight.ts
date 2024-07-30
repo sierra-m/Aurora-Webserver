@@ -39,13 +39,15 @@ export interface FlightPointCoords {
   alt: number
 }
 
+export type FlightUid = string;
+
 const getSafe = (key: string, data: JsvFieldTypes, fieldType: string, def: any) => {
   const item = data[jsvFields.indexOf(key)];
   return (typeof item === fieldType) ? item : def;
 }
 
 export class FlightPoint {
-  uid: string;
+  uid: FlightUid;
   timestamp: number;
   datetime: dayjs.Dayjs | undefined;
   latitude: number;
@@ -114,7 +116,7 @@ export class Flight {
 
   startDate: dayjs.Dayjs | undefined;
   stats: FlightStats;
-  uid: string;
+  uid: FlightUid;
   /**
    * Represents a selected flight
    *
