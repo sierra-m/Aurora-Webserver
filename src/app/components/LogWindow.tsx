@@ -29,20 +29,33 @@ import Container from 'react-bootstrap/Container'
 import Badge from 'react-bootstrap/Badge'
 import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
-import moment from 'moment'
-import Select from 'react-select'
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import Select, {type ActionMeta, type MultiValue} from 'react-select'
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Dropdown from "react-bootstrap/Dropdown";
 import {createPortal} from "react-dom";
 import Column from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
+import type {FlightPoint} from "../util/flight.ts";
 
+
+dayjs.extend(utc);
+
+type UnixTimestamp = number;
 
 class LogItem {
-  constructor (datetime, status, inputPins, outputPins, altitude) {
-    this.datetime = datetime;
-    this.status = status;
-    this.changed = status === 'changed';
+  timestamp: UnixTimestamp;
+  status: string;
+  changed: boolean;
+  inputPins: number;
+  outputPins: number;
+  altitude: number;
+
+  constructor (timestamp: UnixTimestamp, changed: boolean, inputPins: number, outputPins: number, altitude: number) {
+    this.timestamp = timestamp;
+    this.changed = changed;
+    this.status = changed ? "changed" : "unchanged";
     this.inputPins = inputPins;
     this.outputPins = outputPins;
     this.altitude = altitude;
@@ -50,17 +63,17 @@ class LogItem {
 
   // For searching/comparing
   toString () {
-    return `[${this.datetime}] ${this.status} ${this.changed && '  '} | input: ${this.inputPins}, output: ${this.outputPins}`
+    return `[${this.timestamp}] ${this.status} ${this.changed && '  '} | input: ${this.inputPins}, output: ${this.outputPins}`
   }
 
-  toComponent (selected) {
+  toComponent (selected: boolean) {
     // Determine Bootstrap Badge color from status
     const statusVariant = this.changed ? 'success' : 'primary';
 
     return (
       <div style={{backgroundColor: selected ? '#f8e8fd' : '#FFFFFF'}}>
         <samp>[</samp>
-        <ColorSamp color={'#d300a4'}>{moment.utc(this.datetime, 'X').format('YYYY-MM-DD HH:mm:ss')}</ColorSamp>
+        <ColorSamp color={'#d300a4'}>{dayjs.utc(this.timestamp, 'X').format('YYYY-MM-DD HH:mm:ss')}</ColorSamp>
         <samp>]</samp>
         <ColorSamp color={'#b03e00'} keepWhitespace={true}>{`${this.altitude}`.padStart(6, ' ')} meters</ColorSamp>
         <samp> | Input: </samp>
@@ -68,273 +81,295 @@ class LogItem {
         <samp>, Output: </samp>
         <ColorSamp color={(this.outputPins === null) ? '#7c5100' : '#006dbd'}>{`${this.outputPins} `}</ColorSamp>
         {/* First letter caps */}
-        <Badge variant={statusVariant}>{this.status.charAt(0).toUpperCase() + this.status.slice(1)}</Badge>
+        <Badge bg={statusVariant}>{this.status.charAt(0).toUpperCase() + this.status.slice(1)}</Badge>
         {'\n'}
       </div>
     )
   }
 }
 
-export default class LogWindow extends Component {
-  // Defined outside of state as these need to update immediately
-  lastInputPins = null;
-  lastOutputPins = null;
+type LogPrintFunc = (input: number, output: number, timestamp: UnixTimestamp, altitude: number) => void;
 
-  constructor(props) {
-    super(props);
-    this.statusOptions = ['Any', 'Changed', 'Unchanged'].map((item) => ({
-      label: item,
-      value: item.toLowerCase()
-    }));
+type LogClearFunc = () => void;
 
-    this.inputPinOptions = [...Array(16).keys()].map(item => ({
-      label: item,
-      value: item
-    }))
-    this.outputPinOptions = [...Array(8).keys()].map(item => ({
-      label: item,
-      value: item
-    }))
+interface LogWindowProps {
+  registerControls: (printFunc: LogPrintFunc, clearFunc: LogClearFunc) => void;
+  title: string;
+  autoscroll: boolean;
+  selectedPoint: FlightPoint;
+  isDisabled: boolean;
+}
 
-    this.state = {
-      items: [],
-      autoscroll: true,
-      filterText: '',
-      filterStatusOption: this.statusOptions[0],
-      filterInputOptions: null,
-      filterOutputOptions: null
-    };
-  }
+interface StatusSelectOption {
+  label: string;
+  value: string;
+}
 
-  defaultProps = {
-    autoscroll: true
-  };
+interface PinSelectOption {
+  label: number;
+  value: number;
+}
 
-  scrollToBottom () {
-    this.el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-  }
+const statusOptions = ['Any', 'Changed', 'Unchanged'].map((item) => ({
+  label: item,
+  value: item.toLowerCase()
+}) as StatusSelectOption);
 
-  print = (inputPins, outputPins, datetime, altitude) => {
-    let newIn = null;
-    let newOut = null;
+const inputPinOptions = [...Array(16).keys()].map(item => ({
+  label: item,
+  value: item
+}) as PinSelectOption);
+
+const outputPinOptions = [...Array(8).keys()].map(item => ({
+  label: item,
+  value: item
+}) as PinSelectOption);
+
+const LogWindow = (props: LogWindowProps) => {
+  // Defined as non-state as these need to update immediately
+  let lastInputPins: number | null = null;
+  let lastOutputPins: number | null = null;
+
+  // Array of log items
+  const [items, setItems] = React.useState<Array<LogItem>>([]);
+
+  // Indicates whether autoscroll behavior is enabled
+  const [autoscroll, setAutoscroll] = React.useState<boolean>(true);
+
+  // Holds the selected option for filter-by-status select
+  const [filterStatusOption, setFilterStatusOption] = React.useState<StatusSelectOption | null>(statusOptions[0]);
+
+  // Holds the selected options for filter-by-input-values select
+  const [filterInputOptions, setFilterInputOptions] = React.useState<MultiValue<PinSelectOption> | null>(null);
+
+  // Holds the selected options for filter-by-output-values select
+  const [filterOutputOptions, setFilterOutputOptions] = React.useState<MultiValue<PinSelectOption> | null>(null);
+
+  // Ref with element needed for scroll-to-bottom behavior
+  const scrollToBottomRef = React.useRef<HTMLDivElement>(null);
+
+  // Ref with element needed for scrolling to selection
+  const selectedItemElementRef = React.useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = React.useCallback(() => {
+    if (scrollToBottomRef.current != null) {
+      scrollToBottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    }
+  }, [])
+
+  const print = React.useCallback((input: number, output: number, timestamp: UnixTimestamp, altitude: number) => {
+    let newIn;
+    let newOut;
     let inChanged = false;
     let outChanged = false;
-    if (typeof inputPins === "number") {
-      newIn = inputPins % 16;
-      inChanged = (this.lastInputPins !== newIn);
-      this.lastInputPins = newIn;
-    }
-    if (typeof outputPins === "number") {
-      newOut = outputPins % 8;
-      outChanged = (this.lastOutputPins !== newOut);
-      this.lastOutputPins = newOut;
-    }
+
+    // Input pins are sent by NAL as > 16, so modding by 16 normalizes these
+    newIn = input % 16;
+    inChanged = (lastInputPins !== newIn);
+    lastInputPins = newIn;
+
+    // Output pins are modded as well to be sure
+    newOut = output % 8;
+    outChanged = (lastOutputPins !== newOut);
+    lastOutputPins = newOut;
+
     const logItem = new LogItem(
-      datetime,
-      (inChanged || outChanged) ? 'changed' : 'unchanged',
+      timestamp,
+      (inChanged || outChanged),
       newIn,
       newOut,
       altitude
     );
-    this.state.items.push(logItem);
-    this.setState({items: this.state.items});
-  };
+    setItems([...items, logItem]);
+  }, [lastInputPins, lastOutputPins, items]);
 
-  clear () {
-    this.lastInputPins = null;
-    this.lastOutputPins = null;
-    this.setState({items: []});
+  const clear = React.useCallback(() => {
+    lastInputPins = null;
+    lastOutputPins = null;
+    setItems([]);
+  }, [lastInputPins, lastInputPins]);
+
+  const handleStatusFilterChange = React.useCallback((option: StatusSelectOption | null, actionMeta: ActionMeta<StatusSelectOption>) => {
+    setFilterStatusOption(option);
+  }, []);
+
+  const handleInputPinsFilterChange = React.useCallback((options: MultiValue<PinSelectOption>, actionMeta: ActionMeta<PinSelectOption>) => {
+    setFilterInputOptions(options);
+  }, []);
+
+  const handleOutputPinsFilterChange = React.useCallback((options: MultiValue<PinSelectOption>, actionMeta: ActionMeta<PinSelectOption>) => {
+    setFilterOutputOptions(options);
+  }, []);
+
+  const statusFilterActive = () => {
+    return filterStatusOption !== null && filterStatusOption.value !== 'any';
   }
 
-  handleFilterChange (event) {
-    this.setState({filterText: event.target.value});
+  const inputFilterActive = () => {
+    return filterInputOptions !== null && filterInputOptions.length > 0;
   }
 
-  handleStatusFilterChange = async (change) => {
-    this.setState({filterStatusOption: change});
+  const outputFilterActive = () => {
+    return filterOutputOptions !== null && filterOutputOptions.length > 0;
   }
 
-  handleInputPinsFilterChange = async (change) => {
-    this.setState({filterInputOptions: change})
-  }
-
-  handleOutputPinsFilterChange = async (change) => {
-    this.setState({filterOutputOptions: change})
-  }
-
-  statusFilterActive () {
-    return this.state.filterStatusOption && this.state.filterStatusOption.value !== 'any';
-  }
-
-  inputFilterActive () {
-    return this.state.filterInputOptions && this.state.filterInputOptions.length > 0;
-  }
-
-  outputFilterActive () {
-    return this.state.filterOutputOptions && this.state.filterOutputOptions.length > 0;
-  }
-
-  applyFilters (items) {
-    if (this.statusFilterActive()) {
-      items = items.filter(item => item.status === this.state.filterStatusOption.value);
+  const applyFilters = () => {
+    let filteredItems: Array<LogItem> = [...items];
+    if (statusFilterActive()) {
+      filteredItems = filteredItems.filter(item => item.status === filterStatusOption!.value);
     }
-    if (this.inputFilterActive()) {
-      items = items.filter(item => this.state.filterInputOptions.find(option => option.value === item.inputPins));
+    if (inputFilterActive()) {
+      filteredItems = filteredItems.filter(item => filterInputOptions!.find(option => option.value === item.inputPins));
     }
-    if (this.outputFilterActive()) {
-      items = items.filter(item => this.state.filterOutputOptions.find(option => option.value === item.outputPins));
+    if (outputFilterActive()) {
+      filteredItems = filteredItems.filter(item => filterOutputOptions!.find(option => option.value === item.outputPins));
     }
-    return items;
+    return filteredItems;
   }
 
-  componentDidMount () {
-    if (this.props.registerControls !== null) {
-      this.props.registerControls(this.print, this.clear);
+  React.useEffect(() => {
+    if (props.registerControls !== null) {
+      props.registerControls(print, clear);
     }
-    if (this.props.autoscroll) this.scrollToBottom();
-    this.setState({autoscroll: this.props.autoscroll});
-  }
+    if (props.autoscroll) scrollToBottom();
+    setAutoscroll(props.autoscroll);
+  }, []);
 
-  componentDidUpdate () {
-    if (this.state.autoscroll) {
-      if (this.props.selectedPosition) {
-        if (this.selectedItemEl != null) {
-          this.selectedItemEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+  React.useEffect(() => {
+    if (autoscroll) {
+      if (props.selectedPoint) {
+        if (selectedItemElementRef.current != null) {
+          selectedItemElementRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
         }
       } else {
-        this.scrollToBottom();
+        scrollToBottom();
       }
     }
-  }
+  }, [items]);
 
-  render () {
-    return (
-      <Card className={'bg-light'}>
-        <Card.Header>{this.props.title}</Card.Header>
-        <Card.Text>
-          <Container className={'log-container'}>
+  const toggleAutoscroll = React.useCallback(
+    () => setAutoscroll(!autoscroll),
+      [autoscroll]
+    );
 
-            <Card className={'log-card'}>
-              <Card.Text>
-                <Container className={'log-container'}>
-                  {((this.statusFilterActive() || this.inputFilterActive() || this.outputFilterActive())
-                    ? this.applyFilters(this.state.items)
-                    : this.state.items).map(item => {
-                    const selected = this.props.selectedPosition
-                      ? this.props.selectedPosition.datetime.unix() === item.datetime
-                      : false;
-                    if (typeof item === 'string') return (
-                      <div>
-                        <samp>
-                          {item}
-                        </samp>
-                        {'\n'}
+  return (
+    <Card className={'bg-light'}>
+      <Card.Header>{props.title}</Card.Header>
+      <Card.Text>
+        <Container className={'log-container'}>
+
+          <Card className={'log-card'}>
+            <Card.Text>
+              <Container className={'log-container'}>
+                {((statusFilterActive() || inputFilterActive() || outputFilterActive())
+                  ? applyFilters()
+                  : items).map(item => {
+                  const selected = props.selectedPoint
+                    ? props.selectedPoint.timestamp === item.timestamp
+                    : false;
+                  return (
+                    <div ref={el => {
+                      if (selected) {
+                        selectedItemElementRef.current = el;
+                      }
+                    }}>
+                      {item.toComponent(selected)}
+                    </div>
+                  )
+                })}
+                <div ref={scrollToBottomRef}/>
+              </Container>
+            </Card.Text>
+          </Card>
+        </Container>
+      </Card.Text>
+      <Card.Footer>
+        <Row>
+          <Column xs={"auto"}>
+            <Dropdown drop={'up'}>
+              <Dropdown.Toggle
+                disabled={props.isDisabled}
+                variant="outline-primary"
+                id="log-window-filter-dropdown"
+                size={'sm'}
+                className={'pr-1'}
+              >
+                Filter
+                <i className="bi bi-filter pl-1"></i>
+              </Dropdown.Toggle>
+
+              {createPortal(
+                <Dropdown.Menu style={{
+                  width: '24rem',
+                  border: `1px solid rgb(61, 139, 253)`,
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)'
+                }}>
+                  <Form>
+                    <InputGroup className={'mb-3 ml-3'} style={{width: '22rem'}}>
+                      <InputGroup.Text>Status:</InputGroup.Text>
+                      <div className={'react-select form-control p-0'}>
+                        <Select<StatusSelectOption>
+                          value={filterStatusOption}
+                          onChange={handleStatusFilterChange}
+                          options={statusOptions}
+                          defaultValue={statusOptions[0]}
+                        />
                       </div>
-                    );
-                    else return (
-                      <div ref={el => {
-                        if (selected) {
-                          this.selectedItemEl = el;
-                        }
-                      }}>
-                        {item.toComponent(selected)}
+                    </InputGroup>
+                    <InputGroup className={'mb-3 ml-3'} style={{width: '22rem'}}>
+                      <InputGroup.Text>Input Pins:</InputGroup.Text>
+                      <div className={'react-select form-control p-0'}>
+                        <Select<PinSelectOption, true>
+                          value={filterInputOptions}
+                          onChange={handleInputPinsFilterChange}
+                          isMulti
+                          options={inputPinOptions}
+                        />
                       </div>
-                    )
-                  })}
-                  <div ref={el => {
-                    this.el = el;
-                  }}/>
-                </Container>
-              </Card.Text>
-            </Card>
-          </Container>
-        </Card.Text>
-        <Card.Footer>
-          <Row>
-            <Column xs={"auto"}>
-              <Dropdown drop={'up'}>
-                <Dropdown.Toggle
-                  disabled={this.props.isDisabled}
-                  variant="outline-primary"
-                  id="log-window-filter-dropdown"
-                  size={'sm'}
-                  className={'pr-1'}
-                >
-                  Filter
-                  <i className="bi bi-filter pl-1"></i>
-                </Dropdown.Toggle>
-
-                {createPortal(
-                  <Dropdown.Menu style={{
-                    width: '24rem',
-                    border: `1px solid rgb(61, 139, 253)`,
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)'
-                  }}>
-                    <Form>
-                      <InputGroup className={'mb-3 ml-3'} style={{width: '22rem'}}>
-                        <InputGroup.Prepend>
-                          <InputGroup.Text>Status:</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <div className={'react-select form-control p-0'}>
-                          <Select
-                            value={this.state.filterStatusOption}
-                            onChange={this.handleStatusFilterChange}
-                            options={this.statusOptions}
-                            defaultValue={this.statusOptions[0]}
-                          />
-                        </div>
-                      </InputGroup>
-                      <InputGroup className={'mb-3 ml-3'} style={{width: '22rem'}}>
-                        <InputGroup.Prepend>
-                          <InputGroup.Text>Input Pins:</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <div className={'react-select form-control p-0'}>
-                          <Select
-                            value={this.state.filterInputOptions}
-                            onChange={this.handleInputPinsFilterChange}
-                            isMulti
-                            options={this.inputPinOptions}
-                          />
-                        </div>
-                      </InputGroup>
-                      <InputGroup className={'ml-3'} style={{width: '22rem'}}>
-                        <InputGroup.Prepend>
-                          <InputGroup.Text>Output Pins:</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <div className={'react-select form-control p-0'}>
-                          <Select
-                            value={this.state.filterOutputOptions}
-                            onChange={this.handleOutputPinsFilterChange}
-                            isMulti
-                            options={this.outputPinOptions}
-                          />
-                        </div>
-                      </InputGroup>
-                    </Form>
-                  </Dropdown.Menu>,
-                  document.body
-                )}
-              </Dropdown>
-            </Column>
-            <Column>
-              <Form className={'align-middle'}>
-                <Form.Check
-                  type={"checkbox"}
-                  id={"autoscroll-check"}
-                  label={`Autoscroll: ${this.state.autoscroll ? 'On' : 'Off'}`}
-                  onClick={() => this.setState({autoscroll: !this.state.autoscroll})}
-                  checked={this.state.autoscroll}
-                />
-              </Form>
-            </Column>
-          </Row>
-        </Card.Footer>
-      </Card>
-    )
-  }
+                    </InputGroup>
+                    <InputGroup className={'ml-3'} style={{width: '22rem'}}>
+                      <InputGroup.Text>Output Pins:</InputGroup.Text>
+                      <div className={'react-select form-control p-0'}>
+                        <Select<PinSelectOption, true>
+                          value={filterOutputOptions}
+                          onChange={handleOutputPinsFilterChange}
+                          isMulti
+                          options={outputPinOptions}
+                        />
+                      </div>
+                    </InputGroup>
+                  </Form>
+                </Dropdown.Menu>,
+                document.body
+              )}
+            </Dropdown>
+          </Column>
+          <Column>
+            <Form className={'align-middle'}>
+              <Form.Check
+                type={"checkbox"}
+                id={"autoscroll-check"}
+                label={`Autoscroll: ${autoscroll ? 'On' : 'Off'}`}
+                onClick={toggleAutoscroll}
+                checked={autoscroll}
+              />
+            </Form>
+          </Column>
+        </Row>
+      </Card.Footer>
+    </Card>
+  )
 }
 
-const ColorSamp = (props) => (
+export default React.memo(LogWindow);
+
+interface ColorSampProps {
+  color: string;
+  keepWhitespace?: boolean;
+  children: React.ReactNode;
+}
+
+const ColorSamp = (props: ColorSampProps) => (
   <samp style={{color: props.color, whiteSpace: props.keepWhitespace ? 'pre': 'normal'}}>{props.children}</samp>
 );
 
