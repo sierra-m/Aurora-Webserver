@@ -33,6 +33,11 @@ import ModemList, {type RedactedModem} from "../util/modems.ts";
 
 dayjs.extend(utc);
 
+export interface FlightsResponse {
+    date: string;
+    uid: string;
+}
+
 export interface SearchRecord {
     uid: string;
     modem: RedactedModem;
@@ -113,7 +118,7 @@ export default class MetaRoute {
                     [modem.imei]
                 );
 
-                let flights = result.map(x => ({date: x.start_date, uid: x.uid}));
+                let flights = result.map(x => ({date: x.start_date, uid: x.uid}) as FlightsResponse);
                 res.json(flights);
             } else {
                 res.sendStatus(400);
