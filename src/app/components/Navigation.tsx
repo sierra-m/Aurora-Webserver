@@ -31,43 +31,39 @@ import Row from 'react-bootstrap/Row'
 import Column from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 
-class Navigation extends Component {
-  state = {
-    navExpanded: false
-  };
+const Navigation = () => {
+  const [navExpanded, setNavExpanded] = React.useState<boolean>(false);
 
-  setNavExpanded = (expanded) => {
-    this.setState({ navExpanded: expanded });
-  };
+  const navExpandedToggle = React.useCallback((expanded: boolean) => {
+    setNavExpanded(expanded);
+  }, []);
 
-  closeNav = () => {
-    this.setState({ navExpanded: false });
-  };
+  const closeNav = React.useCallback(() => {
+    setNavExpanded(false);
+  }, []);
 
-  render () {
-    return (
-      <Navbar bg="light" expand="lg" sticky="top" onToggle={this.setNavExpanded} expanded={this.state.navExpanded}>
-        <Container className={'page-width'}>
-          <Navbar.Brand>
-            <Link to={'/'}>MSU Borealis</Link>
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav"/>
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="mr-auto" onSelect={this.closeNav}>
-              <LinkContainer to={'/'}>
-                <Nav.Link>Home</Nav.Link>
-              </LinkContainer>
-              <LinkContainer to={'/tracking'}>
-                <Nav.Link>Flight Tracking</Nav.Link>
-              </LinkContainer>
-              <Nav.Link href={'#'}>About</Nav.Link>
-              <Nav.Link href={'#'}>Contact</Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
-    )
-  }
+  return (
+    <Navbar bg="light" expand="lg" sticky="top" onToggle={navExpandedToggle} expanded={navExpanded}>
+      <Container className={'page-width'}>
+        <Navbar.Brand>
+          <Link to={'/'}>MSU Borealis</Link>
+        </Navbar.Brand>
+        <Navbar.Toggle aria-controls="basic-navbar-nav"/>
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Nav className="mr-auto" onSelect={closeNav}>
+            <LinkContainer to={'/'}>
+              <Nav.Link>Home</Nav.Link>
+            </LinkContainer>
+            <LinkContainer to={'/tracking'}>
+              <Nav.Link>Flight Tracking</Nav.Link>
+            </LinkContainer>
+            <Nav.Link href={'#'}>About</Nav.Link>
+            <Nav.Link href={'#'}>Contact</Nav.Link>
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
+  )
 }
 
-export default Navigation;
+export default React.memo(Navigation);
