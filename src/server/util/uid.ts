@@ -28,12 +28,12 @@ import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
 
-const validateUID = (uid: string) => {
+export const validateUID = (uid: string) => {
     return uid.match(/[0-9a-f]{8}\-[0-9a-f]{4}\-4[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f]{12}/i);
 }
 
 
-const standardizeUID = (uid: string) => {
+export const standardizeUID = (uid: string) => {
     let standardUid;
     if (uid.length === 22) {
         const asHex = Buffer.from(uid, 'base64url').toString('hex');
@@ -47,12 +47,12 @@ const standardizeUID = (uid: string) => {
 }
 
 
-const compressUID = (uid: string) => {
+export const compressUID = (uid: string) => {
     return Buffer.from(uid.replaceAll('-', ''), 'hex').toString('base64url');
 }
 
 // Returns flight registry query for uid. Note: start_date is a string in UTC format (YYYY-MM-DDTHH:MM:SSZ)
-const getFlightByUID = async (uid: string): Promise<FlightRegistryQuery | undefined> => {
+export const getFlightByUID = async (uid: string): Promise<FlightRegistryQuery | undefined> => {
     if (uid) {
         let result = await query<FlightRegistryQuery>(
             'SELECT * FROM public."flight-registry" WHERE uid=$1',
@@ -65,7 +65,7 @@ const getFlightByUID = async (uid: string): Promise<FlightRegistryQuery | undefi
 }
 
 
-const getUIDByFlight = async (imei: number, startDate: dayjs.Dayjs): Promise<string | undefined> => {
+export const getUIDByFlight = async (imei: number, startDate: dayjs.Dayjs): Promise<string | undefined> => {
     const isoDate = startDate.format('YYYY-MM-DD HH:mm:ss');
     let result = await query<{uid: string}>(
         'SELECT uid FROM public."flight-registry" WHERE imei=$1 AND start_date=$2',
@@ -75,5 +75,3 @@ const getUIDByFlight = async (imei: number, startDate: dayjs.Dayjs): Promise<str
         return result[0].uid;
     }
 }
-
-export {standardizeUID, compressUID, getFlightByUID, getUIDByFlight};
