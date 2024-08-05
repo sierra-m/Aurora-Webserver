@@ -29,6 +29,7 @@ import utc from "dayjs/plugin/utc";
 import {MINIMUM_SATELLITES} from "../config.ts";
 import {type JsvFormat, type Vector, type JsvFieldTypes, jsvFields} from "../../server/routes/flight.ts";
 import type {FlightStats} from "../../server/util/stats.ts";
+import type {UpdatePoint} from "../../server/routes/update.ts";
 
 
 dayjs.extend(utc);
@@ -63,7 +64,7 @@ export class FlightPoint {
   * Represents one frame in time/space from a flight
   *
   */
-  constructor (uid: string, fields: Array<string>, data: JsvFieldTypes) {
+  constructor (uid: string, data: JsvFieldTypes) {
     this.uid = uid;
     this.timestamp = getSafe('timestamp', data, 'number', 0);
     this.latitude = getSafe('latitude', data, 'number', 0.0);
@@ -76,7 +77,7 @@ export class FlightPoint {
     this.outputPins = getSafe('outputPins', data, 'number', 0);
     this.velocityVector = getSafe('velocityVector', data, 'object', [0, 0]);
 
-    if (this.timestamp) {
+    if (this.timestamp > 0) {
       this.datetime = dayjs.utc(this.datetime, 'X')
     }
   }
@@ -107,15 +108,14 @@ export interface Position {
   lng: number;
 }
 
+const timestampCol = jsvFields.indexOf('timestamp');
+const satsCol = jsvFields.indexOf('satellites');
+
 export class Flight {
-  fields: Array<string>;
   data: Array<JsvFieldTypes>;
 
-  satsCol: number;
-  timestampCol: number;
-
   startDate: dayjs.Dayjs | undefined;
-  stats: FlightStats;
+  stats: FlightStats | null;
   uid: FlightUid;
   /**
    * Represents a selected flight
@@ -133,77 +133,77 @@ export class Flight {
    *
    * @param {Object} packet The data packet
    */
-  constructor (packet: JsvFormat) {
-    this.fields = packet.fields;
-    this.data = packet.data;
-
-    this.satsCol = this.fields.indexOf('satellites');
-    this.timestampCol = this.fields.indexOf('timestamp');
+  constructor (packet?: JsvFormat) {
+    this.data = packet ? packet.data: [];
 
     this.data.sort((a, b) => {
-      if (a[this.timestampCol] < b[this.timestampCol]) return -1;
-      if (a[this.timestampCol] > b[this.timestampCol]) return 1;
+      if (a[timestampCol] < b[timestampCol]) return -1;
+      if (a[timestampCol] > b[timestampCol]) return 1;
       return 0;
     });
 
-    this.stats = packet.stats;
-    this.uid = packet.uid;
+    this.stats = packet ? packet.stats : null;
+    this.uid = packet ? packet.uid : "";
     if (this.data.length > 0 && this.data[0] != null) {
-      let firstPoint = new FlightPoint(this.uid, this.fields, this.data[0]);
+      let firstPoint = new FlightPoint(this.uid, this.data[0]);
       this.startDate = firstPoint.datetime;
     }
   }
 
   get (index: number) {
-    return new FlightPoint(this.uid, this.fields, this.data[index])
+    return new FlightPoint(this.uid, this.data[index])
   }
 
   /**
    * Takes a generic Object data point, assumes same fields
    * @param point
    */
-  add (point: {[key: string]: number | Vector}) {
-    let toAdd = [];
-    for (let field of jsvFields) {
-      if (field in point) {
-        toAdd.push(point[field]);
-      }
-    }
-    if (toAdd.length < jsvFields.length) {
-      return;
-    }
-    const thisPoint = new FlightPoint(this.uid, this.fields, toAdd as JsvFieldTypes);
+  add (point: UpdatePoint) {
+    const toAdd: JsvFieldTypes = [
+      point.timestamp,
+      point.latitude,
+      point.longitude,
+      point.altitude,
+      point.verticalVelocity,
+      point.groundSpeed,
+      point.satellites,
+      point.inputPins,
+      point.outputPins,
+      // Vector between the new point and the last point is stored in the last
+      // point, and a new empty vector is set in the inserted point
+      [0, 0] as Vector
+    ]
+    const thisPoint = new FlightPoint(this.uid, toAdd);
     const lastPoint = this.lastPoint();
     const offsetLat = thisPoint.latitude - lastPoint.latitude;
     const offsetLong = thisPoint.longitude - lastPoint.longitude;
     const offsetSecs = thisPoint.timestamp - lastPoint.timestamp;
     // build the vector in degrees per second
 
-    // velocityVector is always last. Vector between the new point and the last
-    // point is stored in the last point, and a new empty vector is set in the
-    // inserted point
+    // Calculate velocity vector and store in current last point
     const vector: Vector = [offsetLat / offsetSecs, offsetLong / offsetSecs];
     this.updateRaw(this.data.length - 1, 'velocityVector', vector);
-    toAdd.push([0, 0] as Vector);
     this.data.push(toAdd as JsvFieldTypes);
 
     // update statistics
     this.updateStats(thisPoint);
 
-    return this.data.length - 1
+    return this.data.length - 1;
   }
 
   updateStats (point: FlightPoint) {
-    if (point.altitude > this.stats.maxAltitude) this.stats.maxAltitude = point.altitude;
-    if (point.altitude < this.stats.minAltitude) this.stats.minAltitude = point.altitude;
-    if (Math.abs(point.verticalVelocity) > Math.abs(this.stats.maxVerticalVel)) this.stats.maxVerticalVel = point.verticalVelocity;
-    if (point.groundSpeed > this.stats.maxGroundSpeed) this.stats.maxGroundSpeed = point.groundSpeed;
-    this.stats.avgGroundSpeed = roundToTwo(weightedAverage(this.stats.avgGroundSpeed, this.data.length, point.groundSpeed));
+    if (this.stats) {
+      if (point.altitude > this.stats.maxAltitude) this.stats.maxAltitude = point.altitude;
+      if (point.altitude < this.stats.minAltitude) this.stats.minAltitude = point.altitude;
+      if (Math.abs(point.verticalVelocity) > Math.abs(this.stats.maxVerticalVel)) this.stats.maxVerticalVel = point.verticalVelocity;
+      if (point.groundSpeed > this.stats.maxGroundSpeed) this.stats.maxGroundSpeed = point.groundSpeed;
+      this.stats.avgGroundSpeed = roundToTwo(weightedAverage(this.stats.avgGroundSpeed, this.data.length, point.groundSpeed));
+    }
   }
 
   updateRaw (index: number, field: string, value: number | Vector) {
-    if (!this.fields.includes(field)) throw new TypeError(`${field} is not a field of Flight`);
-    const fieldCol = this.fields.indexOf(field);
+    if (!jsvFields.includes(field)) throw new TypeError(`${field} is not a field of Flight`);
+    const fieldCol = jsvFields.indexOf(field);
     this.data[index][fieldCol] = value;
   }
 
@@ -211,13 +211,13 @@ export class Flight {
    * Search by unix timestamp
    */
   getByUnix (timestamp: number): FlightPoint | undefined {
-    let datapoint = this.data.find(x => x[this.timestampCol] === timestamp);
+    let datapoint = this.data.find(x => x[timestampCol] === timestamp);
     if (datapoint) {
-      return new FlightPoint(this.uid, this.fields, datapoint);
+      return new FlightPoint(this.uid, datapoint);
     }
   }
 
-  pointValid = (point: JsvFieldTypes) => (point[this.satsCol] as number) > MINIMUM_SATELLITES;
+  pointValid = (point: JsvFieldTypes) => (point[satsCol] as number) > MINIMUM_SATELLITES;
 
   lastPoint () {
     return this.get(this.data.length - 1);
@@ -230,14 +230,14 @@ export class Flight {
   lastValidPoint () {
     const found = this.data.findLast(x => this.pointValid(x));
     if (found) {
-      return new FlightPoint(this.uid, this.fields, found);
+      return new FlightPoint(this.uid, found);
     }
   }
 
   firstValidPoint () {
     const found = this.data.find(x => this.pointValid(x));
     if (found) {
-      return new FlightPoint(this.uid, this.fields, found);
+      return new FlightPoint(this.uid, found);
     }
   }
 
@@ -246,8 +246,8 @@ export class Flight {
   }
 
   coords () {
-    const lat_col = this.fields.indexOf('latitude');
-    const lng_col = this.fields.indexOf('longitude');
+    const lat_col = jsvFields.indexOf('latitude');
+    const lng_col = jsvFields.indexOf('longitude');
     return this.data.reduce((filtered: Array<Position>, row) => {
       if (this.pointValid(row)) {
         filtered.push({
@@ -260,7 +260,7 @@ export class Flight {
   }
 
   altitudes () {
-    const alt_col = this.fields.indexOf('altitude');
+    const alt_col = jsvFields.indexOf('altitude');
     return this.data.reduce((filtered: Array<number>, row) => {
       if (this.pointValid(row)) {
         filtered.push(row[alt_col] as number);
@@ -270,7 +270,7 @@ export class Flight {
   }
 
   indexOf (flightPoint: FlightPoint) {
-    const foundIndex = this.data.findIndex((row) => row[this.timestampCol] === flightPoint.timestamp);
+    const foundIndex = this.data.findIndex((row) => row[timestampCol] === flightPoint.timestamp);
     if (foundIndex > -1) {
       return foundIndex;
     }
@@ -279,22 +279,22 @@ export class Flight {
   formattedDatetimes () {
     return this.data.reduce((filtered: Array<string>, row) => {
       if (this.pointValid(row)) {
-        filtered.push(dayjs.unix(row[this.timestampCol] as number).format('YYYY-MM-DD HH:mm:ss'))
+        filtered.push(dayjs.unix(row[timestampCol] as number).format('YYYY-MM-DD HH:mm:ss'))
       }
       return filtered
     }, []);
   }
 
   pinStates () {
-    const inputCol = this.fields.indexOf('input_pins');
-    const outputCol = this.fields.indexOf('output_pins');
-    const altitudeCol = this.fields.indexOf('altitude');
+    const inputCol = jsvFields.indexOf('inputPins');
+    const outputCol = jsvFields.indexOf('outputPins');
+    const altitudeCol = jsvFields.indexOf('altitude');
     return this.data.reduce((filtered: Array<PinStatesData>, row) => {
       if (this.pointValid(row)) {
         filtered.push({
           input: row[inputCol] as number,
           output: row[outputCol] as number,
-          timestamp: row[this.timestampCol] as number,
+          timestamp: row[timestampCol] as number,
           altitude: row[altitudeCol] as number
         })
       }
@@ -305,7 +305,7 @@ export class Flight {
   * [Symbol.iterator] () {
     for (let i = 0; i < this.data.length; i++) {
       if (this.pointValid(this.data[i])) {
-        yield new FlightPoint(this.uid, this.fields, this.data[i])
+        yield new FlightPoint(this.uid, this.data[i])
       }
     }
   }
@@ -318,7 +318,7 @@ export class Flight {
     if (end != null) {
       for (let i = 0; i < end; i++) {
         if (this.pointValid(this.data[i]))
-          yield new FlightPoint(this.uid, this.fields, this.data[i]);
+          yield new FlightPoint(this.uid, this.data[i]);
       }
     }
   }
@@ -329,7 +329,26 @@ export class Flight {
   * iterateOn (low: number, high: number) {
     if (low < 0 || low > high || high > this.data.length) throw new RangeError(`Index limits out of range [0,${this.data.length})`);
     for (let i = low; i < high; i++) {
-      yield new FlightPoint(this.uid, this.fields, this.data[i]);
+      yield new FlightPoint(this.uid, this.data[i]);
     }
+  }
+
+  copy (): Flight {
+    const copyFlight = new Flight();
+    copyFlight.data = [...this.data];
+    copyFlight.uid = this.uid;
+    if (this.stats) {
+      copyFlight.stats = {
+        ...this.stats,
+        avgCoords: {
+          ...this.stats.avgCoords
+        }
+      }
+    }
+    if (copyFlight.data.length > 0 && copyFlight.data[0] != null) {
+      const firstPoint = new FlightPoint(copyFlight.uid, copyFlight.data[0]);
+      copyFlight.startDate = firstPoint.datetime;
+    }
+    return copyFlight;
   }
 }
