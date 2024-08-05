@@ -88,15 +88,15 @@ class LogItem {
   }
 }
 
-type LogPrintFunc = (input: number, output: number, timestamp: UnixTimestamp, altitude: number) => void;
+export type LogPrintFunc = (input: number, output: number, timestamp: UnixTimestamp, altitude: number) => void;
 
-type LogClearFunc = () => void;
+export type LogClearFunc = () => void;
 
 interface LogWindowProps {
   registerControls: (printFunc: LogPrintFunc, clearFunc: LogClearFunc) => void;
   title: string;
   autoscroll: boolean;
-  selectedPoint: FlightPoint;
+  selectedPoint: FlightPoint | null;
   isDisabled: boolean;
 }
 
