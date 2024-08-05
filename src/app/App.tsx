@@ -22,40 +22,26 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-import React, { Component } from 'react'
+import React from 'react'
 import './App.css'
 import './custom.scss'
 import { BrowserRouter as Router, Link, Route } from "react-router-dom"
 import Navigation from "./components/Navigation.jsx"
 import Tracking from './components/Tracking.jsx'
 
-import borealisGroup from './images/borealisGroup.jpg'
 import MainPage from './components/MainPage'
 import Error404 from './components/Error404'
 
-const bannerStyle = {
-  backgroundImage: `url(${borealisGroup})`,
-};
 
-const pageWidth = '60vw';
-
-class App extends Component {
-  render () {
-    return (
-      <Router>
-        <Navigation/>
-        <Route exact={true} path={'/'} render={() => (
-          <MainPage/>
-        )}/>
-        <Route path={'/tracking'} render={(props) => (
-          <Tracking {...props}/>
-        )}/>
-        <Route path={'/404'} render={() => (
-          <Error404/>
-        )}/>
-      </Router>
-    );
-  }
+const App = () => {
+  return (
+    <Router>
+      <Navigation/>
+      <Route path={'/'} element={<MainPage/>}/>
+      <Route path={'/tracking'} element={<Tracking/>}/>
+      <Route path={'/404'} element={<Error404/>}/>
+    </Router>
+  );
 }
 
 export default App;
