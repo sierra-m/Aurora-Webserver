@@ -32,21 +32,12 @@ import * as chartjs from "chart.js";
 
 
 interface AltitudeChartProps {
-  chartTitle: string;
   dataTitle: string;
   data: Array<number>;
-  key: number;
+  key: number | null;
   labels: Array<string>;
   selectPoint: (index: number) => void;
   useAnimation: boolean;
-}
-
-interface AltitudeChartState {
-  dataLine: ChartData;
-  xMin: number;
-  xMax: number;
-  yMin: number;
-  yMax: number;
 }
 
 const AltitudeChart = (props: AltitudeChartProps) => {
@@ -172,7 +163,6 @@ const AltitudeChart = (props: AltitudeChartProps) => {
 
   return (
     <MDBContainer className={'px-0'} key={props.key} style={{height: '18rem', maxHeight: '18rem'}}>
-      {props.chartTitle !== null && <h3 className="mt-5 mb-0 pb-0">{props.chartTitle}</h3>}
       <Line
         data={dataLine}
         options={options}
