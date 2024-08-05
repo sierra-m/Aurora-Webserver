@@ -28,9 +28,28 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import ElevationAPI from '../util/elevation'
 import {standardizeUID} from '../util/uid';
+import type {Vector} from "./flight.ts";
 
 
 dayjs.extend(utc);
+
+export interface UpdatePoint {
+  timestamp: number;
+  latitude: number;
+  longitude: number;
+  altitude: number;
+  verticalVelocity: number;
+  groundSpeed: number;
+  satellites: number;
+  inputPins: number;
+  outputPins: number;
+}
+
+export interface UpdateResponse {
+  update: boolean;
+  result: UpdatePoint[];
+  elevation?: number;
+}
 
 const elevationAPI = new ElevationAPI();
 
@@ -93,20 +112,20 @@ export default class UpdateRoute {
         );
 
         const formattedResult = result.map(row => ({
-          datetime: dayjs.utc(row.datetime, 'YYYY-MM-DD HH:mm:ss').unix(),
+          timestamp: dayjs.utc(row.datetime, 'YYYY-MM-DD HH:mm:ss').unix(),
           uid: row.uid,
           latitude: row.latitude,
           longitude: row.longitude,
           altitude: row.altitude,
-          vertical_velocity: row.vertical_velocity,
-          ground_speed: row.ground_speed,
+          verticalVelocity: row.vertical_velocity,
+          groundSpeed: row.ground_speed,
           satellites: row.satellites,
-          input_pins: row.input_pins,
-          output_pins: row.output_pins
-        }));
+          inputPins: row.input_pins,
+          outputPins: row.output_pins
+        }) as UpdatePoint);
 
         // Create partial return packet
-        let content = {
+        const content: UpdateResponse = {
           update: formattedResult.length > 0,
           result: formattedResult
         };
