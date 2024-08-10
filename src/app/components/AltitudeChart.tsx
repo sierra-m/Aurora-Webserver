@@ -27,8 +27,10 @@ import { Line } from 'react-chartjs-2'
 import { MDBContainer } from 'mdbreact'
 import Zoom from 'chartjs-plugin-zoom'
 import Button from 'react-bootstrap/Button'
-import {type ChartData, type ChartEvent, type TooltipItem} from "chart.js";
-import * as chartjs from "chart.js";
+import Chart from "chart.js/auto";
+import {CategoryScale, type ChartData, type ChartEvent, type TooltipItem, type ChartOptions} from "chart.js";
+
+Chart.register(CategoryScale);
 
 
 interface AltitudeChartProps {
@@ -41,7 +43,7 @@ interface AltitudeChartProps {
 }
 
 const AltitudeChart = (props: AltitudeChartProps) => {
-  const [dataLine, setDataLine] = useState<ChartData<'line'>>({
+  const [lineData, setLineData] = useState<ChartData<'line'>>({
     labels: props.labels,
     datasets: [
       {
@@ -73,7 +75,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
   const [yMin, setYMin] = useState(0);
   const [yMax, setYMax] = useState(100);
 
-  const options: chartjs.ChartOptions<'line'> = {
+  const options: ChartOptions<'line'> = {
     // TODO: check if this is needed anymore
     // legend: {
     //   display: false
@@ -147,7 +149,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
     }
   };
 
-  const chartRef = React.useRef<chartjs.Chart<"line">>(null);
+  const chartRef = React.useRef<Chart<"line">>(null);
 
   const resetZoom = React.useCallback(() => {
     if (chartRef.current) {
@@ -165,9 +167,9 @@ const AltitudeChart = (props: AltitudeChartProps) => {
   }, []);
 
   return (
-    <MDBContainer className={'px-0'} key={props.key} style={{height: '18rem', maxHeight: '18rem'}}>
+    <div className="chart-container px-0" style={{height: '18rem', maxHeight: '18rem'}}>
       <Line
-        data={dataLine}
+        data={lineData}
         options={options}
         key={props.key}
         ref={chartRef}
@@ -175,7 +177,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
       />
       <p className={'text-secondary'}>Click a point to view it on the map</p>
       <Button onClick={resetZoom}>Reset Zoom</Button>
-    </MDBContainer>
+    </div>
   );
 }
 
