@@ -22,7 +22,7 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-import React, { Component } from 'react';
+import React, {type ChangeEvent, Component} from 'react';
 import '../custom.scss';
 import { Link } from "react-router-dom";
 import { Navbar, Nav } from "react-bootstrap";
@@ -30,9 +30,12 @@ import { LinkContainer } from "react-router-bootstrap";
 import Row from 'react-bootstrap/Row'
 import Column from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
+import Form from "react-bootstrap/Form";
 
 const Navigation = () => {
   const [navExpanded, setNavExpanded] = React.useState<boolean>(false);
+
+  const [darkModeEnabled, setDarkMode] = React.useState(false);
 
   const navExpandedToggle = React.useCallback((expanded: boolean) => {
     setNavExpanded(expanded);
@@ -42,8 +45,14 @@ const Navigation = () => {
     setNavExpanded(false);
   }, []);
 
+  const toggleDarkMode = React.useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setDarkMode(event.target.checked);
+    const color = event.target.checked ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-bs-theme', color);
+  }, []);
+
   return (
-    <Navbar bg="light" expand="lg" sticky="top" onToggle={navExpandedToggle} expanded={navExpanded}>
+    <Navbar expand="lg" sticky="top" onToggle={navExpandedToggle} expanded={navExpanded} className={"bg-body-secondary"}>
       <Container className={'page-width'}>
         <Navbar.Brand>
           <Link to={'/'}>MSU Borealis</Link>
@@ -60,6 +69,16 @@ const Navigation = () => {
             <Nav.Link href={'#'}>About</Nav.Link>
             <Nav.Link href={'#'}>Contact</Nav.Link>
           </Nav>
+          <Form className="d-flex ps-3">
+            <Form.Check
+              type="switch"
+              id="dark-mode-switch"
+              label="Dark Mode"
+              onChange={toggleDarkMode}
+              checked={darkModeEnabled}
+              className={'ml-auto'}
+            />
+          </Form>
         </Navbar.Collapse>
       </Container>
     </Navbar>

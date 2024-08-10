@@ -253,7 +253,7 @@ const LogWindow = (props: LogWindowProps) => {
     );
 
   return (
-    <Card className={'bg-light'}>
+    <Card className={'bg-body-secondary'}>
       <Card.Header>{props.title}</Card.Header>
       <Card.Text>
         <Container className={'log-container'}>
