@@ -30,7 +30,8 @@ import {query} from "../util/pg";
 import Stats from "../util/stats";
 import KMLEncoder from "../util/kml";
 import * as config from "../config";
-import {standardizeUID, getFlightByUID, getUIDByFlight} from "../util/uid";
+import {standardizeUID} from "../util/uid";
+import {getFlightByUID, getUIDByFlight} from "../util/db";
 import ModemList from "../util/modems.ts";
 
 import {jsvFields} from "../types/routes.ts";

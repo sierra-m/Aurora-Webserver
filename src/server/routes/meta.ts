@@ -28,7 +28,7 @@ import utc from "dayjs/plugin/utc";
 
 import {query} from "../util/pg";
 import * as config from "../config";
-import {getFlightByUID} from "../util/uid";
+import {getFlightByUID} from "../util/db";
 import ModemList from "../util/modems.ts";
 
 import type {
