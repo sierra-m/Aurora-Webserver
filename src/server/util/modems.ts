@@ -23,9 +23,13 @@
 */
 
 import fs from 'fs';
-import { parse } from 'csv-parse/sync';
-import {query, type ModemQuery} from './pg';
+import {parse} from 'csv-parse/sync';
+
+import {query} from './pg';
 import * as config from '../config'
+
+import type {RedactedModem} from "../types/util.ts";
+import type {ModemQuery} from "../types/db.ts";
 
 
 class ModemValidationError extends Error {
@@ -47,13 +51,7 @@ const processCsvFile = (filepath: string): Array<Array<string>> => {
     return parse(content);
 };
 
-interface RedactedModem {
-    partialImei: string,
-    org: string,
-    name: string
-}
-
-class Modem {
+export class Modem {
     imei: number;
     org: string;
     name: string;
@@ -208,5 +206,3 @@ export default class ModemList {
         return out.join('\n');
     }
 }
-
-export {Modem, type RedactedModem};

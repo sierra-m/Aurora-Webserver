@@ -23,7 +23,7 @@
 */
 
 import type {Modem} from "./modems.ts";
-import type {FlightsQuery} from "./pg.ts";
+import type {FlightsQuery} from "../types/db.ts";
 
 const fs = require('fs').promises;
 

@@ -26,8 +26,8 @@ import * as pg from 'pg'
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 
-dayjs.extend(utc);
 
+dayjs.extend(utc);
 
 // Create a new pg connection pool
 const pgPool = new pg.Pool();
@@ -38,43 +38,13 @@ pg.types.setTypeParser(1114, (str: string) => dayjs.utc(str).format());
 // fix bigint and bigserial converting to int
 pg.types.setTypeParser(20, parseInt);
 
-interface AuthQuery {
-  client: string,
-  token: string
-}
-
-interface ModemQuery {
-  imei: number, // pg returns bigint as string
-  organization: string,
-  name: string
-}
-
-interface FlightRegistryQuery {
-  start_date: string,
-  imei: number,
-  uid: string
-}
-
-interface FlightsQuery {
-  uid: string,
-  datetime: string,
-  latitude: number,
-  longitude: number,
-  altitude: number,
-  vertical_velocity: number,
-  ground_speed: number,
-  satellites: number,
-  input_pins: number,
-  output_pins: number
-}
-
 /**
  * Makes a database query
  * @param command The query to make
  * @param values Array of values to insert, for param insertion
  * @returns {Promise<array>} The resulting rows as an array
  */
-const query = async <Type>(command: string, values?: Array<string | number | Array<number>>): Promise<Array<Type>> => {
+export const query = async <Type>(command: string, values?: Array<string | number | Array<number>>): Promise<Array<Type>> => {
   let client = await pgPool.connect();
   let result;
 
@@ -93,5 +63,3 @@ const query = async <Type>(command: string, values?: Array<string | number | Arr
   }
   return result.rows;
 };
-
-export {query, type AuthQuery, type ModemQuery, type FlightRegistryQuery, type FlightsQuery}

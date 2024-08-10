@@ -21,9 +21,10 @@
 * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
 */
-import {query, type FlightRegistryQuery} from './pg'
+import {query} from './pg'
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import type {FlightRegistryQuery} from "../types/db.ts";
 
 
 dayjs.extend(utc);

@@ -22,19 +22,9 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-import type {FlightsQuery} from "./pg.ts";
+import type {FlightStats} from "../types/util.ts";
+import type {FlightsQuery} from "../types/db.ts";
 
-interface FlightStats {
-  avgCoords: {
-    lat: number;
-    lng: number;
-  }
-  avgGroundSpeed: number;
-  maxGroundSpeed: number;
-  maxVerticalVel: number;
-  maxAltitude: number;
-  minAltitude: number;
-}
 
 export default class Stats {
 
@@ -71,5 +61,3 @@ export default class Stats {
     }
   }
 }
-
-export {type FlightStats}
