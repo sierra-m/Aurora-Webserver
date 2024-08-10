@@ -205,7 +205,7 @@ function TrackerMap (props: TrackerMapProps) {
     props.selectPoint(minIndex);
   }, [props.coordinates, props.selectPoint]);
 
-  return (
+  return isLoaded ? (
     <GoogleMap
       // TODO: is this needed?
       //defaultZoom={4}
@@ -291,6 +291,8 @@ function TrackerMap (props: TrackerMapProps) {
       />
       }
     </GoogleMap>
+  ) : (
+    <></>
   )
 }
 
