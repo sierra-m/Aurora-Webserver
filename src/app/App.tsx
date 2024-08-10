@@ -25,7 +25,7 @@
 import React from 'react'
 import './App.css'
 import './custom.scss'
-import { BrowserRouter as Router, Link, Route } from "react-router-dom"
+import {BrowserRouter as Router, Link, Route, Routes} from "react-router-dom"
 import Navigation from "./components/Navigation.jsx"
 import Tracking from './components/Tracking.jsx'
 
@@ -37,9 +37,11 @@ const App = () => {
   return (
     <Router>
       <Navigation/>
-      <Route path={'/'} element={<MainPage/>}/>
-      <Route path={'/tracking'} element={<Tracking/>}/>
-      <Route path={'/404'} element={<Error404/>}/>
+      <Routes>
+        <Route path={'/'} element={<MainPage/>}/>
+        <Route path={'/tracking'} element={<Tracking/>}/>
+        <Route path={'/404'} element={<Error404/>}/>
+      </Routes>
     </Router>
   );
 }
