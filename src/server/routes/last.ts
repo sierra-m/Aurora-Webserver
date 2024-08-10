@@ -23,14 +23,14 @@
 */
 
 import express from 'express'
-import {type FlightRegistryQuery, query} from '../util/pg'
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 
+import {query} from '../util/pg'
+import type {FlightRegistryQuery} from "../types/db.ts";
+
 
 dayjs.extend(utc);
-
-const router = express.Router();
 
 interface LastParameters {
   imei?: string
@@ -66,7 +66,3 @@ export default class LastRoute {
     }
   }
 }
-
-router.get('/', async (req, res, next) => {
-
-});

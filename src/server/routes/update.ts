@@ -23,33 +23,18 @@
 */
 
 import express from 'express'
-import {type FlightsQuery, query} from '../util/pg'
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+
+import {query} from '../util/pg'
 import ElevationAPI from '../util/elevation'
 import {standardizeUID} from '../util/uid';
-import type {Vector} from "./flight.ts";
+
+import type {UpdatePoint, UpdateResponse} from "../types/routes.ts";
+import type {FlightsQuery} from "../types/db.ts";
 
 
 dayjs.extend(utc);
-
-export interface UpdatePoint {
-  timestamp: number;
-  latitude: number;
-  longitude: number;
-  altitude: number;
-  verticalVelocity: number;
-  groundSpeed: number;
-  satellites: number;
-  inputPins: number;
-  outputPins: number;
-}
-
-export interface UpdateResponse {
-  update: boolean;
-  result: UpdatePoint[];
-  elevation?: number;
-}
 
 const elevationAPI = new ElevationAPI();
 

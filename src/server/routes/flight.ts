@@ -22,56 +22,25 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-import express from 'express'
-import {type FlightsQuery, query} from '../util/pg'
+import express from "express";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import Stats, {type FlightStats} from '../util/stats'
-import KMLEncoder from '../util/kml'
-import * as config from '../config'
-import {standardizeUID, getFlightByUID, getUIDByFlight} from '../util/uid';
-import ModemList, {type RedactedModem} from "../util/modems.ts";
+
+import {query} from "../util/pg";
+import Stats from "../util/stats";
+import KMLEncoder from "../util/kml";
+import * as config from "../config";
+import {standardizeUID, getFlightByUID, getUIDByFlight} from "../util/uid";
+import ModemList from "../util/modems.ts";
+
+import {jsvFields} from "../types/routes.ts";
+import type {JsvFormat, Vector, JsvFieldTypes,  JsvDataFormat} from "../types/routes.ts";
+import type {RedactedModem} from "../types/util.ts";
+import type {FlightsQuery} from "../types/db.ts";
 
 
 dayjs.extend(utc);
 
-type Vector = [lat: number, lng: number];
-
-type JsvFieldTypes = [
-  timestamp: number,
-  latitude: number,
-  longitude: number,
-  altitude: number,
-  verticalVelocity: number,
-  groundSpeed: number,
-  satellites: number,
-  inputPins: number,
-  outputPins: number,
-  velocityVector: Vector
-];
-
-interface JsvFormat {
-  uid: string;
-  fields: Array<string>;
-  data: Array<JsvFieldTypes>;
-  modem: RedactedModem;
-  stats: FlightStats;
-}
-
-type JsvDataFormat = Pick<JsvFormat, 'data'>
-
-const jsvFields = [
-  'timestamp',
-  'latitude',
-  'longitude',
-  'altitude',
-  'verticalVelocity',
-  'groundSpeed',
-  'satellites',
-  'inputPins',
-  'outputPins',
-  'velocityVector'
-];
 
 /**
  * Data is retrieved from postgres as an array of
@@ -267,5 +236,3 @@ export default class FlightRoute {
     }
   }
 }
-
-export { type JsvFormat, type Vector, type JsvFieldTypes, jsvFields }

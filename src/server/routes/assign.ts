@@ -23,13 +23,16 @@
 */
 
 import * as express from "express";
-import {type FlightRegistryQuery, query} from "../util/pg";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+
+import {query} from "../util/pg";
 import { FlightPoint } from "../util/flightpoint";
 import * as config from "../config"
 import {DatabaseError} from "pg";
+
 import type ModemList from "../util/modems.ts";
+import type {FlightRegistryQuery} from "../types/db.ts";
 
 
 dayjs.extend(utc);
@@ -91,10 +94,10 @@ export default class AssignRoute {
         return;
       }
 
-      // TODO: implement protocol buffer
+      // TODO: implement protocol buffer/refactor iris
       // const bad_fields = flightPoint.checkInvalidFields();
       // if (bad_fields.length > 0) {
-      //   await res.status(403).json({
+      //   res.status(403).json({
       //     status: 'error',
       //     data: `Flight point fields are incorrectly formatted: ${bad_fields}`
       //   });

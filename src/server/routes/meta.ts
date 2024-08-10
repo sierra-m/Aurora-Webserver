@@ -22,62 +22,22 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-import * as express from 'express'
-import {type FlightRegistryQuery, query} from '../util/pg'
+import * as express from "express";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import * as config from '../config'
-import {getFlightByUID} from '../util/uid'
-import ModemList, {type RedactedModem} from "../util/modems.ts";
 
+import {query} from "../util/pg";
+import * as config from "../config";
+import {getFlightByUID} from "../util/uid";
+import ModemList from "../util/modems.ts";
+
+import type {
+    FlightsResponse, SearchRecord, SearchResponse,
+    ActiveFlightsQuery, ActiveFlightRecord, RecentActiveFlightsResponse
+} from "../types/routes.ts";
+import type {FlightRegistryQuery} from "../types/db.ts";
 
 dayjs.extend(utc);
-
-export interface FlightsResponse {
-    date: string;
-    uid: string;
-}
-
-export interface SearchRecord {
-    uid: string;
-    modem: RedactedModem;
-    startPoint: {
-        dt: string;
-        lat: number;
-        lng: number;
-    }
-}
-
-export interface SearchResponse {
-    found: number;
-    results: Array<SearchRecord>;
-}
-
-// Type returned by the database query
-interface ActiveFlightsQuery {
-    uid: string;
-    datetime: string;
-    latitude: number;
-    longitude:  number;
-    altitude: number;
-}
-
-// Type with extra context that we will return
-export interface ActiveFlightRecord {
-    uid: string;
-    datetime: string;
-    latitude: number;
-    longitude: number;
-    altitude: number;
-    modem: RedactedModem;
-    startDate: string;
-}
-
-// Full response
-export interface RecentActiveFlightsResponse {
-    status: string;
-    points?: Array<ActiveFlightRecord>;
-}
 
 export default class MetaRoute {
     router: express.Router;
