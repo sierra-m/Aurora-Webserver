@@ -22,12 +22,12 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-import React, {Component, useState} from 'react'
+import React, {type EventHandler, useState} from 'react'
 import { Line } from 'react-chartjs-2'
 import { MDBContainer } from 'mdbreact'
 import Zoom from 'chartjs-plugin-zoom'
 import Button from 'react-bootstrap/Button'
-import {type ChartData, type TooltipItem} from "chart.js";
+import {type ChartData, type ChartEvent, type TooltipItem} from "chart.js";
 import * as chartjs from "chart.js";
 
 
@@ -41,7 +41,7 @@ interface AltitudeChartProps {
 }
 
 const AltitudeChart = (props: AltitudeChartProps) => {
-  const [dataLine, setDataLine] = useState<ChartData>({
+  const [dataLine, setDataLine] = useState<ChartData<'line'>>({
     labels: props.labels,
     datasets: [
       {
@@ -73,7 +73,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
   const [yMin, setYMin] = useState(0);
   const [yMax, setYMax] = useState(100);
 
-  const options: chartjs.ChartOptions = {
+  const options: chartjs.ChartOptions<'line'> = {
     // TODO: check if this is needed anymore
     // legend: {
     //   display: false
@@ -147,17 +147,20 @@ const AltitudeChart = (props: AltitudeChartProps) => {
     }
   };
 
-  const chartRef = React.useRef<Line>(null);
+  const chartRef = React.useRef<chartjs.Chart<"line">>(null);
 
   const resetZoom = React.useCallback(() => {
     if (chartRef.current) {
-      chartRef.current.chartInstance.resetZoom();
+      chartRef.current.resetZoom();
     }
   }, []);
 
-  const handleClick = React.useCallback((element: any) => {
-    if (element && element[0]) {
-      props.selectPoint(element[0]._index)
+  const handleClick = React.useCallback((event: any) => {
+    if (chartRef.current) {
+      const points = chartRef.current.getElementsAtEventForMode(event, 'nearest', {intersect: true}, false);
+      if (points.length > 0 && points[0]) {
+        props.selectPoint(points[0].index)
+      }
     }
   }, []);
 
@@ -168,7 +171,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
         options={options}
         key={props.key}
         ref={chartRef}
-        getElementAtEvent={handleClick}
+        onClick={handleClick}
       />
       <p className={'text-secondary'}>Click a point to view it on the map</p>
       <Button onClick={resetZoom}>Reset Zoom</Button>

@@ -36,16 +36,11 @@ import dayjs from "dayjs";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import {createPortal} from "react-dom";
 import type {ActionMeta} from "react-select";
-import type {RedactedModem} from "../../server/util/modems.ts";
 import type {FlightsByDate} from "./Tracking.tsx";
 import type {FlightUid} from "../util/flight.ts";
-import type {FlightsResponse} from "../../server/routes/meta.ts";
+import type {FlightsResponse} from "../../server/types/routes.ts";
+import type {RedactedModem} from "../../server/types/util.ts";
 
-
-interface SelectOption {
-  value: string,
-  label: string
-}
 
 type ModemName = string;
 

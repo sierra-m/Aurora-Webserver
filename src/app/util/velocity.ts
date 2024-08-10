@@ -55,8 +55,8 @@ const little_g = 9.80665;
 *   Given an altitude in meters, this function approximates
 *   the resulting air density in kg/m^3
 */
-const getDensity = (altitude) => {
-  const third_order = (coef, x) => coef[0]*x**3 + coef[1]*x**2 + coef[2]*x + coef[3];
+const getDensity = (altitude: number) => {
+  const third_order = (coef: number[], x: number) => coef[0]*x**3 + coef[1]*x**2 + coef[2]*x + coef[3];
 
   if (altitude <= 16000)
     return third_order(lowerProfile, altitude);
@@ -91,8 +91,8 @@ const getDensity = (altitude) => {
 *
 *   The negative sign indicates the payload is, in fact, falling.
 */
-const getVelocity = (altitude, mass, paraDiameter, dragCoeff) => {
-  let density = getDensity(altitude);
+const getVelocity = (altitude: number, mass: number, paraDiameter: number, dragCoeff: number) => {
+  let density = getDensity(altitude)!;
 
   // density might be negative for too high an altitude ¯\_(ツ)_/¯
   density = density > 0 ? density : 0.0000001;

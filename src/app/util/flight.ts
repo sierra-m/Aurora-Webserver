@@ -27,9 +27,10 @@ import { weightedAverage, roundToTwo } from "./helpers"
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import {MINIMUM_SATELLITES} from "../config.ts";
-import {type JsvFormat, type Vector, type JsvFieldTypes, jsvFields} from "../../server/routes/flight.ts";
-import type {FlightStats} from "../../server/util/stats.ts";
-import type {UpdatePoint} from "../../server/routes/update.ts";
+import {jsvFields} from "../../server/types/routes.ts";
+
+import type {JsvFormat, Vector, JsvFieldTypes, UpdatePoint} from "../../server/types/routes.ts";
+import type {FlightStats} from "../../server/types/util.ts";
 
 
 dayjs.extend(utc);

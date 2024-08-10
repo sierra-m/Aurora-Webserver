@@ -25,7 +25,7 @@
 // eslint-disable-next-line
 import {Flight, FlightPoint, type Position} from './flight'
 import { weightedAverage } from "./helpers"
-import type {Vector} from "../../server/routes/flight.ts";
+import type {Vector} from "../../server/types/routes";
 
 const ALTITUDE_BLOCK = 150;
 const MAX_SPEED = 6.0386e-4;  // degrees/s, close to 150 mph

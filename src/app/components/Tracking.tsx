@@ -66,13 +66,13 @@ import type {
   ActiveFlightRecord, FlightsResponse,
   RecentActiveFlightsResponse,
   SearchRecord,
-  SearchResponse
-} from "../../server/routes/meta.ts";
-import type {RedactedModem} from "../../server/util/modems.ts";
-import type {JsvFormat, Vector} from "../../server/routes/flight.ts";
+  SearchResponse,
+  JsvFormat, Vector,
+  UpdateResponse
+} from "../../server/types/routes.ts";
+import type {RedactedModem} from "../../server/types/util.ts";
 import {compressUID, standardizeUID} from "../../server/util/uid.ts";
 import {useNavigate, useSearchParams} from "react-router-dom";
-import type {UpdateResponse} from "../../server/routes/update.ts";
 import {UPDATE_DELAY, ACTIVE_DELAY} from "../config.ts";
 
 export interface ActiveFlight extends Omit<ActiveFlightRecord, 'datetime' | 'startDate'>{

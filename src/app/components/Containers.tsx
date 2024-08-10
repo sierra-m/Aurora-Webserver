@@ -40,7 +40,7 @@ import { dispMetersFeetBr, dispMetersFeet, mpsToFps, kphToMph } from '../util/he
 import '../style/containers.css'
 import Badge from "react-bootstrap/Badge";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import type {RedactedModem} from "../../server/util/modems.ts";
+import type {RedactedModem} from "../../server/types/util";
 
 
 dayjs.extend(duration);
