@@ -101,6 +101,7 @@ if (useProduction) {
     });
     app.get('/', function (req, res, next) {
         res.sendFile(path.join(__dirname, 'src/app/dist', 'index.html'));
+        console.log(`Sending ${path.join(__dirname, 'src/app/dist', 'index.html')}`);
     });
 }
 
