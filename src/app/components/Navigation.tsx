@@ -22,20 +22,63 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-import React, {type ChangeEvent, Component} from 'react';
+import React, {type ChangeEvent} from 'react';
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import '../custom.scss';
 import { Link } from "react-router-dom";
-import { Navbar, Nav } from "react-bootstrap";
+import {Navbar, Nav, Modal} from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
-import Row from 'react-bootstrap/Row'
-import Column from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Form from "react-bootstrap/Form";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import Button from "react-bootstrap/Button";
+import Toggle from "./Toggle.tsx";
+import Column from "react-bootstrap/Col";
+import Row from "react-bootstrap/Row";
+import Select, {type ActionMeta} from "react-select";
 
-const Navigation = () => {
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+export interface PagePreferences {
+  useMetric: boolean;
+  timeZone: string;
+}
+
+interface NavigationProps {
+  handleDarkModeEnabled: (darkMode: boolean) => void;
+  handlePagePrefChange: (preferences: PagePreferences) => void;
+}
+
+interface TimezoneSelectOption {
+  value: string;
+  label: string;
+}
+
+const guessedTz = dayjs.tz.guess();
+
+const defaultTimeZone: TimezoneSelectOption = {
+  value: guessedTz,
+  label: guessedTz
+}
+
+export const defaultPreferences: PagePreferences = {
+  useMetric: true,
+  timeZone: guessedTz
+}
+
+const Navigation = (props: NavigationProps) => {
   const [navExpanded, setNavExpanded] = React.useState<boolean>(false);
 
   const [darkModeEnabled, setDarkMode] = React.useState(false);
+
+  const [showPreferences, setShowPreferences] = React.useState<boolean>(false);
+
+  const [pagePreferences, setPagePreferences] = React.useState<PagePreferences>(defaultPreferences);
+
+  const [timeZoneOption, setTimeZoneOption] = React.useState<TimezoneSelectOption | null>(defaultTimeZone);
 
   const navExpandedToggle = React.useCallback((expanded: boolean) => {
     setNavExpanded(expanded);
@@ -47,41 +90,153 @@ const Navigation = () => {
 
   const toggleDarkMode = React.useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setDarkMode(event.target.checked);
-    const color = event.target.checked ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-bs-theme', color);
+    // Preference only saved when switch changes
+    localStorage.setItem('preferColorMode', event.target.checked ? 'dark' : 'light');
   }, []);
 
+  React.useEffect(() => {
+    const color = darkModeEnabled ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-bs-theme', color);
+    props.handleDarkModeEnabled(darkModeEnabled);
+  }, [darkModeEnabled]);
+
+  React.useEffect(() => {
+    const preferColorMode = localStorage.getItem('preferColorMode');
+    if (preferColorMode !== null) {
+      setDarkMode(preferColorMode === 'dark');
+    }
+    const storedPagePreferences = localStorage.getItem('pagePreferences');
+    if (storedPagePreferences !== null) {
+      const newPagePreferences: PagePreferences = JSON.parse(storedPagePreferences);
+      setPagePreferences(newPagePreferences);
+      setTimeZoneOption({
+        value: newPagePreferences.timeZone,
+        label: newPagePreferences.timeZone
+      });
+    }
+  }, []);
+
+  const handleShowPreferences = React.useCallback(() => {
+    setShowPreferences(true);
+  }, [])
+
+  const handleClosePreferences = React.useCallback(() => {
+    setShowPreferences(false);
+  }, [])
+
+  // Propagate page pref changes up
+  React.useEffect(() => {
+    props.handlePagePrefChange(pagePreferences)
+  }, [pagePreferences]);
+
+  const togglePrefUnits = React.useCallback((toggled: boolean, event: React.MouseEvent<HTMLDivElement>) => {
+    const newPreferences = {
+      ...pagePreferences,
+      useMetric: toggled
+    }
+    setPagePreferences(newPreferences);
+    localStorage.setItem('pagePreferences', JSON.stringify(newPreferences));
+    console.log(`Wrote new pref: ${JSON.stringify(newPreferences)}`);
+  }, [pagePreferences]);
+
+  const timeZonePrefChange = React.useCallback((option: TimezoneSelectOption | null, actionMeta: ActionMeta<TimezoneSelectOption>) => {
+    let newPreferences;
+    if (option) {
+      newPreferences = {
+        ...pagePreferences,
+        timeZone: option.value
+      }
+      setTimeZoneOption(option);
+      setPagePreferences(newPreferences);
+      dayjs.tz.setDefault(option.value);
+    } else {
+      newPreferences = {
+        ...pagePreferences,
+        timeZone: guessedTz
+      }
+      setTimeZoneOption(null);
+      setPagePreferences(newPreferences);
+    }
+    localStorage.setItem('pagePreferences', JSON.stringify(newPreferences));
+  }, [pagePreferences]);
+
   return (
-    <Navbar expand="lg" sticky="top" onToggle={navExpandedToggle} expanded={navExpanded} className={"bg-body-secondary"}>
-      <Container className={'page-width'}>
-        <Navbar.Brand>
-          <Link to={'/'}>MSU Borealis</Link>
-        </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav"/>
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="mr-auto" onSelect={closeNav}>
-            <LinkContainer to={'/'}>
-              <Nav.Link>Home</Nav.Link>
-            </LinkContainer>
-            <LinkContainer to={'/tracking'}>
-              <Nav.Link>Flight Tracking</Nav.Link>
-            </LinkContainer>
-            <Nav.Link href={'#'}>About</Nav.Link>
-            <Nav.Link href={'#'}>Contact</Nav.Link>
-          </Nav>
-          <Form className="d-flex ps-3">
-            <Form.Check
-              type="switch"
-              id="dark-mode-switch"
-              label="Dark Mode"
-              onChange={toggleDarkMode}
-              checked={darkModeEnabled}
-              className={'ml-auto'}
-            />
-          </Form>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+    <>
+      <Navbar expand="lg" sticky="top" onToggle={navExpandedToggle} expanded={navExpanded} className={"bg-body-secondary"}>
+        <Container className={'page-width'}>
+          <Navbar.Brand>
+            <Link to={'/'}>MSU Borealis</Link>
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav"/>
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="mr-auto" onSelect={closeNav}>
+              <LinkContainer to={'/'}>
+                <Nav.Link>Flight Tracking</Nav.Link>
+              </LinkContainer>
+              <Nav.Link href={'#'}>About</Nav.Link>
+              <Nav.Link href={'#'}>Contact</Nav.Link>
+            </Nav>
+            <Form className="d-flex pe-4 ms-auto">
+              <Form.Check
+                type="switch"
+                id="dark-mode-switch"
+                label="Dark Mode"
+                onChange={toggleDarkMode}
+                checked={darkModeEnabled}
+              />
+            </Form>
+            <Nav.Link>
+              <Button variant={darkModeEnabled ? 'outline-light' : 'outline-dark'} onClick={handleShowPreferences}>
+                <i className="bi bi-gear"></i>
+              </Button>
+            </Nav.Link>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+      <Modal show={showPreferences} onHide={handleClosePreferences} centered>
+        <Modal.Header>
+          Preferences
+        </Modal.Header>
+        <Modal.Body>
+          <h3>General</h3>
+          <Row>
+            <Column xs={5}>
+              Units
+            </Column>
+            <Column style={{display: 'flex', justifyContent: 'right'}}>
+              <Toggle
+                onClick={togglePrefUnits}
+                active={pagePreferences.useMetric}
+                onElement={<span>metric</span>}
+                offElement={<span>imperial</span>}
+                size={'sm'}
+              />
+            </Column>
+          </Row>
+          <Row className={'pt-2'}>
+            <Column xs={5}>
+              Time Zone
+            </Column>
+            <Column>
+              <Select<TimezoneSelectOption>
+                value={timeZoneOption}
+                onChange={timeZonePrefChange}
+                options={Intl.supportedValuesOf('timeZone').map((timeZone) => ({
+                  value: timeZone,
+                  label: timeZone
+                }) as TimezoneSelectOption)}
+                menuPosition="fixed"
+                isSearchable={true}
+                isClearable={true}
+              />
+            </Column>
+          </Row>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant={'secondary'} onClick={handleClosePreferences}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   )
 }
 

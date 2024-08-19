@@ -74,6 +74,7 @@ import type {RedactedModem} from "../../server/types/util.ts";
 import {compressUID, standardizeUID} from "../../server/util/uid.ts";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {UPDATE_DELAY, ACTIVE_DELAY} from "../config.ts";
+import type {PagePreferences} from "./Navigation.tsx";
 
 export interface ActiveFlight extends Omit<ActiveFlightRecord, 'datetime' | 'startDate'>{
   datetime: dayjs.Dayjs;
@@ -86,7 +87,12 @@ export interface FlightsByDate extends SearchRecord {
   callback: () => Promise<void>;
 }
 
-const Tracking = () => {
+interface TrackingProps {
+  darkModeEnabled: boolean;
+  pagePreferences: PagePreferences;
+}
+
+const Tracking = (props: TrackingProps) => {
 
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -152,9 +158,6 @@ const Tracking = () => {
 
   // Selected flight's last point's ground elevation, if available
   const [groundElevation, setGroundElevation] = React.useState<number | null>(null);
-
-  // Currently selected accordion tab
-  const [accordionKey, setAccordionKey] = React.useState<string>('flight-select');
 
   // Indicates whether new flight load steps should take place
   let newFlightLoaded: boolean = false;
@@ -282,7 +285,6 @@ const Tracking = () => {
       setSelectedFlightIsActive(active);
       setAnimateAltitudeChart(true);
       setGroundElevation(null);
-      setAccordionKey('flight-data');
       setSelectedModem(data.modem);
 
       // Set browser url
@@ -404,11 +406,6 @@ const Tracking = () => {
     }
   }, [selectedFlight, calcLandingPrediction, landingPrediction]);
 
-  const setAccordionTab = React.useCallback(async (key: string) => {
-    setAccordionKey(key);
-    console.log(`Set accordionKey ${key}`);
-  }, []);
-
   const downloadFlight = React.useCallback(async (format: string) => {
     if (selectedFlight) {
       const uid = selectedFlight.firstPoint().uid;
@@ -506,7 +503,7 @@ const Tracking = () => {
           <Accordion defaultActiveKey={'flight-select'}>
             <Accordion.Item eventKey={'flight-select'}>
               <Accordion.Header>
-                <Image src={threeBarIcon} className={'icon-bar ml-2'}/>
+                <Image src={threeBarIcon} className={'icon-bar me-2'}/>
                 Flight Select
               </Accordion.Header>
               <Accordion.Body>
@@ -525,7 +522,7 @@ const Tracking = () => {
             </Accordion.Item>
             <Accordion.Item eventKey={'payload-details'}>
               <Accordion.Header>
-                <Image src={balloonIcon} className={'icon-balloon ml-2'}/>
+                <Image src={balloonIcon} className={'icon-balloon me-2'}/>
                 Payload Details
               </Accordion.Header>
               <Accordion.Body className={'custom-curve-window'}>
@@ -598,7 +595,7 @@ const Tracking = () => {
             </Accordion.Item>
             <Accordion.Item eventKey={'active-flights'}>
               <Accordion.Header>
-                <Image src={clockIcon} className={'icon-bar ml-2'}/>
+                <Image src={clockIcon} className={'icon-bar me-2'}/>
                 Active Flights
               </Accordion.Header>
               <Accordion.Body style={{overflowY: 'auto', maxHeight: '20rem'}}>
@@ -621,7 +618,7 @@ const Tracking = () => {
             </Accordion.Item>
             <Accordion.Item eventKey={'flight-data'}>
               <Accordion.Header>
-                <Image src={chartIcon} className={'icon-bar ml-2'}/>
+                <Image src={chartIcon} className={'icon-bar me-2'}/>
                 Flight Data
               </Accordion.Header>
               <Accordion.Body style={{overflowY: 'auto', height: '45vh', maxHeight: '280px'}}>

@@ -26,7 +26,7 @@ import React from 'react'
 import './App.css'
 import './custom.scss'
 import {BrowserRouter as Router, Link, Route, Routes} from "react-router-dom"
-import Navigation from "./components/Navigation.jsx"
+import Navigation, {defaultPreferences, type PagePreferences} from "./components/Navigation.jsx"
 import Tracking from './components/Tracking.jsx'
 
 import MainPage from './components/MainPage'
@@ -34,12 +34,24 @@ import Error404 from './components/Error404'
 
 
 const App = () => {
+
+  const [darkModeEnabled, setDarkModeEnabled] = React.useState<boolean>(false);
+
+  const [pagePreferences, setPagePreferences] = React.useState<PagePreferences>(defaultPreferences)
+
+  const handleDarkModeChange = React.useCallback((darkMode: boolean) => {
+    setDarkModeEnabled(darkMode);
+  }, []);
+
+  const handlePagePrefChange = React.useCallback((preferences: PagePreferences) => {
+    setPagePreferences(preferences);
+  }, [])
+
   return (
     <Router>
-      <Navigation/>
+      <Navigation handleDarkModeEnabled={handleDarkModeChange} handlePagePrefChange={handlePagePrefChange}/>
       <Routes>
-        <Route path={'/'} element={<MainPage/>}/>
-        <Route path={'/tracking'} element={<Tracking/>}/>
+        <Route path={'/'} element={<Tracking darkModeEnabled={darkModeEnabled} pagePreferences={pagePreferences}/>}/>
         <Route path={'/404'} element={<Error404/>}/>
       </Routes>
     </Router>
