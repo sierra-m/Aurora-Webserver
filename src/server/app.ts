@@ -24,7 +24,7 @@
 
 //import createError from 'http-errors'
 import express from 'express'
-//import path from 'path'
+import path from 'path'
 //import cookieParser from 'cookie-parser'
 import {query} from './util/pg'
 import logger from 'morgan'
@@ -95,15 +95,13 @@ app.use('/api/last', authRouter, lastRoute.router);
 
 // React App
 if (useProduction) {
-    // TODO: serve react app
-    // app.use(express.static(path.join(__dirname, '/../../Aurora-React/build')));
-    // app.use(['/tracking', '/404'], async (req, res) => {
-    //     res.sendFile(path.join(__dirname, '/../../Aurora-React/build', 'index.html'));
-    // });
-    // app.use('/', function (req, res, next) {
-    //     if (parseUrl.original(req).pathname !== req.baseUrl) return next(); // skip this for strictness
-    //     res.sendFile(path.join(__dirname, '/../../Aurora-React/build', 'index.html'));
-    // });
+    app.use(express.static(path.join(__dirname, '/../app/dist')));
+    app.use(['/404'], async (req, res) => {
+        res.sendFile(path.join(__dirname, '/../app/dist', 'index.html'));
+    });
+    app.get('/', function (req, res, next) {
+        res.sendFile(path.join(__dirname, '/../app/dist', 'index.html'));
+    });
 }
 
 // catch 404 and forward to error handler
