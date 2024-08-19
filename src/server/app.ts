@@ -94,16 +94,14 @@ app.use('/api/update', updateRoute.router);
 app.use('/api/last', authRouter, lastRoute.router);
 
 // React App
-if (useProduction) {
-    app.use(express.static(path.join(__dirname, 'src/app/dist')));
-    app.use(['/404'], async (req, res) => {
-        res.sendFile(path.join(__dirname, 'src/app/dist', 'index.html'));
-    });
-    app.get('/', function (req, res, next) {
-        res.sendFile(path.join(__dirname, 'src/app/dist', 'index.html'));
-        console.log(`Sending ${path.join(__dirname, 'src/app/dist', 'index.html')}`);
-    });
-}
+app.use(express.static(path.join(__dirname, 'src/app/dist')));
+app.use(['/404'], async (req, res) => {
+    res.sendFile(path.join(__dirname, 'src/app/dist', 'index.html'));
+});
+app.get('/', function (req, res, next) {
+    res.sendFile(path.join(__dirname, 'src/app/dist', 'index.html'));
+    console.log(`Sending ${path.join(__dirname, 'src/app/dist', 'index.html')}`);
+});
 
 // catch 404 and forward to error handler
 app.use(async (req, res, next) => {
