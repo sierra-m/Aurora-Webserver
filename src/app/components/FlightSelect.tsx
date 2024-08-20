@@ -100,7 +100,7 @@ export const ModemSelect = React.memo((props: ModemSelectProps) => {
       setSelectedModemOption(null);
       await props.handleModemCleared();
     }
-  }, [props.handleModemSelected, props.handleModemCleared]);
+  }, [props.handleModemSelected, props.handleModemCleared, props.modemList]);
 
   return (
     <div>
