@@ -315,7 +315,7 @@ const Tracking = (props: TrackingProps) => {
       setSelectedModem(data.modem);
 
       // Set browser url
-      navigate(`/tracking?uid=${compressedUid}`);
+      navigate(`/?uid=${compressedUid}`);
     } catch (e) {
       console.log(e);
     }
@@ -521,7 +521,7 @@ const Tracking = (props: TrackingProps) => {
             />
           </div>
           {selectedFlight &&
-            <a href={'/tracking'}
+            <a href={'/'}
                className={'text-secondary link-offset-2 link-underline-opacity-50 link-underline-opacity-100-hover'}>
               ← Return to active flights
             </a>}
