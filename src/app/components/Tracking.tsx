@@ -42,7 +42,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import {Buffer} from "node:buffer";
+import {Buffer} from "buffer";
 
 dayjs.extend(utc);
 dayjs.extend(duration);
