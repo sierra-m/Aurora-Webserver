@@ -72,13 +72,36 @@ import type {
   UpdateResponse
 } from "../../server/types/routes.ts";
 import type {RedactedModem} from "../../server/types/util.ts";
-import {compressUID, standardizeUID} from "../../server/util/uid.ts";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {UPDATE_DELAY, ACTIVE_DELAY} from "../config.ts";
 import type {PagePreferences} from "./Navigation.tsx";
 
 // @ts-ignore
 window.Buffer = Buffer;
+
+const validateUID = (uid: string) => {
+  return uid.match(/[0-9a-f]{8}\-[0-9a-f]{4}\-4[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f]{12}/i);
+}
+
+const standardizeUID = (uid: string) => {
+  let standardUid;
+  if (uid.length === 22) {
+    const asHex = Buffer.from(uid, 'base64').toString('hex');
+    standardUid = `${asHex.slice(0,8)}-${asHex.slice(8,12)}-${asHex.slice(12,16)}-${asHex.slice(16,20)}-${asHex.slice(20)}`;
+  } else {
+    standardUid = uid;
+  }
+  if (typeof standardUid === 'string' && validateUID(standardUid)) {
+    return standardUid;
+  }
+}
+
+const compressUID = (uid: string) => {
+  let asBase64 = Buffer.from(uid.replaceAll('-', ''), 'hex').toString('base64');
+  // Poly-filled Buffer does not support url-safe b64 encoding, so we need to manually format this
+  // as per https://datatracker.ietf.org/doc/html/rfc4648#section-5
+  return asBase64.replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+}
 
 export interface ActiveFlight extends Omit<ActiveFlightRecord, 'datetime' | 'startDate'>{
   datetime: dayjs.Dayjs;
