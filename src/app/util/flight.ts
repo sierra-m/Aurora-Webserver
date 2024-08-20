@@ -26,6 +26,7 @@ import moment from 'moment'
 import { weightedAverage, roundToTwo } from "./helpers"
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 import {MINIMUM_SATELLITES} from "../config.ts";
 import {jsvFields} from "../../server/types/routes.ts";
 
@@ -33,6 +34,7 @@ import type {JsvFormat, Vector, JsvFieldTypes, UpdatePoint} from "../../server/t
 import type {FlightStats} from "../../server/types/util.ts";
 
 
+dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 
 export interface FlightPointCoords {
