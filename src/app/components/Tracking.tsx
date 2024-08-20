@@ -544,6 +544,7 @@ const Tracking = (props: TrackingProps) => {
                   clearFlightDateList={clearFlightDateList}
                   clearModemsByDateList={clearModemsByDateList}
                   clearSelectedFlight={clearSelectedFlight}
+                  darkModeEnabled={props.darkModeEnabled}
                 />
               </Accordion.Body>
             </Accordion.Item>
@@ -726,6 +727,7 @@ const Tracking = (props: TrackingProps) => {
                 autoscroll={true}
                 selectedPoint={selectedPoint}
                 isDisabled={!!selectedFlight}
+                darkModeEnabled={props.darkModeEnabled}
               />
             </Card.Body>
           </Card>

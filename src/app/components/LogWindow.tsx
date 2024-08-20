@@ -31,13 +31,14 @@ import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import Select, {type ActionMeta, type MultiValue} from 'react-select'
+import Select, {type ActionMeta, type MultiValue, type Theme} from 'react-select'
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Dropdown from "react-bootstrap/Dropdown";
 import {createPortal} from "react-dom";
 import Column from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import type {FlightPoint} from "../util/flight.ts";
+import {selectDarkTheme} from "../util/themes.ts";
 
 
 dayjs.extend(utc);
@@ -98,6 +99,7 @@ interface LogWindowProps {
   autoscroll: boolean;
   selectedPoint: FlightPoint | null;
   isDisabled: boolean;
+  darkModeEnabled: boolean;
 }
 
 interface StatusSelectOption {
@@ -252,6 +254,14 @@ const LogWindow = (props: LogWindowProps) => {
       [autoscroll]
     );
 
+  const selectThemeChanger = React.useCallback((theme: Theme) => (props.darkModeEnabled ? {
+    ...theme,
+    colors: {
+      ...theme.colors,
+      ...selectDarkTheme
+    },
+  } : theme), [props.darkModeEnabled])
+
   return (
     <Card className={'bg-body-secondary'}>
       <Card.Header>{props.title}</Card.Header>
@@ -302,7 +312,7 @@ const LogWindow = (props: LogWindowProps) => {
                 <Dropdown.Menu style={{
                   width: '24rem',
                   border: `1px solid rgb(61, 139, 253)`,
-                  backgroundColor: 'rgba(255, 255, 255, 0.8)'
+                  backgroundColor: props.darkModeEnabled ? 'rgba(112,112,112,0.8)' : 'rgba(255, 255, 255, 0.8)'
                 }}>
                   <Form>
                     <InputGroup className={'mb-3 ml-3'} style={{width: '22rem'}}>
@@ -313,6 +323,7 @@ const LogWindow = (props: LogWindowProps) => {
                           onChange={handleStatusFilterChange}
                           options={statusOptions}
                           defaultValue={statusOptions[0]}
+                          theme={selectThemeChanger}
                         />
                       </div>
                     </InputGroup>
@@ -324,6 +335,7 @@ const LogWindow = (props: LogWindowProps) => {
                           onChange={handleInputPinsFilterChange}
                           isMulti
                           options={inputPinOptions}
+                          theme={selectThemeChanger}
                         />
                       </div>
                     </InputGroup>
@@ -335,6 +347,7 @@ const LogWindow = (props: LogWindowProps) => {
                           onChange={handleOutputPinsFilterChange}
                           isMulti
                           options={outputPinOptions}
+                          theme={selectThemeChanger}
                         />
                       </div>
                     </InputGroup>

@@ -26,7 +26,7 @@ import React, {useState} from 'react'
 import Column from 'react-bootstrap/Col'
 import Row from 'react-bootstrap/Row'
 import Card from 'react-bootstrap/Card'
-import Select from 'react-select'
+import Select, {type Theme} from 'react-select'
 import Form from 'react-bootstrap/Form'
 import Tab from 'react-bootstrap/Tab'
 import Nav from 'react-bootstrap/Nav'
@@ -40,6 +40,7 @@ import type {FlightsByDate} from "./Tracking.tsx";
 import type {FlightUid} from "../util/flight.ts";
 import type {FlightsResponse} from "../../server/types/routes.ts";
 import type {RedactedModem} from "../../server/types/util.ts";
+import {selectDarkTheme} from "../util/themes.ts";
 
 
 type ModemName = string;
@@ -61,6 +62,7 @@ interface ModemSelectProps {
   handleModemSelected: (modem: RedactedModem) => Promise<void>;
   handleModemCleared: () => Promise<void>;
   isDisabled: boolean;
+  darkModeEnabled: boolean;
 }
 
 export const ModemSelect = React.memo((props: ModemSelectProps) => {
@@ -102,6 +104,14 @@ export const ModemSelect = React.memo((props: ModemSelectProps) => {
     }
   }, [props.handleModemSelected, props.handleModemCleared, props.modemList]);
 
+  const selectThemeChanger = React.useCallback((theme: Theme) => (props.darkModeEnabled ? {
+    ...theme,
+    colors: {
+      ...theme.colors,
+      ...selectDarkTheme
+    },
+  } : theme), [props.darkModeEnabled])
+
   return (
     <div>
       <Row>
@@ -129,6 +139,7 @@ export const ModemSelect = React.memo((props: ModemSelectProps) => {
             isClearable={true}
             autoFocus={true}
             isDisabled={props.isDisabled}
+            theme={selectThemeChanger}
           />
         </Column>
         {/* Button for filter by organization */}
@@ -151,6 +162,7 @@ export const ModemSelect = React.memo((props: ModemSelectProps) => {
                   }) as OrgSelectOption)}
                   menuPortalTarget={document.querySelector('body')}
                   isSearchable={true}
+                  theme={selectThemeChanger}
                 />
               </Dropdown.Menu>,
               document.body
@@ -208,6 +220,7 @@ interface FlightSelectProps {
   clearFlightDateList: () => void;
   clearModemsByDateList: () => void;
   clearSelectedFlight: () => void;
+  darkModeEnabled: boolean;
 }
 
 const FlightSelect = (props: FlightSelectProps) => {
@@ -305,6 +318,14 @@ const FlightSelect = (props: FlightSelectProps) => {
     [handleModemCleared]
   );
 
+  const selectThemeChanger = React.useCallback((theme: Theme) => (props.darkModeEnabled ? {
+    ...theme,
+    colors: {
+      ...theme.colors,
+      ...selectDarkTheme
+    },
+  } : theme), [props.darkModeEnabled])
+
   return (
     <Tab.Container id={'flight-select-by'} defaultActiveKey={'by-modem'}>
       <Nav justify variant="pills">
@@ -324,6 +345,7 @@ const FlightSelect = (props: FlightSelectProps) => {
                 handleModemSelected={handleModemSelectByModem}
                 handleModemCleared={handleModemClearedByModem}
                 isDisabled={false}
+                darkModeEnabled={props.darkModeEnabled}
               />
             </Column>
           </Row>
@@ -345,6 +367,7 @@ const FlightSelect = (props: FlightSelectProps) => {
                 isSearchable={true}
                 isDisabled={props.flightDateList.length < 1}
                 isLoading={selectedModem !== null && props.flightDateList.length === 0}
+                theme={selectThemeChanger}
               />
             </Column>
           </Row>
@@ -379,6 +402,7 @@ const FlightSelect = (props: FlightSelectProps) => {
                 handleModemSelected={handleModemSelectByDate}
                 handleModemCleared={handleModemClearedByDate}
                 isDisabled={!selectedDate}
+                darkModeEnabled={props.darkModeEnabled}
               />
             </Column>
           </Row>

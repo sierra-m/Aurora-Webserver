@@ -37,7 +37,8 @@ import Button from "react-bootstrap/Button";
 import Toggle from "./Toggle.tsx";
 import Column from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
-import Select, {type ActionMeta} from "react-select";
+import Select, {type ActionMeta, type Theme, type ThemeConfig} from "react-select";
+import {selectDarkTheme} from "../util/themes.ts";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -154,11 +155,19 @@ const Navigation = (props: NavigationProps) => {
         ...pagePreferences,
         timeZone: guessedTz
       }
-      setTimeZoneOption(null);
+      setTimeZoneOption(defaultTimeZone);
       setPagePreferences(newPreferences);
     }
     localStorage.setItem('pagePreferences', JSON.stringify(newPreferences));
   }, [pagePreferences]);
+
+  const selectThemeChanger = React.useCallback((theme: Theme) => (darkModeEnabled ? {
+    ...theme,
+    colors: {
+      ...theme.colors,
+      ...selectDarkTheme
+    },
+  } : theme), [darkModeEnabled])
 
   return (
     <>
@@ -228,6 +237,7 @@ const Navigation = (props: NavigationProps) => {
                 menuPosition="fixed"
                 isSearchable={true}
                 isClearable={true}
+                theme={selectThemeChanger}
               />
             </Column>
           </Row>
