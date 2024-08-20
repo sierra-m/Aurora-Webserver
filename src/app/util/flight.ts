@@ -78,9 +78,7 @@ export class FlightPoint {
     this.outputPins = getSafe('outputPins', data, 'number', 0);
     this.velocityVector = getSafe('velocityVector', data, 'object', [0, 0]);
 
-    if (this.timestamp > 0) {
-      this.datetime = dayjs.utc(this.datetime, 'X')
-    }
+    this.datetime = dayjs.utc(this.timestamp, 'X')
   }
 
   /**
