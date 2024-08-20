@@ -51,7 +51,7 @@ const getSafe = (key: string, data: JsvFieldTypes, fieldType: string, def: any) 
 export class FlightPoint {
   uid: FlightUid;
   timestamp: number;
-  datetime: dayjs.Dayjs | undefined;
+  datetime: dayjs.Dayjs;
   latitude: number;
   longitude: number;
   altitude: number;
