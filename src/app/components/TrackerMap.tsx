@@ -158,10 +158,16 @@ function TrackerMap (props: TrackerMapProps) {
 
   // Map load callback
   const onLoad = React.useCallback(function callback(map: google.maps.Map) {
-    map.panTo(props.defaultCenter || {lat: 39.833333, lng: -98.583333});
+    map.panTo({lat: 39.833333, lng: -98.583333});
 
     setMap(map); // save created map in local hook object
-  }, [props.defaultCenter])
+  }, [])
+
+  React.useEffect(() => {
+    if (props.startPosition) {
+      map?.panTo(props.startPosition);
+    }
+  }, [props.startPosition])
 
   // Map unmount callback
   const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
