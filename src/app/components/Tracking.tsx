@@ -42,6 +42,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import {Buffer} from "node:buffer";
 
 dayjs.extend(utc);
 dayjs.extend(duration);
@@ -75,6 +76,9 @@ import {compressUID, standardizeUID} from "../../server/util/uid.ts";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {UPDATE_DELAY, ACTIVE_DELAY} from "../config.ts";
 import type {PagePreferences} from "./Navigation.tsx";
+
+// @ts-ignore
+window.Buffer = Buffer;
 
 export interface ActiveFlight extends Omit<ActiveFlightRecord, 'datetime' | 'startDate'>{
   datetime: dayjs.Dayjs;
