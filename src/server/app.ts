@@ -93,6 +93,18 @@ app.use('/api/assign', authRouter, assignRoute.router);
 app.use('/api/update', updateRoute.router);
 app.use('/api/last', authRouter, lastRoute.router);
 
+// CSP for Google Maps apis
+app.use(async (req: express.Request, res: express.Response, next: express.NextFunction): Promise<void> => {
+    res.setHeader(
+      "Content-Security-Policy",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googleapis.com https://*.gstatic.com *.google.com https://*.ggpht.com *.googleusercontent.com blob:; " +
+      "img-src 'self' https://*.googleapis.com https://*.gstatic.com *.google.com  *.googleusercontent.com data:; " +
+      "frame-src *.google.com; connect-src 'self' https://*.googleapis.com *.google.com https://*.gstatic.com  data: blob:; " +
+      "font-src https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; worker-src blob:;"
+    );
+    next();
+})
+
 // React App
 app.use(express.static(path.join(__dirname, '../../dist')));
 app.use(['/404'], async (req, res) => {
