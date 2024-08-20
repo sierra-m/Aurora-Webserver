@@ -22,7 +22,7 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-export const GOOGLE_MAPS_KEY = import.meta.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+export const GOOGLE_MAPS_KEY = import.meta.env.VITE_REACT_APP_GOOGLE_MAPS_API_KEY;
 
 export const MINIMUM_SATELLITES = 5;
 
