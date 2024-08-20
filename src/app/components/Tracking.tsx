@@ -686,7 +686,7 @@ const Tracking = (props: TrackingProps) => {
                   <Card.Title className={'mt-3'}>Altitude over Time</Card.Title>
                   {selectedPoint &&
                     <Card.Subtitle>
-                      Selected Point: {selectedPoint.datetime.local().format('YYYY-MM-DD HH:mm:ss Z')}
+                      Selected Point: {selectedPoint.datetime.format('YYYY-MM-DD HH:mm:ss Z')}
                     </Card.Subtitle>}
                   <AltitudeChart
                     dataTitle={'Balloon Altitude'}
