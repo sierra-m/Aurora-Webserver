@@ -78,7 +78,6 @@ interface InfoMarkerProps {
   altitude: string; // this is pre-formatted
   icon: string | google.maps.Icon | google.maps.Symbol;
   zIndex: number;
-  darkModeEnabled: boolean;
 }
 
 const InfoMarker = React.memo((props: InfoMarkerProps) => {
@@ -124,13 +123,11 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
   return (
     <Marker position={props.position} onClick={onMarkerClicked} icon={props.icon} zIndex={props.zIndex}>
       {isInfoShown && <InfoWindow onCloseClick={handleWindowClose}>
-        <div style={props.darkModeEnabled ? {backgroundColor: '#1b1f2b', color: '#ceddea'} : undefined}>
-          <p>
-            <strong>Latitude:</strong> {props.position.lat}<br/>
-            <strong>Longitude:</strong> {props.position.lng}<br/>
-            <strong>Altitude:</strong> {props.altitude}
-          </p>
-        </div>
+        <p style={{color: '#181920'}}>
+          <strong>Latitude:</strong> {props.position.lat}<br/>
+          <strong>Longitude:</strong> {props.position.lng}<br/>
+          <strong>Altitude:</strong> {props.altitude}
+        </p>
       </InfoWindow>}
     </Marker>
   );
@@ -228,7 +225,9 @@ function TrackerMap (props: TrackerMapProps) {
       mapContainerStyle={{height: '85vh', maxHeight: '530px'}}
       options={props.darkModeEnabled ? {
         styles: mapDarkTheme
-      } : undefined}
+      } : {
+        styles: []
+      }}
     >
       {props.startPosition &&
       <InfoMarker
@@ -236,7 +235,6 @@ function TrackerMap (props: TrackerMapProps) {
         altitude={displayMetersFeet(props.startPosition.alt, props.pagePreferences.useMetric)}
         icon={greenIcon}
         updateLastWindowClose={handleLastWindowClose}
-        darkModeEnabled={props.darkModeEnabled}
         zIndex={2}
       />
       }
@@ -261,7 +259,6 @@ function TrackerMap (props: TrackerMapProps) {
         altitude={displayMetersFeet(props.endPosition.alt, props.pagePreferences.useMetric)}
         icon={orangeIcon}
         updateLastWindowClose={handleLastWindowClose}
-        darkModeEnabled={props.darkModeEnabled}
         zIndex={1}
       />
       }
@@ -274,7 +271,6 @@ function TrackerMap (props: TrackerMapProps) {
             scaledSize: new google.maps.Size(34, 48)
           }}
           updateLastWindowClose={handleLastWindowClose}
-          darkModeEnabled={props.darkModeEnabled}
           zIndex={3}
         />
       }
@@ -317,7 +313,6 @@ function TrackerMap (props: TrackerMapProps) {
         altitude={'---'}
         icon={parachuteIcon}
         updateLastWindowClose={handleLastWindowClose}
-        darkModeEnabled={props.darkModeEnabled}
         zIndex={1}
       />
       }
