@@ -36,11 +36,12 @@ import React from 'react'
 import dayjs from "dayjs";
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { dispMetersFeetBr, dispMetersFeet, mpsToFps, kphToMph } from '../util/helpers'
+import {displayMetersFeet, displayMpsFps, displayKphMph} from '../util/helpers'
 import '../style/containers.css'
 import Badge from "react-bootstrap/Badge";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import type {RedactedModem} from "../../server/types/util";
+import type {PagePreferences} from "./Navigation.tsx";
 
 
 dayjs.extend(duration);
@@ -68,6 +69,7 @@ export interface SelectedFlightDataProps {
     elevation: number;
     downloadFlight: (format: string) => void;
     isActive: boolean;
+    pagePreferences: PagePreferences;
 }
 
 export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) => {
@@ -137,18 +139,18 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
           <i className="bi bi-box-arrow-up-right pl-1"></i>
         </Button>
       </Form>
-      <Card.Text className={'my-1'} style={{fontSize: '10pt'}}><strong>Altitude:</strong> {dispMetersFeet(props.altitude)}
+      <Card.Text className={'my-1'} style={{fontSize: '10pt'}}><strong>Altitude:</strong> {displayMetersFeet(props.altitude, props.pagePreferences.useMetric)}
       </Card.Text>
       <Card.Text className={'my-0'} style={{fontSize: '10pt'}}><strong>Date/Time:</strong> {props.formattedDatetime}</Card.Text>
       <Card.Text className={'mt-0 mb-1 text-secondary'} style={{fontSize: '10pt'}}>({props.duration} from start)</Card.Text>
       <Card.Text className={'mb-1 mt-0'} style={{fontSize: '10pt'}}><strong>Vertical
-        velocity:</strong> {mpsToFps(props.verticalVelocity)}</Card.Text>
-      <Card.Text className={'mb-1 mt-0'} style={{fontSize: '10pt'}}><strong>Ground speed:</strong> {kphToMph(props.groundSpeed)}
+        velocity:</strong> {displayMpsFps(props.verticalVelocity, props.pagePreferences.useMetric)}</Card.Text>
+      <Card.Text className={'mb-1 mt-0'} style={{fontSize: '10pt'}}><strong>Ground speed:</strong> {displayKphMph(props.groundSpeed, props.pagePreferences.useMetric)}
       </Card.Text>
       {props.elevation &&
       [
         <Card.Text className={'mb-1 mt-0'} style={{fontSize: '10pt'}}><strong>Ground
-          elevation:</strong> {dispMetersFeet(props.elevation)}</Card.Text>,
+          elevation:</strong> {displayMetersFeet(props.elevation, props.pagePreferences.useMetric)}</Card.Text>,
         <Card.Text className={'mb-1 mt-0'} style={{fontSize: '10pt'}}>
           {dayjs.duration((Math.abs(props.verticalVelocity) ** -1) * Math.abs(props.altitude - props.elevation), 'seconds').humanize()} until
           touchdown.
@@ -174,23 +176,23 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
           <tbody style={{fontSize: '10pt'}}>
           <tr>
             <td><strong>Max Altitude:</strong></td>
-            <td>{dispMetersFeetBr(props.maxAltitude)}</td>
+            <td>{displayMetersFeet(props.maxAltitude, props.pagePreferences.useMetric)}</td>
           </tr>
           <tr>
             <td><strong>Min Altitude:</strong></td>
-            <td>{dispMetersFeetBr(props.minAltitude)}</td>
+            <td>{displayMetersFeet(props.minAltitude, props.pagePreferences.useMetric)}</td>
           </tr>
           <tr>
             <td><strong>Average Ground Speed:</strong></td>
-            <td>{`${props.avgGroundSpeed} kph`}</td>
+            <td>{displayKphMph(props.avgGroundSpeed, props.pagePreferences.useMetric)}</td>
           </tr>
           <tr>
             <td><strong>Max Ground Speed:</strong></td>
-            <td>{`${props.maxGroundSpeed} kph`}</td>
+            <td>{displayKphMph(props.maxGroundSpeed, props.pagePreferences.useMetric)}</td>
           </tr>
           <tr>
             <td><strong>Max Vertical Speed:</strong></td>
-            <td>{`${Math.abs(props.maxVerticalVelocity)} m/s`}</td>
+            <td>{displayMpsFps(Math.abs(props.maxVerticalVelocity), props.pagePreferences.useMetric)}</td>
           </tr>
           </tbody>
         </Table>

@@ -75,6 +75,7 @@ import type {RedactedModem} from "../../server/types/util.ts";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {UPDATE_DELAY, ACTIVE_DELAY} from "../config.ts";
 import type {PagePreferences} from "./Navigation.tsx";
+import {metersToFeet} from "../util/helpers.ts";
 
 // @ts-ignore
 window.Buffer = Buffer;
@@ -518,6 +519,7 @@ const Tracking = (props: TrackingProps) => {
               selectPoint={selectPointByIndex}
               activeFlights={activeFlights}
               modemsByDateList={modemsByDateList}
+              pagePreferences={props.pagePreferences}
             />
           </div>
           {selectedFlight &&
@@ -671,6 +673,7 @@ const Tracking = (props: TrackingProps) => {
                     elevation={groundElevation || 0}
                     downloadFlight={downloadFlight}
                     isActive={selectedFlightIsActive}
+                    pagePreferences={props.pagePreferences}
                   />
                 }
               </Accordion.Body>
@@ -682,7 +685,7 @@ const Tracking = (props: TrackingProps) => {
         <Column lg={12} xl={12} md={12} sm={12} xs={12}>
           <Card className={'my-3'} style={{height: '36rem'}}>
             <Card.Body style={{maxHeight: '530px'}}>
-              <Tabs defaultActiveKey={'altitude'} id={'data-tabs'} fill>
+              <Tabs defaultActiveKey={'altitude'} id={'data-tabs'} variant={'pills'} fill>
                 <Tab eventKey={'altitude'} title={'Altitude'}>
                   <Card.Title className={'mt-3'}>Altitude over Time</Card.Title>
                   {selectedPoint &&
@@ -691,11 +694,14 @@ const Tracking = (props: TrackingProps) => {
                     </Card.Subtitle>}
                   <AltitudeChart
                     dataTitle={'Balloon Altitude'}
-                    data={(selectedFlight && selectedFlight.altitudes()) || []}
+                    data={(selectedFlight && (
+                      props.pagePreferences.useMetric ? selectedFlight.altitudes() : selectedFlight.altitudes().map(metersToFeet)
+                    )) || []}
                     key={chartRedrawKey}
                     labels={(selectedFlight && selectedFlight.formattedDatetimes()) || []}
                     selectPoint={selectPointByIndex}
                     useAnimation={animateAltitudeChart}
+                    pagePreferences={props.pagePreferences}
                   />
                 </Tab>
                 <Tab eventKey={'wind-layers'} title={'Wind Layers'}>

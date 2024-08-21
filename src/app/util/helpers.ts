@@ -22,15 +22,7 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-// Displays value in `M m \n(F ft)` format
-export const dispMetersFeetBr = (value: number) => (
-  `${value} m\n(${(value * 3.28084).toFixed(2)} ft)`
-);
-
-// Displays value in `M m (F ft)` format
-export const dispMetersFeet = (value: number) => (
-  `${value} m (${(value * 3.28084).toFixed(2)} ft)`
-);
+export const metersToFeet = (value: number) => value * 3.28084;
 
 // Displays value in `M m/s (F ft/s)` format
 export const mpsToFps = (value: number) => (
@@ -38,9 +30,13 @@ export const mpsToFps = (value: number) => (
 );
 
 // Displays value in `K kph (M mph)` format
-export const kphToMph = (value: number) => (
-  `${value} kph (${(value * 0.621371).toFixed(2)} mph)`
-);
+export const kphToMph = (value: number) => value * 0.621371;
+
+export const displayMetersFeet = (value: number, useMetric: boolean) => useMetric ? `${value} m` : `${metersToFeet(value)} ft`;
+
+export const displayMpsFps = (value: number, useMetric: boolean) => useMetric ? `${value} m/s` : `${metersToFeet(value)} f/s`;
+
+export const displayKphMph = (value: number, useMetric: boolean) => useMetric ? `${value} kph` : `${kphToMph(value)} mph`;
 
 // Calculates the weighted average
 export const weightedAverage = (current: number, count: number, toAdd: number) => {

@@ -34,8 +34,9 @@ import orangeIcon from '../images/orangeIcon.png'
 import {chooseRandomIcon} from "../util/balloonIcons";
 import type {Position, FlightPointCoords} from "../util/flight.ts";
 import {FlightPoint} from "../util/flight.ts";
-import {dispMetersFeet} from "../util/helpers.ts";
+import {displayMetersFeet} from "../util/helpers.ts";
 import type {ActiveFlight, FlightsByDate} from "./Tracking.tsx";
+import type {PagePreferences} from "./Navigation.tsx";
 
 
 const balloonColors = [
@@ -141,6 +142,7 @@ interface TrackerMapProps {
   selectPoint: (index: number) => void;
   activeFlights: Array<ActiveFlight>;
   modemsByDateList: Array<FlightsByDate>;
+  pagePreferences: PagePreferences;
 }
 
 function TrackerMap (props: TrackerMapProps) {
@@ -222,7 +224,7 @@ function TrackerMap (props: TrackerMapProps) {
       {...props}
     >
       {props.startPosition &&
-      <InfoMarker position={props.startPosition} altitude={dispMetersFeet(props.startPosition.alt)}
+      <InfoMarker position={props.startPosition} altitude={displayMetersFeet(props.startPosition.alt, props.pagePreferences.useMetric)}
                   icon={greenIcon} updateLastWindowClose={handleLastWindowClose} zIndex={2}
       />
       }
@@ -242,14 +244,14 @@ function TrackerMap (props: TrackerMapProps) {
       }
 
       {props.endPosition &&
-      <InfoMarker position={props.endPosition} altitude={dispMetersFeet(props.endPosition.alt)}
+      <InfoMarker position={props.endPosition} altitude={displayMetersFeet(props.endPosition.alt, props.pagePreferences.useMetric)}
                   icon={orangeIcon} updateLastWindowClose={handleLastWindowClose}  zIndex={1}
       />
       }
       {props.selectedPoint &&
         <InfoMarker
           position={props.selectedPoint.coords()}
-          altitude={dispMetersFeet(props.selectedPoint.altitude)}
+          altitude={displayMetersFeet(props.selectedPoint.altitude, props.pagePreferences.useMetric)}
           icon={{
             url: chooseRandomIcon(props.selectedPoint.uid),
             scaledSize: new google.maps.Size(34, 48)
@@ -303,21 +305,3 @@ function TrackerMap (props: TrackerMapProps) {
 }
 
 export default React.memo(TrackerMap);
-
-// TODO: review if any of these format options are still needed
-/*
-*   Wrapper for `WrappedMap` with inserted props
-*/
-// export default class TrackerMap extends React.Component {
-//
-//   render() {
-//     return (
-//       <WrappedMap
-//         loadingElement={<div style={{height: '100%'}}/>}
-//         containerElement={<div style={{height: '85vh', maxHeight: '530px'}}/>}
-//         mapElement={<div style={{height: '100%'}}/>}
-//         {...this.props}
-//       />
-//     )
-//   };
-// }

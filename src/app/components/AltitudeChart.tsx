@@ -27,8 +27,23 @@ import { Line } from 'react-chartjs-2'
 import { MDBContainer } from 'mdbreact'
 import Zoom from 'chartjs-plugin-zoom'
 import Button from 'react-bootstrap/Button'
-import Chart from "chart.js/auto";
+import Chart, {type PluginChartOptions, type PluginOptionsByType} from "chart.js/auto";
 import {CategoryScale, type ChartData, type ChartEvent, type TooltipItem, type ChartOptions} from "chart.js";
+import type {PagePreferences} from "./Navigation.tsx";
+
+// DeepPartial implementation taken from the utility-types NPM package, which is
+// Copyright (c) 2016 Piotr Witek <piotrek.witek@gmail.com> (http://piotrwitek.github.io)
+// and used under the terms of the MIT license
+export type DeepPartial<T> = T extends Function
+  ? T
+  : T extends Array<infer U>
+    ? _DeepPartialArray<U>
+    : T extends object
+      ? _DeepPartialObject<T>
+      : T | undefined;
+
+type _DeepPartialArray<T> = Array<DeepPartial<T>>
+type _DeepPartialObject<T> = { [P in keyof T]?: DeepPartial<T[P]> };
 
 Chart.register(CategoryScale);
 
@@ -40,6 +55,7 @@ interface AltitudeChartProps {
   labels: Array<string>;
   selectPoint: (index: number) => void;
   useAnimation: boolean;
+  pagePreferences: PagePreferences;
 }
 
 const AltitudeChart = (props: AltitudeChartProps) => {
@@ -75,11 +91,52 @@ const AltitudeChart = (props: AltitudeChartProps) => {
   const [yMin, setYMin] = useState(0);
   const [yMax, setYMax] = useState(100);
 
-  const options: ChartOptions<'line'> = {
-    // TODO: check if this is needed anymore
-    // legend: {
-    //   display: false
-    // },
+  const chartPlugins: _DeepPartialObject<PluginOptionsByType<"line">> = {
+    legend: {
+      display: false
+    },
+    tooltip: {
+      mode: 'nearest',
+      callbacks: {
+        label: function (tooltipItem: TooltipItem<'line'>) {
+          return tooltipItem.label + ' m';
+        }
+      }
+    },
+    zoom: {
+      // Container for pan options
+      pan: {
+        // Boolean to enable panning
+        enabled: true,
+
+        mode: 'xy',
+      },
+
+      // Container for zoom options
+      zoom: {
+        wheel: {
+          enabled: true,
+          modifierKey: 'ctrl'
+        },
+        pinch: {
+          enabled: true
+        },
+        mode: 'xy'
+      },
+      limits: {
+        x: {
+          min: xMin,
+          max: xMax
+        },
+        y: {
+          min: yMin,
+          max: yMax
+        }
+      }
+    }
+  };
+
+  const [options, setOptions] = React.useState<ChartOptions<'line'>>({
     animation: (props.useAnimation && {
       easing: 'easeInOutQuart',
       duration: 1000
@@ -90,7 +147,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      xAxes: {
+      x: {
         //type: 'linear',
         ticks: {
           autoSkip: true,
@@ -99,55 +156,15 @@ const AltitudeChart = (props: AltitudeChartProps) => {
           minRotation: 0
         }
       },
-      yAxes: {
+      y: {
         title: {
           display: true,
           text: 'Altitude (meters)'
         }
       }
     },
-    plugins: {
-      tooltip: {
-        mode: 'nearest',
-        callbacks: {
-          label: function (tooltipItem: TooltipItem<'line'>) {
-            return tooltipItem.label + ' m';
-          }
-        }
-      },
-      zoom: {
-        // Container for pan options
-        pan: {
-          // Boolean to enable panning
-          enabled: true,
-
-          mode: 'xy',
-        },
-
-        // Container for zoom options
-        zoom: {
-          wheel: {
-            enabled: true,
-            modifierKey: 'ctrl'
-          },
-          pinch: {
-            enabled: true
-          },
-          mode: 'xy'
-        },
-        limits: {
-          x: {
-            min: xMin,
-            max: xMax
-          },
-          y: {
-            min: yMin,
-            max: yMax
-          }
-        }
-      }
-    }
-  };
+    plugins: chartPlugins
+  });
 
   const chartRef = React.useRef<Chart<"line">>(null);
 
@@ -165,6 +182,34 @@ const AltitudeChart = (props: AltitudeChartProps) => {
       }
     }
   }, []);
+
+  // Update Y axis with preferred units
+  React.useEffect(() => {
+    setOptions({
+      ...options,
+      animation: {
+        ...options.animation
+      },
+      scales: {
+        x: {
+          //type: 'linear',
+          ticks: {
+            autoSkip: true,
+            maxTicksLimit: 3,
+            maxRotation: 0,
+            minRotation: 0
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: `Altitude (${props.pagePreferences.useMetric ? 'meters' : 'feet'})`
+          }
+        }
+      },
+      plugins: chartPlugins
+    })
+  }, [props.pagePreferences])
 
   return (
     <div className="chart-container px-0" style={{height: '18rem', maxHeight: '18rem'}}>

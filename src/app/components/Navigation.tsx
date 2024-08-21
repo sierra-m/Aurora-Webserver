@@ -216,8 +216,8 @@ const Navigation = (props: NavigationProps) => {
               <Toggle
                 onClick={togglePrefUnits}
                 active={pagePreferences.useMetric}
-                onElement={<span>metric</span>}
-                offElement={<span>imperial</span>}
+                onElement={<span>Metric</span>}
+                offElement={<span>Imperial</span>}
                 size={'sm'}
               />
             </Column>
