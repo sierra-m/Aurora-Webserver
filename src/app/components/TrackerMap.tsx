@@ -78,6 +78,7 @@ interface InfoMarkerProps {
   altitude: string; // this is pre-formatted
   icon: string | google.maps.Icon | google.maps.Symbol;
   zIndex: number;
+  darkModeEnabled: boolean;
 }
 
 const InfoMarker = React.memo((props: InfoMarkerProps) => {
@@ -123,11 +124,13 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
   return (
     <Marker position={props.position} onClick={onMarkerClicked} icon={props.icon} zIndex={props.zIndex}>
       {isInfoShown && <InfoWindow onCloseClick={handleWindowClose}>
-        <p>
-          <strong>Latitude:</strong> {props.position.lat}<br/>
-          <strong>Longitude:</strong> {props.position.lng}<br/>
-          <strong>Altitude:</strong> {props.altitude}
-        </p>
+        <div style={props.darkModeEnabled ? {backgroundColor: '#1b1f2b', color: '#ceddea'} : undefined}>
+          <p>
+            <strong>Latitude:</strong> {props.position.lat}<br/>
+            <strong>Longitude:</strong> {props.position.lng}<br/>
+            <strong>Altitude:</strong> {props.altitude}
+          </p>
+        </div>
       </InfoWindow>}
     </Marker>
   );
@@ -225,11 +228,16 @@ function TrackerMap (props: TrackerMapProps) {
       mapContainerStyle={{height: '85vh', maxHeight: '530px'}}
       options={props.darkModeEnabled ? {
         styles: mapDarkTheme
-      } : {}}
+      } : undefined}
     >
       {props.startPosition &&
-      <InfoMarker position={props.startPosition} altitude={displayMetersFeet(props.startPosition.alt, props.pagePreferences.useMetric)}
-                  icon={greenIcon} updateLastWindowClose={handleLastWindowClose} zIndex={2}
+      <InfoMarker
+        position={props.startPosition}
+        altitude={displayMetersFeet(props.startPosition.alt, props.pagePreferences.useMetric)}
+        icon={greenIcon}
+        updateLastWindowClose={handleLastWindowClose}
+        darkModeEnabled={props.darkModeEnabled}
+        zIndex={2}
       />
       }
 
@@ -248,8 +256,13 @@ function TrackerMap (props: TrackerMapProps) {
       }
 
       {props.endPosition &&
-      <InfoMarker position={props.endPosition} altitude={displayMetersFeet(props.endPosition.alt, props.pagePreferences.useMetric)}
-                  icon={orangeIcon} updateLastWindowClose={handleLastWindowClose}  zIndex={1}
+      <InfoMarker
+        position={props.endPosition}
+        altitude={displayMetersFeet(props.endPosition.alt, props.pagePreferences.useMetric)}
+        icon={orangeIcon}
+        updateLastWindowClose={handleLastWindowClose}
+        darkModeEnabled={props.darkModeEnabled}
+        zIndex={1}
       />
       }
       {props.selectedPoint &&
@@ -261,6 +274,7 @@ function TrackerMap (props: TrackerMapProps) {
             scaledSize: new google.maps.Size(34, 48)
           }}
           updateLastWindowClose={handleLastWindowClose}
+          darkModeEnabled={props.darkModeEnabled}
           zIndex={3}
         />
       }
@@ -298,8 +312,13 @@ function TrackerMap (props: TrackerMapProps) {
       />
       }
       {props.landingZone &&  // TODO: fix altitude
-      <InfoMarker position={props.landingZone} altitude={'---'}
-                  icon={parachuteIcon} updateLastWindowClose={handleLastWindowClose} zIndex={1}
+      <InfoMarker
+        position={props.landingZone}
+        altitude={'---'}
+        icon={parachuteIcon}
+        updateLastWindowClose={handleLastWindowClose}
+        darkModeEnabled={props.darkModeEnabled}
+        zIndex={1}
       />
       }
     </GoogleMap>

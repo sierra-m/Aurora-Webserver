@@ -658,7 +658,7 @@ const Tracking = (props: TrackingProps) => {
                 {(selectedFlight && selectedPoint) &&
                   <SelectedFlightData
                     modem={selectedModem!}
-                    formattedDate={selectedFlight.startDate!.format('MMMM Do, YYYY')}
+                    formattedDate={selectedFlight.startDate!.format('MMMM D, YYYY')}
                     formattedDatetime={selectedPoint.datetime!.format('YYYY-MM-DD HH:mm:ss')}
                     duration={dayjs.duration(selectedPoint.datetime!.utc().diff(selectedFlight.firstPoint().datetime!.utc())).humanize()}
                     maxAltitude={selectedFlight.stats?.maxAltitude || 0}
@@ -690,8 +690,8 @@ const Tracking = (props: TrackingProps) => {
                 <Tab eventKey={'altitude'} title={'Altitude'}>
                   <Card.Title className={'mt-3'}>Altitude over Time</Card.Title>
                   {selectedPoint &&
-                    <Card.Subtitle>
-                      Selected Point: {selectedPoint.datetime.local().format('YYYY-MM-DD HH:mm:ss Z')}
+                    <Card.Subtitle className={'mb-2'}>
+                      Selected Point: {selectedPoint.datetime.local().format('YYYY-MM-DD HH:mm:ss (Z)')}
                     </Card.Subtitle>}
                   <AltitudeChart
                     dataTitle={'Balloon Altitude'}
