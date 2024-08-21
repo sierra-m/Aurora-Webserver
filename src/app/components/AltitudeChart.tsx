@@ -51,7 +51,6 @@ Chart.register(CategoryScale);
 interface AltitudeChartProps {
   dataTitle: string;
   data: Array<number>;
-  key: number | null;
   labels: Array<string>;
   selectPoint: (index: number) => void;
   useAnimation: boolean;
@@ -183,6 +182,36 @@ const AltitudeChart = (props: AltitudeChartProps) => {
     }
   }, []);
 
+  // Update data
+  React.useEffect(() => {
+    setLineData({
+      labels: props.labels,
+      datasets: [
+        {
+          label: props.dataTitle,
+          fill: true,
+          tension: 0.3,
+          backgroundColor: "rgba(225, 204,230, .3)",
+          borderColor: "rgb(205, 130, 158)",
+          borderCapStyle: "butt",
+          borderDash: [],
+          borderDashOffset: 0.0,
+          borderJoinStyle: "miter",
+          pointBorderColor: "rgb(205, 130,1 58)",
+          pointBackgroundColor: "rgb(255,232,247)",
+          pointBorderWidth: 4,
+          pointHoverRadius: 2,
+          pointHoverBackgroundColor: "rgb(53, 166, 232)",
+          pointHoverBorderColor: "rgba(188, 216, 220, 1)",
+          pointHoverBorderWidth: 1,
+          pointRadius: 1,
+          pointHitRadius: 10,
+          data: props.data
+        }
+      ]
+    });
+  }, [props.labels, props.dataTitle, props.data])
+
   // Update Y axis with preferred units
   React.useEffect(() => {
     setOptions({
@@ -216,7 +245,6 @@ const AltitudeChart = (props: AltitudeChartProps) => {
       <Line
         data={lineData}
         options={options}
-        key={props.key}
         ref={chartRef}
         onClick={handleClick}
       />

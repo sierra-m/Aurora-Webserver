@@ -697,7 +697,6 @@ const Tracking = (props: TrackingProps) => {
                     data={(selectedFlight && (
                       props.pagePreferences.useMetric ? selectedFlight.altitudes() : selectedFlight.altitudes().map(metersToFeet)
                     )) || []}
-                    key={chartRedrawKey}
                     labels={(selectedFlight && selectedFlight.formattedDatetimes()) || []}
                     selectPoint={selectPointByIndex}
                     useAnimation={animateAltitudeChart}
