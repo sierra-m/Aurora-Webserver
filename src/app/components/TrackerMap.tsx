@@ -37,6 +37,7 @@ import {FlightPoint} from "../util/flight.ts";
 import {displayMetersFeet} from "../util/helpers.ts";
 import type {ActiveFlight, FlightsByDate} from "./Tracking.tsx";
 import type {PagePreferences} from "./Navigation.tsx";
+import {mapDarkTheme} from "../util/themes.ts";
 
 
 const balloonColors = [
@@ -142,6 +143,7 @@ interface TrackerMapProps {
   selectPoint: (index: number) => void;
   activeFlights: Array<ActiveFlight>;
   modemsByDateList: Array<FlightsByDate>;
+  darkModeEnabled: boolean;
   pagePreferences: PagePreferences;
 }
 
@@ -221,7 +223,9 @@ function TrackerMap (props: TrackerMapProps) {
       onLoad={onLoad}
       onUnmount={onUnmount}
       mapContainerStyle={{height: '85vh', maxHeight: '530px'}}
-      {...props}
+      options={props.darkModeEnabled ? {
+        styles: mapDarkTheme
+      } : {}}
     >
       {props.startPosition &&
       <InfoMarker position={props.startPosition} altitude={displayMetersFeet(props.startPosition.alt, props.pagePreferences.useMetric)}
