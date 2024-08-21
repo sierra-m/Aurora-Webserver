@@ -520,6 +520,7 @@ const Tracking = (props: TrackingProps) => {
               activeFlights={activeFlights}
               modemsByDateList={modemsByDateList}
               pagePreferences={props.pagePreferences}
+              darkModeEnabled={props.darkModeEnabled}
             />
           </div>
           {selectedFlight &&
