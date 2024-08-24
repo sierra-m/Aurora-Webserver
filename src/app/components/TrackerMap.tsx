@@ -71,6 +71,42 @@ const coordDistance = (a: Position, b: Position) => {
   return Math.sqrt((a.lat - b.lat)**2 + (a.lng - b.lng)**2)
 };
 
+interface HoverMarkerProps {
+  position: Position;
+  modemName: string;
+  icon: string | google.maps.Icon | google.maps.Symbol;
+  onMarkerClick: () => void;
+}
+
+const HoverMarker = React.memo((props: HoverMarkerProps) => {
+
+  const [isNameShown, setIsNameShown] = React.useState(false);
+
+  const onHoverStart = React.useCallback(() => {
+      setIsNameShown(true);
+  }, []);
+
+  const onHoverEnd = React.useCallback(() => {
+      setIsNameShown(false);
+  }, []);
+
+  return (
+    <Marker
+      position={props.position}
+      onClick={props.onMarkerClick}
+      icon={props.icon}
+      onMouseOver={onHoverStart}
+      onMouseOut={onHoverEnd}
+    >
+      {isNameShown && <InfoWindow>
+        <p style={{color: '#181920'}}>
+          <strong>{props.modemName}</strong>
+        </p>
+      </InfoWindow>}
+    </Marker>
+  );
+});
+
 
 interface InfoMarkerProps {
   updateLastWindowClose: (closer: CloseMarkerFunc) => void;
@@ -78,6 +114,8 @@ interface InfoMarkerProps {
   altitude: string; // this is pre-formatted
   icon: string | google.maps.Icon | google.maps.Symbol;
   zIndex: number;
+  showNameOnHover?: boolean;
+  modemName?: string;
 }
 
 const InfoMarker = React.memo((props: InfoMarkerProps) => {
@@ -124,7 +162,12 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
   }, []);
 
   return (
-    <Marker position={props.position} onClick={onMarkerClicked} icon={props.icon} zIndex={props.zIndex}>
+    <Marker
+      position={props.position}
+      onClick={onMarkerClicked}
+      icon={props.icon}
+      zIndex={props.zIndex}
+    >
       {isInfoShown && <InfoWindow onCloseClick={handleWindowClose}>
         <p style={{color: '#181920'}}>
           <strong>Latitude:</strong> {props.position.lat.toFixed(8)}<br/>
@@ -277,13 +320,14 @@ function TrackerMap (props: TrackerMapProps) {
       }
       {(props.activeFlights.length > 0 && !props.selectedPoint && props.modemsByDateList.length === 0) &&
         props.activeFlights.map(partial => (
-        <Marker
+        <HoverMarker
           position={{lat: partial.latitude, lng: partial.longitude}}
           icon={{
             url: chooseRandomIcon(partial.uid),
             scaledSize: new google.maps.Size(34, 48)
           }}
-          onClick={partial.callback}
+          onMarkerClick={partial.callback}
+          modemName={partial.modem.name}
         />
       ))}
       {
