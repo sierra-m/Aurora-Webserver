@@ -171,10 +171,10 @@ function TrackerMap (props: TrackerMapProps) {
   }, [])
 
   React.useEffect(() => {
-    if (props.startPosition) {
-      map?.panTo(props.startPosition);
+    if (props.selectedPoint) {
+      map?.panTo(props.selectedPoint.coords());
     }
-  }, [props.startPosition])
+  }, [props.selectedPoint]);
 
   // Map unmount callback
   const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
