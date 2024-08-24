@@ -526,7 +526,7 @@ const Tracking = (props: TrackingProps) => {
           </div>
           {selectedFlight &&
             <>
-              <Alert variant={'secondary'} className={'pt-1'}>
+              <Alert variant={'secondary'} className={'mt-1'}>
                 Clicking a marker will show its position. Clicking a point on the line changes the selected point
               </Alert>
               <a href={'/'}
@@ -697,8 +697,7 @@ const Tracking = (props: TrackingProps) => {
                   <Card.Title className={'mt-3'}>Altitude over Time</Card.Title>
                   {selectedPoint &&
                     <Card.Subtitle className={'mb-2'}>
-                      Selected Point:
-                      <Badge bg={'success'} className={'ps-2'}>
+                      Selected Point: <Badge bg={'success'}>
                         {selectedPoint.datetime.local().format('YYYY-MM-DD HH:mm:ss (Z)')}
                       </Badge>
                     </Card.Subtitle>}
