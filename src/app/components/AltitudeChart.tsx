@@ -246,9 +246,11 @@ const AltitudeChart = (props: AltitudeChartProps) => {
           }
         }
       },
-      plugins: chartPlugins
+      plugins: chartPlugins,
+      onClick: handleClick
     })
-  }, [props.pagePreferences])
+    // selectPoint included in dep list as onClick function will need to be updated
+  }, [props.pagePreferences, props.selectPoint])
 
   return (
     <div className="chart-container px-0" style={{height: '18rem', maxHeight: '18rem'}}>
