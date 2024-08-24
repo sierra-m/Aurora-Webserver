@@ -153,7 +153,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
         props.selectPoint(points[0].index);
       }
     }
-  }, []);
+  }, [props.selectPoint]);
 
   const [options, setOptions] = React.useState<ChartOptions<'line'>>({
     animation: (props.useAnimation && {
