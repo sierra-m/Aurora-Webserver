@@ -145,6 +145,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
     },
     responsive: true,
     maintainAspectRatio: false,
+    events: ['click'],
     scales: {
       x: {
         //type: 'linear',
