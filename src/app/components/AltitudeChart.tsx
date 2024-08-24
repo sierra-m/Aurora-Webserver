@@ -107,18 +107,18 @@ const AltitudeChart = (props: AltitudeChartProps) => {
     },
     zoom: {
       // Container for pan options
-      pan: {
-        // Boolean to enable panning
-        enabled: true,
-
-        mode: 'xy',
-      },
+      // pan: {
+      //   // Boolean to enable panning
+      //   enabled: true,
+      //
+      //   mode: 'xy',
+      // },
 
       // Container for zoom options
       zoom: {
         wheel: {
-          enabled: true,
-          modifierKey: 'shift'
+          enabled: true
+          //modifierKey: 'shift'
         },
         pinch: {
           enabled: true
