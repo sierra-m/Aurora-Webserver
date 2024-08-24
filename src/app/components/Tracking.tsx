@@ -418,7 +418,6 @@ const Tracking = (props: TrackingProps) => {
   }, []);
 
   const selectPointByIndex = React.useCallback((index: number) => {
-    console.log(`Attempting to select point, selected flight: ${!!selectedFlight}`);
     if (selectedFlight) {
       const point = selectedFlight.get(index);
       //console.log(`Velocity at ${point.altitude} m is ${this.calculateVelocity(point.altitude)}`);
@@ -430,7 +429,6 @@ const Tracking = (props: TrackingProps) => {
         //console.log(`Landing zone predicted:`);
         //console.log(zone);
       }
-      console.log(`Setting selected point to ${JSON.stringify(point)}`);
       setSelectedPoint(point);
       setLandingZone(zone);
     }

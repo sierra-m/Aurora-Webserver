@@ -144,12 +144,9 @@ const AltitudeChart = (props: AltitudeChartProps) => {
   }, [])
 
   const handleClick = React.useCallback((event: any) => {
-    console.log(`Altitude chart click!`);
     if (chartRef.current) {
-      console.log(`Chart ref current!`);
       const points = chartRef.current.getElementsAtEventForMode(event, 'nearest', {intersect: true}, false);
       if (points.length > 0 && points[0]) {
-        console.log(`Selecting point ${points[0].index}`);
         props.selectPoint(points[0].index);
       }
     }
@@ -250,6 +247,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
       onClick: handleClick
     })
     // selectPoint included in dep list as onClick function will need to be updated
+    // with new handleClick function
   }, [props.pagePreferences, props.selectPoint])
 
   return (
