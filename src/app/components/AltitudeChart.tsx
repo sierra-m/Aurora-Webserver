@@ -258,7 +258,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
         options={options}
         ref={setChartRef}
       />
-      <Alert variant={'light'}>
+      <Alert variant={'light'} className={'pt-2'}>
         Click a point on the chart to view its position on the map. <strong>Shift + Zoom</strong> to zoom 🔎
       </Alert>
       <Button onClick={resetZoom}>Reset Zoom</Button>
