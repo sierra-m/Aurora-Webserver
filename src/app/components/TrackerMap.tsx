@@ -98,9 +98,9 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
   *   [ Info Window Closer ]
   *   Used by both info window onCloseClick() and parent
   */
-  const closeInfoWindow = React.useCallback(() => {
+  const closeInfoWindow = () => {
     setIsInfoShown(false);
-  }, []);
+  }
 
   /*
   *   [ Marker Click Callback ]
@@ -108,9 +108,12 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
   *   updates parent with close function to close last info window
   */
   const onMarkerClicked = React.useCallback(() => {
-    setIsInfoShown(true);
-    props.updateLastWindowClose(closeInfoWindow)
-  }, [props.updateLastWindowClose]);
+    setIsInfoShown(!isInfoShown);
+    // Only close last window if opening a new one
+    if (!isInfoShown) {
+      props.updateLastWindowClose(closeInfoWindow);
+    }
+  }, [props.updateLastWindowClose, isInfoShown]);
 
   /*
   *   [ Info Window Close Callback ]
@@ -158,7 +161,7 @@ function TrackerMap (props: TrackerMapProps) {
   const [map, setMap] = React.useState<google.maps.Map | null>(null);
 
   // holds close function for last opened info window
-  const [lastWindowCloser, setLastWindowCloser] = React.useState<(CloseMarkerFunc) | null>(null);
+  const [lastWindowCloser, setLastWindowCloser] = React.useState<CloseMarkerFunc | null>(null);
 
   // Map load callback
   const onLoad = React.useCallback(function callback(map: google.maps.Map) {
