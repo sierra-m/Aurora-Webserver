@@ -33,6 +33,7 @@ import Chart, {
 import {CategoryScale, type ChartData, type TooltipItem, type ChartOptions} from "chart.js";
 import type {PagePreferences} from "./Navigation.tsx";
 import Alert from "react-bootstrap/Alert";
+import useCheckMobileScreen from "../util/check-mobile.ts";
 
 // DeepPartial implementation taken from the utility-types NPM package, which is
 // Copyright (c) 2016 Piotr Witek <piotrek.witek@gmail.com> (http://piotrwitek.github.io)
@@ -62,6 +63,9 @@ interface AltitudeChartProps {
 }
 
 const AltitudeChart = (props: AltitudeChartProps) => {
+
+  const isMobileScreen = useCheckMobileScreen();
+
   const [lineData, setLineData] = useState<ChartData<'line'>>({
     labels: props.labels,
     datasets: [
@@ -248,7 +252,9 @@ const AltitudeChart = (props: AltitudeChartProps) => {
         ref={setChartRef}
       />
       <Alert variant={'light'} className={'mt-2'}>
-        Click a point on the chart to view its position on the map. <strong>Shift + Zoom</strong> to zoom 🔎
+        Click a point on the chart to view its position on the map. {
+          isMobileScreen ? <strong>Pinch</strong> : <strong>Shift + Zoom</strong>
+        } to zoom 🔎
       </Alert>
       <Button onClick={resetZoom}>Reset Zoom</Button>
     </div>
