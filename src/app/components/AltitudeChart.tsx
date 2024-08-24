@@ -27,8 +27,10 @@ import { Line } from 'react-chartjs-2'
 import { MDBContainer } from 'mdbreact'
 import Zoom from 'chartjs-plugin-zoom'
 import Button from 'react-bootstrap/Button'
-import Chart, {type PluginChartOptions, type PluginOptionsByType} from "chart.js/auto";
-import {CategoryScale, type ChartData, type ChartEvent, type TooltipItem, type ChartOptions} from "chart.js";
+import Chart, {
+  type PluginOptionsByType
+} from "chart.js/auto";
+import {CategoryScale, type ChartData, type TooltipItem, type ChartOptions} from "chart.js";
 import type {PagePreferences} from "./Navigation.tsx";
 
 // DeepPartial implementation taken from the utility-types NPM package, which is
@@ -135,6 +137,15 @@ const AltitudeChart = (props: AltitudeChartProps) => {
     }
   };
 
+  const handleClick = React.useCallback((event: any) => {
+    if (chartRef.current) {
+      const points = chartRef.current.getElementsAtEventForMode(event, 'nearest', {intersect: true}, false);
+      if (points.length > 0 && points[0]) {
+        props.selectPoint(points[0].index)
+      }
+    }
+  }, []);
+
   const [options, setOptions] = React.useState<ChartOptions<'line'>>({
     animation: (props.useAnimation && {
       easing: 'easeInOutQuart',
@@ -145,7 +156,6 @@ const AltitudeChart = (props: AltitudeChartProps) => {
     },
     responsive: true,
     maintainAspectRatio: false,
-    events: ['click'],
     scales: {
       x: {
         //type: 'linear',
@@ -163,7 +173,8 @@ const AltitudeChart = (props: AltitudeChartProps) => {
         }
       }
     },
-    plugins: chartPlugins
+    plugins: chartPlugins,
+    onClick: handleClick
   });
 
   const chartRef = React.useRef<Chart<"line">>(null);
@@ -171,15 +182,6 @@ const AltitudeChart = (props: AltitudeChartProps) => {
   const resetZoom = React.useCallback(() => {
     if (chartRef.current) {
       chartRef.current.resetZoom();
-    }
-  }, []);
-
-  const handleClick = React.useCallback((event: any) => {
-    if (chartRef.current) {
-      const points = chartRef.current.getElementsAtEventForMode(event, 'nearest', {intersect: true}, false);
-      if (points.length > 0 && points[0]) {
-        props.selectPoint(points[0].index)
-      }
     }
   }, []);
 
@@ -247,7 +249,6 @@ const AltitudeChart = (props: AltitudeChartProps) => {
         data={lineData}
         options={options}
         ref={chartRef}
-        onClick={handleClick}
       />
       <p className={'text-secondary'}>Click a point to view it on the map</p>
       <Button onClick={resetZoom}>Reset Zoom</Button>
