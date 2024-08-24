@@ -137,6 +137,12 @@ const AltitudeChart = (props: AltitudeChartProps) => {
     }
   };
 
+  const chartRef = React.useRef<Chart<"line"> | null>(null);
+
+  const setChartRef = React.useCallback((chart: any | null) => {
+    chartRef.current = chart;
+  }, [])
+
   const handleClick = React.useCallback((event: any) => {
     console.log(`Altitude chart click!`);
     if (chartRef.current) {
@@ -177,8 +183,6 @@ const AltitudeChart = (props: AltitudeChartProps) => {
     plugins: chartPlugins,
     onClick: handleClick
   });
-
-  const chartRef = React.useRef<Chart<"line">>(null);
 
   const resetZoom = React.useCallback(() => {
     if (chartRef.current) {
@@ -249,7 +253,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
       <Line
         data={lineData}
         options={options}
-        ref={chartRef}
+        ref={setChartRef}
       />
       <p className={'text-secondary'}>Click a point to view it on the map</p>
       <Button onClick={resetZoom}>Reset Zoom</Button>

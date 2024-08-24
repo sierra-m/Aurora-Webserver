@@ -188,10 +188,9 @@ function TrackerMap (props: TrackerMapProps) {
   */
   const handleLastWindowClose = React.useCallback((closer: CloseMarkerFunc) => {
     if (lastWindowCloser != null) {
-      console.log(`last window closer: ${lastWindowCloser}`);
       lastWindowCloser();
     }
-    setLastWindowCloser(closer);
+    setLastWindowCloser(() => closer);
   }, [lastWindowCloser]);
 
   // Handles translating a selection of the polyline to a selection of a flight point
