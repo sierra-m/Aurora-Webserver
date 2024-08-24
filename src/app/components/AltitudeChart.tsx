@@ -25,7 +25,7 @@
 import React, {type EventHandler, useState} from 'react'
 import { Line } from 'react-chartjs-2'
 import { MDBContainer } from 'mdbreact'
-import Zoom from 'chartjs-plugin-zoom'
+import zoomPlugin from 'chartjs-plugin-zoom'
 import Button from 'react-bootstrap/Button'
 import Chart, {
   type PluginOptionsByType
@@ -49,6 +49,7 @@ type _DeepPartialArray<T> = Array<DeepPartial<T>>
 type _DeepPartialObject<T> = { [P in keyof T]?: DeepPartial<T[P]> };
 
 Chart.register(CategoryScale);
+Chart.register(zoomPlugin);
 
 
 interface AltitudeChartProps {
@@ -107,18 +108,16 @@ const AltitudeChart = (props: AltitudeChartProps) => {
     },
     zoom: {
       // Container for pan options
-      // pan: {
-      //   // Boolean to enable panning
-      //   enabled: true,
-      //
-      //   mode: 'xy',
-      // },
-
+      pan: {
+        // Boolean to enable panning
+        enabled: true,
+        mode: 'xy',
+      },
       // Container for zoom options
       zoom: {
         wheel: {
-          enabled: true
-          //modifierKey: 'shift'
+          enabled: true,
+          modifierKey: 'shift'
         },
         pinch: {
           enabled: true
