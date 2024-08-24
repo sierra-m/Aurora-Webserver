@@ -32,6 +32,7 @@ import Chart, {
 } from "chart.js/auto";
 import {CategoryScale, type ChartData, type TooltipItem, type ChartOptions} from "chart.js";
 import type {PagePreferences} from "./Navigation.tsx";
+import Alert from "react-bootstrap/Alert";
 
 // DeepPartial implementation taken from the utility-types NPM package, which is
 // Copyright (c) 2016 Piotr Witek <piotrek.witek@gmail.com> (http://piotrwitek.github.io)
@@ -117,7 +118,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
       zoom: {
         wheel: {
           enabled: true,
-          modifierKey: 'ctrl'
+          modifierKey: 'shift'
         },
         pinch: {
           enabled: true
@@ -257,7 +258,9 @@ const AltitudeChart = (props: AltitudeChartProps) => {
         options={options}
         ref={setChartRef}
       />
-      <p className={'text-secondary'}>Click a point to view it on the map</p>
+      <Alert variant={'light'}>
+        Click a point on the chart to view its position on the map. <strong>Shift + Zoom</strong> to zoom 🔎
+      </Alert>
       <Button onClick={resetZoom}>Reset Zoom</Button>
     </div>
   );

@@ -76,6 +76,7 @@ import {useNavigate, useSearchParams} from "react-router-dom";
 import {UPDATE_DELAY, ACTIVE_DELAY} from "../config.ts";
 import type {PagePreferences} from "./Navigation.tsx";
 import {metersToFeet} from "../util/helpers.ts";
+import Badge from "react-bootstrap/Badge";
 
 // @ts-ignore
 window.Buffer = Buffer;
@@ -524,10 +525,15 @@ const Tracking = (props: TrackingProps) => {
             />
           </div>
           {selectedFlight &&
-            <a href={'/'}
-               className={'text-secondary link-offset-2 link-underline-opacity-50 link-underline-opacity-100-hover'}>
-              ← Return to active flights
-            </a>}
+            <>
+              <Alert variant={'secondary'}>
+                Clicking a marker will show its position. Clicking a point on the line to changes the selected point
+              </Alert>
+              <a href={'/'}
+                 className={'text-secondary link-offset-2 link-underline-opacity-50 link-underline-opacity-100-hover'}>
+                ← Return to active flights
+              </a>
+            </>}
         </Column>
         <Column className={'my-2'}>
           <Accordion defaultActiveKey={'flight-select'}>
@@ -691,7 +697,10 @@ const Tracking = (props: TrackingProps) => {
                   <Card.Title className={'mt-3'}>Altitude over Time</Card.Title>
                   {selectedPoint &&
                     <Card.Subtitle className={'mb-2'}>
-                      Selected Point: {selectedPoint.datetime.local().format('YYYY-MM-DD HH:mm:ss (Z)')}
+                      Selected Point:
+                      <Badge bg={'success'} className={'ps-1'}>
+                        {selectedPoint.datetime.local().format('YYYY-MM-DD HH:mm:ss (Z)')}
+                      </Badge>
                     </Card.Subtitle>}
                   <AltitudeChart
                     dataTitle={'Balloon Altitude'}

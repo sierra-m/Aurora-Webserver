@@ -32,11 +32,11 @@ export const mpsToFps = (value: number) => (
 // Displays value in `K kph (M mph)` format
 export const kphToMph = (value: number) => value * 0.621371;
 
-export const displayMetersFeet = (value: number, useMetric: boolean) => useMetric ? `${value} m` : `${metersToFeet(value)} ft`;
+export const displayMetersFeet = (value: number, useMetric: boolean) => useMetric ? `${value} m` : `${metersToFeet(value).toFixed(2)} ft`;
 
-export const displayMpsFps = (value: number, useMetric: boolean) => useMetric ? `${value} m/s` : `${metersToFeet(value)} f/s`;
+export const displayMpsFps = (value: number, useMetric: boolean) => useMetric ? `${value} m/s` : `${metersToFeet(value).toFixed(2)} f/s`;
 
-export const displayKphMph = (value: number, useMetric: boolean) => useMetric ? `${value} kph` : `${kphToMph(value)} mph`;
+export const displayKphMph = (value: number, useMetric: boolean) => useMetric ? `${value} kph` : `${kphToMph(value).toFixed(2)} mph`;
 
 // Calculates the weighted average
 export const weightedAverage = (current: number, count: number, toAdd: number) => {
