@@ -187,7 +187,7 @@ function TrackerMap (props: TrackerMapProps) {
   *   present and updates state variable to new one
   */
   const handleLastWindowClose = React.useCallback((closer: CloseMarkerFunc) => {
-    if (lastWindowCloser !== null) {
+    if (lastWindowCloser != null) {
       console.log(`last window closer: ${lastWindowCloser}`);
       lastWindowCloser();
     }

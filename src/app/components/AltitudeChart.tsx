@@ -138,6 +138,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
   };
 
   const handleClick = React.useCallback((event: any) => {
+    console.log(`Altitude chart click!`);
     if (chartRef.current) {
       const points = chartRef.current.getElementsAtEventForMode(event, 'nearest', {intersect: true}, false);
       if (points.length > 0 && points[0]) {
