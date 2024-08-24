@@ -429,6 +429,7 @@ const Tracking = (props: TrackingProps) => {
         //console.log(`Landing zone predicted:`);
         //console.log(zone);
       }
+      console.log(`Setting selected point to ${JSON.stringify(point)}`);
       setSelectedPoint(point);
       setLandingZone(zone);
     }
