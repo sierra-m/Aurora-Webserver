@@ -124,16 +124,6 @@ const AltitudeChart = (props: AltitudeChartProps) => {
           enabled: true
         },
         mode: 'xy'
-      },
-      limits: {
-        x: {
-          min: xMin,
-          max: xMax
-        },
-        y: {
-          min: yMin,
-          max: yMax
-        }
       }
     }
   };
