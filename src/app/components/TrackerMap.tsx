@@ -153,6 +153,28 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
   );
 })
 
+interface MapControllerProps {
+  selectedPoint: FlightPoint | null;
+}
+
+const MapController = React.memo((props: MapControllerProps) => {
+  const map = useMap();
+
+  React.useEffect(() => {
+    if (!map) return;
+
+    console.log(`Captured map!`);
+  }, [map]);
+
+  React.useEffect(() => {
+    if (props.selectedPoint) {
+      map?.panTo(props.selectedPoint.coords());
+      map?.setZoom(4);
+    }
+  }, [props.selectedPoint]);
+  return <></>
+})
+
 interface TrackerMapProps {
   defaultCenter: Position | null;
   coordinates: Array<Position> | null;
@@ -177,16 +199,16 @@ function TrackerMap (props: TrackerMapProps) {
   // local map object created in render
   //const [map, setMap] = React.useState<google.maps.Map | null>(null);
 
-  const map = useMap('tracker-google-map');
+  //const map = useMap('tracker-google-map');
 
   // holds close function for last opened info window
   const [lastWindowCloser, setLastWindowCloser] = React.useState<CloseMarkerFunc | null>(null);
 
-  React.useEffect(() => {
-    if (!map) return;
-
-    console.log(`Captured map!`);
-  }, [map]);
+  // React.useEffect(() => {
+  //   if (!map) return;
+  //
+  //   console.log(`Captured map!`);
+  // }, [map]);
 
   // Map load callback
   // const onLoad = React.useCallback(function callback(map: google.maps.Map) {
@@ -195,11 +217,12 @@ function TrackerMap (props: TrackerMapProps) {
   //   setMap(map); // save created map in local hook object
   // }, [])
 
-  React.useEffect(() => {
-    if (props.selectedPoint) {
-      map?.panTo(props.selectedPoint.coords());
-    }
-  }, [props.selectedPoint]);
+  // React.useEffect(() => {
+  //   if (props.selectedPoint) {
+  //     map?.panTo(props.selectedPoint.coords());
+  //     map?.setZoom(4);
+  //   }
+  // }, [props.selectedPoint]);
 
   // Map unmount callback
   // const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
@@ -338,6 +361,7 @@ function TrackerMap (props: TrackerMapProps) {
           />
         }
       </Map>
+      <MapController selectedPoint={props.selectedPoint}/>
     </APIProvider>
 
   )
