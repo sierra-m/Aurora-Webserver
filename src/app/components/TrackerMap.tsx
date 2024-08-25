@@ -30,7 +30,7 @@ import {
   Map,
   AdvancedMarker,
   InfoWindow,
-  useMap
+  useMap, useAdvancedMarkerRef
 } from '@vis.gl/react-google-maps';
 import {Polyline} from "./Polyline.tsx";
 import {Circle} from "./Circle.tsx";
@@ -90,6 +90,8 @@ interface InfoMarkerProps {
   zIndex: number;
   showNameOnHover?: boolean;
   modemName?: string;
+  width?: number;
+  height?: number;
 }
 
 const InfoMarker = React.memo((props: InfoMarkerProps) => {
@@ -105,6 +107,7 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
   */
 
   const [isInfoShown, setIsInfoShown] = React.useState(false);
+  const [markerRef, marker] = useAdvancedMarkerRef();
 
   /*
   *   [ Info Window Closer ]
@@ -137,24 +140,26 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
 
   return (
     <AdvancedMarker
+      ref={markerRef}
       position={props.position}
       onClick={onMarkerClicked}
       zIndex={props.zIndex}
     >
-      <Image src={props.icon} width={34} height={48}/>
-      {isInfoShown && <InfoWindow onCloseClick={handleWindowClose}>
+      {isInfoShown && <InfoWindow onCloseClick={handleWindowClose} anchor={marker}>
         <p style={{color: '#181920'}}>
           <strong>Latitude:</strong> {props.position.lat.toFixed(8)}<br/>
           <strong>Longitude:</strong> {props.position.lng.toFixed(8)}<br/>
           <strong>Altitude:</strong> {props.altitude}
         </p>
       </InfoWindow>}
+      <Image src={props.icon} width={props.width || 34} height={props.height || 48}/>
     </AdvancedMarker>
   );
 })
 
 interface MapControllerProps {
   selectedPoint: FlightPoint | null;
+  startPosition: FlightPointCoords | null;
 }
 
 const MapController = React.memo((props: MapControllerProps) => {
@@ -166,16 +171,21 @@ const MapController = React.memo((props: MapControllerProps) => {
     console.log(`Captured map!`);
   }, [map]);
 
+  // Pan map when selected point changes
   React.useEffect(() => {
     if (props.selectedPoint) {
       if (map) {
         map.panTo(props.selectedPoint.coords());
-        map.setZoom(11);
-      } else {
-        console.log(`Point selected, but map not loaded :(`);
       }
     }
   }, [props.selectedPoint]);
+
+  // Zoom map when flight selection changes
+  React.useEffect(() => {
+    if (map) {
+      map.setZoom(11);
+    }
+  }, [props.startPosition]);
   return <></>
 });
 
@@ -286,6 +296,8 @@ function TrackerMap (props: TrackerMapProps) {
             altitude={displayMetersFeet(props.startPosition.alt, props.pagePreferences.useMetric)}
             icon={greenIcon}
             updateLastWindowClose={handleLastWindowClose}
+            width={40}
+            height={40}
             zIndex={2}
           />
         }
@@ -306,6 +318,8 @@ function TrackerMap (props: TrackerMapProps) {
             position={props.endPosition}
             altitude={displayMetersFeet(props.endPosition.alt, props.pagePreferences.useMetric)}
             icon={orangeIcon}
+            width={40}
+            height={40}
             updateLastWindowClose={handleLastWindowClose}
             zIndex={1}
           />
@@ -360,12 +374,14 @@ function TrackerMap (props: TrackerMapProps) {
             position={props.landingZone}
             altitude={'---'}
             icon={parachuteIcon}
+            width={45}
+            height={45}
             updateLastWindowClose={handleLastWindowClose}
             zIndex={1}
           />
         }
       </Map>
-      <MapController selectedPoint={props.selectedPoint}/>
+      <MapController selectedPoint={props.selectedPoint} startPosition={props.startPosition}/>
     </APIProvider>
 
   )
