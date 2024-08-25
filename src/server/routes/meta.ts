@@ -236,7 +236,7 @@ export default class MetaRoute {
 
                 const recentResult = await query<ActiveFlightsQuery>(
                     `SELECT uid, datetime, latitude, longitude, altitude FROM public."flights" ` +
-                    `WHERE (uid, datetime) in (${point_identifiers}) AND satellites>=${config.MIN_SATELLITES} ORDER BY datetime DESC`
+                    `WHERE (uid, datetime) in (${point_identifiers}) ORDER BY datetime DESC`
                 );
 
                 const activeFlights: Array<ActiveFlightRecord> = await Promise.all(recentResult.map(async (partial): Promise<ActiveFlightRecord> => {
