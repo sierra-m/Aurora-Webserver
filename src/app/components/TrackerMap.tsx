@@ -41,7 +41,7 @@ import greenIcon from '../images/greenIcon.png'
 import orangeIcon from '../images/orangeIcon.png'
 
 import {chooseRandomIcon} from "../util/balloonIcons";
-import type {Position, FlightPointCoords} from "../util/flight.ts";
+import {type Position, type FlightPointCoords, Flight} from "../util/flight.ts";
 import {FlightPoint} from "../util/flight.ts";
 import {displayMetersFeet} from "../util/helpers.ts";
 import type {ActiveFlight, FlightsByDate} from "./Tracking.tsx";
@@ -193,6 +193,7 @@ const MapController = React.memo((props: MapControllerProps) => {
 });
 
 interface TrackerMapProps {
+  selectedFlight: Flight | null;
   defaultCenter: Position | null;
   coordinates: Array<Position> | null;
   startPosition: FlightPointCoords | null;
@@ -282,6 +283,14 @@ function TrackerMap (props: TrackerMapProps) {
     }
     props.selectPoint(minIndex);
   }, [props.coordinates, props.selectPoint]);
+
+  React.useEffect(() => {
+    console.log(`Tracker map: start position changed!`);
+  }, [props.startPosition]);
+
+  React.useEffect(() => {
+    console.log(`Tracker map: selected flight changed!`);
+  }, [props.selectedFlight]);
 
   return (
     <APIProvider apiKey={GOOGLE_MAPS_KEY}>

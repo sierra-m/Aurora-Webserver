@@ -511,6 +511,7 @@ const Tracking = (props: TrackingProps) => {
           <div className={'map-rounded'}>
             {/* TODO: fix this nonsense (you should only need to pass selected flight & point) */}
             <TrackerMap
+              selectedFlight={selectedFlight}
               coordinates={selectedFlight && selectedFlight.coords()}
               startPosition={selectedFlight && (selectedFlight.firstValidPoint()?.coords() || null)}
               endPosition={(selectedFlight && !selectedFlightIsActive && selectedFlight.lastValidPoint()?.coords() || null)}
