@@ -185,8 +185,7 @@ function TrackerMap (props: TrackerMapProps) {
   React.useEffect(() => {
     if (!map) return;
 
-    console.log(`Panning map to default center`);
-    map.panTo({lat: 39.833333, lng: -98.583333});
+    console.log(`Captured map!`);
   }, [map]);
 
   // Map load callback
@@ -248,9 +247,10 @@ function TrackerMap (props: TrackerMapProps) {
     <APIProvider apiKey={GOOGLE_MAPS_KEY}>
       <Map
         id={'tracker-google-map'}
-        zoom={(props.defaultCenter && 11) || 4}
+        defaultZoom={(props.defaultCenter && 11) || 4}
         style={{height: '85vh', maxHeight: '530px'}}
         styles={props.darkModeEnabled ? mapDarkTheme : []}
+        defaultCenter={{lat: 39.833333, lng: -98.583333}}
       >
         {props.startPosition &&
           <InfoMarker
