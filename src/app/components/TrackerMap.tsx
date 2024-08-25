@@ -23,8 +23,17 @@
 */
 
 import React from 'react'
-import {GoogleMap, Marker, InfoWindow, Polyline, Circle, useJsApiLoader} from "@react-google-maps/api"
+//import {GoogleMap, Marker, InfoWindow, Polyline, Circle, useJsApiLoader} from "@react-google-maps/api"
 import {GOOGLE_MAPS_KEY} from '../config'
+import {
+  APIProvider,
+  Map,
+  AdvancedMarker,
+  InfoWindow,
+  useMap
+} from '@vis.gl/react-google-maps';
+import {Polyline} from "./Polyline.tsx";
+import {Circle} from "./Circle.tsx";
 
 import greenBalloon from '../images/greenBalloon.png'
 import parachuteIcon from '../images/parachuteIcon45.png'
@@ -38,6 +47,7 @@ import {displayMetersFeet} from "../util/helpers.ts";
 import type {ActiveFlight, FlightsByDate} from "./Tracking.tsx";
 import type {PagePreferences} from "./Navigation.tsx";
 import {mapDarkTheme} from "../util/themes.ts";
+import Image from "react-bootstrap/Image";
 
 
 const balloonColors = [
@@ -71,48 +81,12 @@ const coordDistance = (a: Position, b: Position) => {
   return Math.sqrt((a.lat - b.lat)**2 + (a.lng - b.lng)**2)
 };
 
-interface HoverMarkerProps {
-  position: Position;
-  modemName: string;
-  icon: string | google.maps.Icon | google.maps.Symbol;
-  onMarkerClick: () => void;
-}
-
-const HoverMarker = React.memo((props: HoverMarkerProps) => {
-
-  const [isNameShown, setIsNameShown] = React.useState(false);
-
-  const onHoverStart = React.useCallback((event: any) => {
-      setIsNameShown(true);
-  }, []);
-
-  const onHoverEnd = React.useCallback((event: any) => {
-      setIsNameShown(false);
-  }, []);
-
-  return (
-    <Marker
-      position={props.position}
-      onClick={props.onMarkerClick}
-      icon={props.icon}
-      onMouseOver={onHoverStart}
-      onMouseOut={onHoverEnd}
-    >
-      {isNameShown && <InfoWindow>
-        <p style={{color: '#181920'}}>
-          <strong>{props.modemName}</strong>
-        </p>
-      </InfoWindow>}
-    </Marker>
-  );
-});
-
 
 interface InfoMarkerProps {
   updateLastWindowClose: (closer: CloseMarkerFunc) => void;
   position: Position;
   altitude: string; // this is pre-formatted
-  icon: string | google.maps.Icon | google.maps.Symbol;
+  icon: string;
   zIndex: number;
   showNameOnHover?: boolean;
   modemName?: string;
@@ -162,12 +136,12 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
   }, []);
 
   return (
-    <Marker
+    <AdvancedMarker
       position={props.position}
       onClick={onMarkerClicked}
-      icon={props.icon}
       zIndex={props.zIndex}
     >
+      <Image src={props.icon} width={34} height={48}/>
       {isInfoShown && <InfoWindow onCloseClick={handleWindowClose}>
         <p style={{color: '#181920'}}>
           <strong>Latitude:</strong> {props.position.lat.toFixed(8)}<br/>
@@ -175,7 +149,7 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
           <strong>Altitude:</strong> {props.altitude}
         </p>
       </InfoWindow>}
-    </Marker>
+    </AdvancedMarker>
   );
 })
 
@@ -195,23 +169,32 @@ interface TrackerMapProps {
 
 function TrackerMap (props: TrackerMapProps) {
 
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: GOOGLE_MAPS_KEY as string
-  })
+  // const { isLoaded } = useJsApiLoader({
+  //   id: 'google-map-script',
+  //   googleMapsApiKey: GOOGLE_MAPS_KEY as string
+  // })
 
   // local map object created in render
-  const [map, setMap] = React.useState<google.maps.Map | null>(null);
+  //const [map, setMap] = React.useState<google.maps.Map | null>(null);
+
+  const map = useMap('tracker-google-map');
 
   // holds close function for last opened info window
   const [lastWindowCloser, setLastWindowCloser] = React.useState<CloseMarkerFunc | null>(null);
 
-  // Map load callback
-  const onLoad = React.useCallback(function callback(map: google.maps.Map) {
-    map.panTo({lat: 39.833333, lng: -98.583333});
+  React.useEffect(() => {
+    if (!map) return;
 
-    setMap(map); // save created map in local hook object
-  }, [])
+    console.log(`Panning map to default center`);
+    map.panTo({lat: 39.833333, lng: -98.583333});
+  }, [map]);
+
+  // Map load callback
+  // const onLoad = React.useCallback(function callback(map: google.maps.Map) {
+  //   map.panTo({lat: 39.833333, lng: -98.583333});
+  //
+  //   setMap(map); // save created map in local hook object
+  // }, [])
 
   React.useEffect(() => {
     if (props.selectedPoint) {
@@ -220,9 +203,9 @@ function TrackerMap (props: TrackerMapProps) {
   }, [props.selectedPoint]);
 
   // Map unmount callback
-  const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
-    setMap(null)
-  }, [])
+  // const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
+  //   setMap(null)
+  // }, [])
 
   /*
   *   [ Closes Last Opened InfoWindow ]
@@ -261,109 +244,101 @@ function TrackerMap (props: TrackerMapProps) {
     props.selectPoint(minIndex);
   }, [props.coordinates, props.selectPoint]);
 
-  return isLoaded ? (
-    <GoogleMap
-      zoom={(props.defaultCenter && 11) || 4}
-      onLoad={onLoad}
-      onUnmount={onUnmount}
-      mapContainerStyle={{height: '85vh', maxHeight: '530px'}}
-      options={props.darkModeEnabled ? {
-        styles: mapDarkTheme
-      } : {
-        styles: []
-      }}
-    >
-      {props.startPosition &&
-      <InfoMarker
-        position={props.startPosition}
-        altitude={displayMetersFeet(props.startPosition.alt, props.pagePreferences.useMetric)}
-        icon={greenIcon}
-        updateLastWindowClose={handleLastWindowClose}
-        zIndex={2}
-      />
-      }
-
-      {props.coordinates &&
-      <Polyline
-        path={props.coordinates}
-        options={{
-          strokeColor: "#3cb2e2",
-          strokeOpacity: 1.0,
-          strokeWeight: 4,
-          // TODO: review what exactly this does to the line
-          geodesic: true
-        }}
-        onClick={selectPoint}
-      />
-      }
-
-      {props.endPosition &&
-      <InfoMarker
-        position={props.endPosition}
-        altitude={displayMetersFeet(props.endPosition.alt, props.pagePreferences.useMetric)}
-        icon={orangeIcon}
-        updateLastWindowClose={handleLastWindowClose}
-        zIndex={1}
-      />
-      }
-      {props.selectedPoint &&
-        <InfoMarker
-          position={props.selectedPoint.coords()}
-          altitude={displayMetersFeet(props.selectedPoint.altitude, props.pagePreferences.useMetric)}
-          icon={{
-            url: chooseRandomIcon(props.selectedPoint.uid),
-            scaledSize: new google.maps.Size(34, 48)
-          }}
-          updateLastWindowClose={handleLastWindowClose}
-          zIndex={3}
-        />
-      }
-      {(props.activeFlights.length > 0 && !props.selectedPoint && props.modemsByDateList.length === 0) &&
-        props.activeFlights.map(partial => (
-        <HoverMarker
-          position={{lat: partial.latitude, lng: partial.longitude}}
-          icon={{
-            url: chooseRandomIcon(partial.uid),
-            scaledSize: new google.maps.Size(34, 48)
-          }}
-          onMarkerClick={partial.callback}
-          modemName={partial.modem.name}
-        />
-      ))}
-      {
-        (props.modemsByDateList.length > 0 && !props.selectedPoint) &&
-        props.modemsByDateList.map((flight) => (
-          <Marker
-            position={{lat: flight.startPoint.lat, lng: flight.startPoint.lng}}
-            icon={{
-              url: chooseRandomIcon(flight.uid),
-              scaledSize: new google.maps.Size(34, 48)
-            }}
-            onClick={flight.callback}
+  return (
+    <APIProvider apiKey={GOOGLE_MAPS_KEY}>
+      <Map
+        id={'tracker-google-map'}
+        zoom={(props.defaultCenter && 11) || 4}
+        style={{height: '85vh', maxHeight: '530px'}}
+        styles={props.darkModeEnabled ? mapDarkTheme : []}
+      >
+        {props.startPosition &&
+          <InfoMarker
+            position={props.startPosition}
+            altitude={displayMetersFeet(props.startPosition.alt, props.pagePreferences.useMetric)}
+            icon={greenIcon}
+            updateLastWindowClose={handleLastWindowClose}
+            zIndex={2}
           />
-        ))
-      }
-      {props.landingZone &&
-      <Circle
-        center={new google.maps.LatLng(props.landingZone.lat, props.landingZone.lng)}
-        radius={4025 /* meters = 5 miles */}
-        options={{
-          strokeColor: "#ff42b1"
-        }}
-      />
-      }
-      {props.landingZone &&  // TODO: fix altitude
-      <InfoMarker
-        position={props.landingZone}
-        altitude={'---'}
-        icon={parachuteIcon}
-        updateLastWindowClose={handleLastWindowClose}
-        zIndex={1}
-      />
-      }
-    </GoogleMap>
-  ) : (
-    <></>
+        }
+
+        {props.coordinates &&
+          <Polyline
+            path={props.coordinates}
+            strokeColor={"#3cb2e2"}
+            strokeOpacity={1.0}
+            strokeWeight={4}
+            geodesic={true}
+            onClick={selectPoint}
+          />
+        }
+
+        {props.endPosition &&
+          <InfoMarker
+            position={props.endPosition}
+            altitude={displayMetersFeet(props.endPosition.alt, props.pagePreferences.useMetric)}
+            icon={orangeIcon}
+            updateLastWindowClose={handleLastWindowClose}
+            zIndex={1}
+          />
+        }
+        {props.selectedPoint &&
+          <InfoMarker
+            position={props.selectedPoint.coords()}
+            altitude={displayMetersFeet(props.selectedPoint.altitude, props.pagePreferences.useMetric)}
+            icon={chooseRandomIcon(props.selectedPoint.uid)}
+            updateLastWindowClose={handleLastWindowClose}
+            zIndex={3}
+          />
+        }
+        {(props.activeFlights.length > 0 && !props.selectedPoint && props.modemsByDateList.length === 0) &&
+          props.activeFlights.map(partial => (
+            <AdvancedMarker
+              position={{lat: partial.latitude, lng: partial.longitude}}
+              // icon={{
+              //   url: chooseRandomIcon(partial.uid),
+              //   scaledSize: new google.maps.Size(34, 48)
+              // }}
+              onClick={partial.callback}
+              //modemName={partial.modem.name}
+            >
+              <Image src={chooseRandomIcon(partial.uid)} width={34} height={48} />
+            </AdvancedMarker>
+          ))}
+        {
+          (props.modemsByDateList.length > 0 && !props.selectedPoint) &&
+          props.modemsByDateList.map((flight) => (
+            <AdvancedMarker
+              position={{lat: flight.startPoint.lat, lng: flight.startPoint.lng}}
+              // icon={{
+              //   url: chooseRandomIcon(flight.uid),
+              //   scaledSize: new google.maps.Size(34, 48)
+              // }}
+              onClick={flight.callback}
+            >
+              <Image src={chooseRandomIcon(flight.uid)} width={34} height={48} />
+            </AdvancedMarker>
+          ))
+        }
+        {props.landingZone &&
+          <Circle
+            center={new google.maps.LatLng(props.landingZone.lat, props.landingZone.lng)}
+            radius={4025 /* meters = 5 miles */}
+            strokeColor={"#ff42b1"}
+          />
+        }
+        {props.landingZone &&  // TODO: fix altitude
+          <InfoMarker
+            position={props.landingZone}
+            altitude={'---'}
+            icon={parachuteIcon}
+            updateLastWindowClose={handleLastWindowClose}
+            zIndex={1}
+          />
+        }
+      </Map>
+    </APIProvider>
+
   )
 }
 

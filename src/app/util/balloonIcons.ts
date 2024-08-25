@@ -104,8 +104,8 @@ const balloonIconList = [
   balloonIconVertArcsPurple
 ]
 
-const calcGroupSelect = (uid, digits, groupSize) => (parseInt(uid.slice(-digits), 16) % groupSize);
+const calcGroupSelect = (uid: string, digits: number, groupSize: number) => (parseInt(uid.slice(-digits), 16) % groupSize);
 
-const chooseRandomIcon = (uid) => (balloonIconList[calcGroupSelect(uid, 2, balloonIconList.length)]);
+const chooseRandomIcon = (uid: string) => (balloonIconList[calcGroupSelect(uid, 2, balloonIconList.length)]);
 
 export {chooseRandomIcon}
