@@ -82,11 +82,11 @@ const HoverMarker = React.memo((props: HoverMarkerProps) => {
 
   const [isNameShown, setIsNameShown] = React.useState(false);
 
-  const onHoverStart = React.useCallback(() => {
+  const onHoverStart = React.useCallback((event: any) => {
       setIsNameShown(true);
   }, []);
 
-  const onHoverEnd = React.useCallback(() => {
+  const onHoverEnd = React.useCallback((event: any) => {
       setIsNameShown(false);
   }, []);
 

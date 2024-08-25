@@ -677,7 +677,7 @@ const Tracking = (props: TrackingProps) => {
                     altitude={selectedPoint.altitude}
                     verticalVelocity={selectedPoint.verticalVelocity}
                     groundSpeed={selectedPoint.groundSpeed}
-                    elevation={groundElevation || 0}
+                    elevation={groundElevation || undefined}
                     downloadFlight={downloadFlight}
                     isActive={selectedFlightIsActive}
                     pagePreferences={props.pagePreferences}
