@@ -362,6 +362,7 @@ function TrackerMap (props: TrackerMapProps) {
               // }}
               onClick={flight.callback}
             >
+              <p><strong>{flight.modem.name}</strong></p>
               <Image src={chooseRandomIcon(flight.uid)} width={34} height={48} />
             </AdvancedMarker>
           ))
