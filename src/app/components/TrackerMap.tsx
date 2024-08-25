@@ -363,7 +363,9 @@ function TrackerMap (props: TrackerMapProps) {
               // }}
               onClick={flight.callback}
             >
-              <Badge bg={'light'} className={'pb-1'}>{flight.modem.name}</Badge>
+              <div>
+                <Badge bg={'secondary'} className={'pb-1'}>{flight.modem.name}</Badge>
+              </div>
               <Image src={chooseRandomIcon(flight.uid)} width={34} height={48} />
             </AdvancedMarker>
           ))
