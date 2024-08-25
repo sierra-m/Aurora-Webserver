@@ -66,7 +66,7 @@ export interface SelectedFlightDataProps {
     altitude: number;
     verticalVelocity: number;
     groundSpeed: number;
-    elevation: number;
+    elevation?: number;
     downloadFlight: (format: string) => void;
     isActive: boolean;
     pagePreferences: PagePreferences;
@@ -147,7 +147,7 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
         velocity:</strong> {displayMpsFps(props.verticalVelocity, props.pagePreferences.useMetric)}</Card.Text>
       <Card.Text className={'mb-1 mt-0'} style={{fontSize: '10pt'}}><strong>Ground speed:</strong> {displayKphMph(props.groundSpeed, props.pagePreferences.useMetric)}
       </Card.Text>
-      {props.elevation &&
+      {(props.elevation != null) &&
       [
         <Card.Text className={'mb-1 mt-0'} style={{fontSize: '10pt'}}><strong>Ground
           elevation:</strong> {displayMetersFeet(props.elevation, props.pagePreferences.useMetric)}</Card.Text>,
