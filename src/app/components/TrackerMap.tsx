@@ -90,7 +90,7 @@ interface InfoMarkerProps {
   icon: string;
   zIndex: number;
   showNameOnHover?: boolean;
-  modemName?: string;
+  title?: string;
   width?: number;
   height?: number;
 }
@@ -148,6 +148,7 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
     >
       {isInfoShown && <InfoWindow onCloseClick={handleWindowClose} anchor={marker}>
         <p style={{color: '#181920'}}>
+          {props.title ? <h3>{props.title}</h3> : <></>}
           <strong>Latitude:</strong> {props.position.lat.toFixed(8)}<br/>
           <strong>Longitude:</strong> {props.position.lng.toFixed(8)}<br/>
           <strong>Altitude:</strong> {props.altitude}
@@ -304,6 +305,7 @@ function TrackerMap (props: TrackerMapProps) {
             width={40}
             height={40}
             zIndex={2}
+            title={'Flight Start'}
           />
         }
 
@@ -327,6 +329,7 @@ function TrackerMap (props: TrackerMapProps) {
             height={40}
             updateLastWindowClose={handleLastWindowClose}
             zIndex={1}
+            title={'Flight End'}
           />
         }
         {props.selectedPoint &&
@@ -336,6 +339,7 @@ function TrackerMap (props: TrackerMapProps) {
             icon={chooseRandomIcon(props.selectedPoint.uid)}
             updateLastWindowClose={handleLastWindowClose}
             zIndex={3}
+            title={props.selectedFlight?.modem.name}
           />
         }
         {(props.activeFlights.length > 0 && !props.selectedPoint && props.modemsByDateList.length === 0) &&
@@ -349,7 +353,12 @@ function TrackerMap (props: TrackerMapProps) {
               onClick={partial.callback}
               //modemName={partial.modem.name}
             >
-              <Image src={chooseRandomIcon(partial.uid)} width={34} height={48} />
+              <div className={'text-center'}>
+                <h6>
+                  <Badge bg={'secondary'} className={'pb-1'}>{partial.modem.name}</Badge>
+                </h6>
+                <Image src={chooseRandomIcon(partial.uid)} width={34} height={48}/>
+              </div>
             </AdvancedMarker>
           ))}
         {

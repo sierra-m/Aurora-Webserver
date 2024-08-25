@@ -31,7 +31,7 @@ import {MINIMUM_SATELLITES} from "../config.ts";
 import {jsvFields} from "../../server/types/routes.ts";
 
 import type {JsvFormat, Vector, JsvFieldTypes, UpdatePoint} from "../../server/types/routes.ts";
-import type {FlightStats} from "../../server/types/util.ts";
+import type {FlightStats, RedactedModem} from "../../server/types/util.ts";
 
 
 dayjs.extend(customParseFormat);
@@ -118,6 +118,7 @@ export class Flight {
   startDate: dayjs.Dayjs | undefined;
   stats: FlightStats | null;
   uid: FlightUid;
+  modem: RedactedModem;
   /**
    * Represents a selected flight
    *
@@ -149,6 +150,7 @@ export class Flight {
       let firstPoint = new FlightPoint(this.uid, this.data[0]);
       this.startDate = firstPoint.datetime;
     }
+    this.modem = packet ? packet.modem : {} as RedactedModem;
   }
 
   get (index: number) {
