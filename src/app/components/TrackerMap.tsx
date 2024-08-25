@@ -159,7 +159,7 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
 
 interface MapControllerProps {
   selectedPoint: FlightPoint | null;
-  startPosition: FlightPointCoords | null;
+  selectedFlight: Flight | null;
 }
 
 const MapController = React.memo((props: MapControllerProps) => {
@@ -187,8 +187,8 @@ const MapController = React.memo((props: MapControllerProps) => {
       map.setZoom(12);
       console.log(`Setting zoom!`);
     }
-    console.log(`Start position changed to ${JSON.stringify(props.startPosition)}`);
-  }, [props.startPosition]);
+    console.log(`Start position changed to ${JSON.stringify(props.selectedFlight)}`);
+  }, [props.selectedFlight]);
   return <></>
 });
 
@@ -283,14 +283,6 @@ function TrackerMap (props: TrackerMapProps) {
     }
     props.selectPoint(minIndex);
   }, [props.coordinates, props.selectPoint]);
-
-  React.useEffect(() => {
-    console.log(`Tracker map: start position changed!`);
-  }, [props.startPosition]);
-
-  React.useEffect(() => {
-    console.log(`Tracker map: selected flight changed!`);
-  }, [props.selectedFlight]);
 
   return (
     <APIProvider apiKey={GOOGLE_MAPS_KEY}>
@@ -393,7 +385,7 @@ function TrackerMap (props: TrackerMapProps) {
           />
         }
       </Map>
-      <MapController selectedPoint={props.selectedPoint} startPosition={props.startPosition}/>
+      <MapController selectedPoint={props.selectedPoint} selectedFlight={props.selectedFlight}/>
     </APIProvider>
 
   )
