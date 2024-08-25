@@ -48,6 +48,7 @@ import type {ActiveFlight, FlightsByDate} from "./Tracking.tsx";
 import type {PagePreferences} from "./Navigation.tsx";
 import {mapDarkTheme} from "../util/themes.ts";
 import Image from "react-bootstrap/Image";
+import Badge from "react-bootstrap/Badge";
 
 
 const balloonColors = [
@@ -362,7 +363,7 @@ function TrackerMap (props: TrackerMapProps) {
               // }}
               onClick={flight.callback}
             >
-              <p><strong>{flight.modem.name}</strong></p>
+              <Badge bg={'light'} className={'pb-1'}>{flight.modem.name}</Badge>
               <Image src={chooseRandomIcon(flight.uid)} width={34} height={48} />
             </AdvancedMarker>
           ))
