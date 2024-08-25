@@ -24,7 +24,7 @@
 
 import React from 'react'
 //import {GoogleMap, Marker, InfoWindow, Polyline, Circle, useJsApiLoader} from "@react-google-maps/api"
-import {GOOGLE_MAPS_KEY} from '../config'
+import {GOOGLE_MAPS_KEY, GOOGLE_MAP_ID} from '../config'
 import {
   APIProvider,
   Map,
@@ -247,6 +247,7 @@ function TrackerMap (props: TrackerMapProps) {
     <APIProvider apiKey={GOOGLE_MAPS_KEY}>
       <Map
         id={'tracker-google-map'}
+        mapId={GOOGLE_MAP_ID}
         defaultZoom={(props.defaultCenter && 11) || 4}
         style={{height: '85vh', maxHeight: '530px'}}
         styles={props.darkModeEnabled ? mapDarkTheme : []}
