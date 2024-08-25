@@ -187,6 +187,7 @@ const MapController = React.memo((props: MapControllerProps) => {
       map.setZoom(12);
       console.log(`Setting zoom!`);
     }
+    console.log(`Start position changed to ${props.startPosition}`);
   }, [props.startPosition]);
   return <></>
 });
