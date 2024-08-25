@@ -157,8 +157,8 @@ interface MapControllerProps {
   selectedPoint: FlightPoint | null;
 }
 
-const MapController = React.memo((props: MapControllerProps) => {
-  const map = useMap();
+const MapController = (props: MapControllerProps) => {
+  const map = useMap('tracker-google-map');
 
   React.useEffect(() => {
     if (!map) return;
@@ -168,12 +168,16 @@ const MapController = React.memo((props: MapControllerProps) => {
 
   React.useEffect(() => {
     if (props.selectedPoint) {
-      map?.panTo(props.selectedPoint.coords());
-      map?.setZoom(4);
+      if (map) {
+        map.panTo(props.selectedPoint.coords());
+        map.setZoom(4);
+      } else {
+        console.log(`Point selected, but map not loaded :(`);
+      }
     }
   }, [props.selectedPoint]);
   return <></>
-})
+}
 
 interface TrackerMapProps {
   defaultCenter: Position | null;
