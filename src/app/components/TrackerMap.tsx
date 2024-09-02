@@ -178,7 +178,6 @@ const MapController = React.memo((props: MapControllerProps) => {
     if (props.selectedPoint) {
       if (map) {
         map.panTo(props.selectedPoint.coords());
-        console.log(`Panning!`);
       }
     }
   }, [props.selectedPoint]);
@@ -187,9 +186,7 @@ const MapController = React.memo((props: MapControllerProps) => {
   React.useEffect(() => {
     if (map) {
       map.setZoom(12);
-      console.log(`Setting zoom!`);
     }
-    console.log(`Start position changed to ${JSON.stringify(props.selectedFlight)}`);
   }, [props.selectedFlight]);
   return <></>
 });

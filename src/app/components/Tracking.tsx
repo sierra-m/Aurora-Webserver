@@ -224,7 +224,7 @@ const Tracking = (props: TrackingProps) => {
     }
   }, []);
 
-  const fetchUpdates = async () => {
+  const fetchUpdates = React.useCallback(async () => {
     try {
       if (selectedFlight) {
         let mostRecent = selectedFlight.lastValidPoint();
@@ -265,13 +265,11 @@ const Tracking = (props: TrackingProps) => {
           setGroundElevation(elevation);
           setSelectedPoint(updateFlight.lastPoint());
         }
-      } else {
-        console.log('Update failed - flight not selected');
       }
     } catch (e) {
       console.log(e);
     }
-  };
+  }, [selectedFlight, pinLogPrint]);
 
   // Flight selection callback
   const fetchFlight = React.useCallback(async (uid: FlightUid) => {
