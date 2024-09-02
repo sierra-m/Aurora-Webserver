@@ -273,7 +273,7 @@ const LogWindow = (props: LogWindowProps) => {
               <Container className={'log-container'}>
                 {((statusFilterActive() || inputFilterActive() || outputFilterActive())
                   ? applyFilters()
-                  : items).map(item => {
+                  : items).map((item, index) => {
                   const selected = props.selectedPoint
                     ? props.selectedPoint.timestamp === item.timestamp
                     : false;
@@ -282,7 +282,7 @@ const LogWindow = (props: LogWindowProps) => {
                       if (selected) {
                         selectedItemElementRef.current = el;
                       }
-                    }}>
+                    }} key={index}>
                       {item.toComponent(selected)}
                     </div>
                   )
