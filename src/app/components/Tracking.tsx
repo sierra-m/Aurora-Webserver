@@ -194,6 +194,9 @@ const Tracking = (props: TrackingProps) => {
   // Indicates whether new flight load steps should take place
   let newFlightLoaded: boolean = false;
 
+  // Indicates whether a new flight update interval should be created
+  let enableUpdates: boolean = false;
+
   const calculateVelocity = (altitude: number) => {
     const mass = (!isNaN(payloadMass)) ? payloadMass : 0.001;
     const diameter = (!isNaN(parachuteDiameter)) ? parachuteDiameter : 0.001;
@@ -303,6 +306,7 @@ const Tracking = (props: TrackingProps) => {
       if (durationSince.asHours() < 5) {
         active = true;
         selected = lastPoint;
+        enableUpdates = true;
       }
 
       pinLogClear!();
@@ -335,9 +339,10 @@ const Tracking = (props: TrackingProps) => {
         pinLogPrint!(point.input, point.output, point.timestamp, point.altitude);
       }
       newFlightLoaded = false;
-      if (selectedFlightIsActive) {
+      if (enableUpdates) {
         setUpdateInterval(setInterval(fetchUpdates, UPDATE_DELAY));
         console.log('Enabled updating');
+        enableUpdates = false;
       }
     }
   }, [selectedFlight])
