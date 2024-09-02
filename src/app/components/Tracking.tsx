@@ -79,7 +79,6 @@ import {UPDATE_DELAY, ACTIVE_DELAY} from "../config.ts";
 import type {PagePreferences} from "./Navigation.tsx";
 import {metersToFeet} from "../util/helpers.ts";
 import Badge from "react-bootstrap/Badge";
-import {clearInterval} from "node:timers";
 
 // @ts-ignore
 window.Buffer = Buffer;
