@@ -221,13 +221,13 @@ const Tracking = (props: TrackingProps) => {
     return getVelocity(altitude, mass, diameter, drag);
   };
 
-  const [pinLogPrint, setPinLogPrint] = React.useState<LogPrintFunc | null>(null);
+  let pinLogPrint: LogPrintFunc | null = null;
 
-  const [pinLogClear, setPinLogClear] = React.useState<LogClearFunc | null>(null);
+  let pinLogClear: LogClearFunc | null = null;
 
   const registerControls = (printFunc: LogPrintFunc, clearFunc: LogClearFunc) => {
-    setPinLogPrint(() => printFunc);
-    setPinLogClear(() => clearFunc);
+    pinLogPrint = printFunc;
+    pinLogClear = clearFunc;
   };
 
   // Modem Select Dropdown Callback
@@ -245,12 +245,12 @@ const Tracking = (props: TrackingProps) => {
     }
   }, []);
 
-  const fetchUpdates = React.useCallback(async () => {
+  const fetchUpdates = React.useCallback(async (flight: Flight | null) => {
     try {
-      if (selectedFlight) {
-        let mostRecent = selectedFlight.lastValidPoint();
+      if (flight) {
+        let mostRecent = flight.lastValidPoint();
         if (!mostRecent) {
-          mostRecent = selectedFlight.lastPoint();
+          mostRecent = flight.lastPoint();
         }
         let result = await fetch('/api/update', {
           method: 'POST',
@@ -269,7 +269,7 @@ const Tracking = (props: TrackingProps) => {
         if (data.update && data.result.length > 0) {
           // `Flight.add()` returns index added. Map the adds to an array and use the first
           // index as the entry for updating the altitude profile
-          const updateFlight = selectedFlight.copy();
+          const updateFlight = flight.copy();
           const updateIndices = data.result.map(point => updateFlight.add(point));
           await landingPrediction?.updateAltitudeProfile(updateIndices[0], updateIndices[updateIndices.length - 1]);
 
@@ -290,7 +290,7 @@ const Tracking = (props: TrackingProps) => {
     } catch (e) {
       console.log(e);
     }
-  }, [selectedFlight, pinLogPrint]);
+  }, [pinLogPrint]);
 
   // Flight selection callback
   const fetchFlight = React.useCallback(async (uid: FlightUid) => {
@@ -323,10 +323,18 @@ const Tracking = (props: TrackingProps) => {
       if (durationSince.asHours() < 5) {
         active = true;
         selected = lastPoint;
-        enableUpdates = true;
+        setUpdateInterval(setInterval(() => fetchUpdates(flight), UPDATE_DELAY));
+        console.log('Enabled updating');
       }
 
       pinLogClear!();
+
+      // TODO: improve speed of this/place it elsewhere
+      const pinStates = flight.pinStates();
+      // Load pin states log
+      for (const point of pinStates) {
+        pinLogPrint!(point.input, point.output, point.timestamp, point.altitude);
+      }
 
       // Needed to differentiate behavior from when fetchUpdates() updates the selected flight
       setNewFlightLoaded(true);
@@ -344,29 +352,7 @@ const Tracking = (props: TrackingProps) => {
     } catch (e) {
       console.log(e);
     }
-  }, [updateInterval, pinLogClear]);
-
-
-  //React.useEffect(finishFlightLoad, [selectedFlight]);
-
-  useEffectAllDepsChange(() => {
-    if (selectedFlight && newFlightLoaded) {
-      console.log("Loading pin states");
-      // Pin log loaded after flight loaded to speed up render of main page when
-      // selecting a new flight
-      const pinStates = selectedFlight.pinStates();
-      // Load pin states log
-      for (const point of pinStates) {
-        pinLogPrint!(point.input, point.output, point.timestamp, point.altitude);
-      }
-      if (enableUpdates) {
-        setUpdateInterval(setInterval(fetchUpdates, UPDATE_DELAY));
-        console.log('Enabled updating');
-        enableUpdates = false;
-      }
-      setNewFlightLoaded(false);
-    }
-  }, [selectedFlight, newFlightLoaded])
+  }, [updateInterval, pinLogClear, pinLogPrint]);
 
   const fetchModemsByDate = React.useCallback(async (formattedDate: string) => {
     try {
