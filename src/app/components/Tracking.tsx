@@ -303,8 +303,6 @@ const Tracking = (props: TrackingProps) => {
       if (durationSince.asHours() < 5) {
         active = true;
         selected = lastPoint;
-        setUpdateInterval(setInterval(fetchUpdates, UPDATE_DELAY));
-        console.log('Enabled updating');
       }
 
       pinLogClear!();
@@ -337,6 +335,10 @@ const Tracking = (props: TrackingProps) => {
         pinLogPrint!(point.input, point.output, point.timestamp, point.altitude);
       }
       newFlightLoaded = false;
+      if (selectedFlightIsActive) {
+        setUpdateInterval(setInterval(fetchUpdates, UPDATE_DELAY));
+        console.log('Enabled updating');
+      }
     }
   }, [selectedFlight])
 
