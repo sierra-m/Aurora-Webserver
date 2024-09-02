@@ -24,7 +24,7 @@
 
 import React from 'react'
 //import {GoogleMap, Marker, InfoWindow, Polyline, Circle, useJsApiLoader} from "@react-google-maps/api"
-import {GOOGLE_MAPS_KEY, GOOGLE_MAP_ID} from '../config'
+import {GOOGLE_MAPS_KEY, GOOGLE_MAP_ID, GOOGLE_MAP_NIGHT_ID} from '../config'
 import {
   APIProvider,
   Map,
@@ -148,7 +148,7 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
     >
       {isInfoShown && <InfoWindow onCloseClick={handleWindowClose} anchor={marker}>
         <p style={{color: '#181920'}}>
-          {props.title ? <h3>{props.title}</h3> : <></>}
+          {props.title ? <h5>{props.title}</h5> : <></>}
           <strong>Latitude:</strong> {props.position.lat.toFixed(8)}<br/>
           <strong>Longitude:</strong> {props.position.lng.toFixed(8)}<br/>
           <strong>Altitude:</strong> {props.altitude}
@@ -290,10 +290,10 @@ function TrackerMap (props: TrackerMapProps) {
     <APIProvider apiKey={GOOGLE_MAPS_KEY}>
       <Map
         id={'tracker-google-map'}
-        mapId={GOOGLE_MAP_ID}
+        mapId={props.darkModeEnabled ? GOOGLE_MAP_NIGHT_ID : GOOGLE_MAP_ID}
         defaultZoom={(props.defaultCenter && 11) || 4}
         style={{height: '85vh', maxHeight: '530px'}}
-        styles={props.darkModeEnabled ? mapDarkTheme : []}
+        //styles={props.darkModeEnabled ? mapDarkTheme : []}
         defaultCenter={{lat: 39.833333, lng: -98.583333}}
       >
         {props.startPosition &&

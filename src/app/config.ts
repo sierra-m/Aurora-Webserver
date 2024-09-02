@@ -25,6 +25,7 @@
 export const GOOGLE_MAPS_KEY = import.meta.env.VITE_REACT_APP_GOOGLE_MAPS_API_KEY;
 
 export const GOOGLE_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
+export const GOOGLE_MAP_NIGHT_ID = import.meta.env.VITE_GOOGLE_MAPS_NIGHT_ID;
 
 export const MINIMUM_SATELLITES = 5;
 
