@@ -22,7 +22,7 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-import React from 'react'
+import React, {useState} from 'react'
 import '../custom.scss'
 import '../style/tracking.css'
 import Column from 'react-bootstrap/Col'
@@ -128,8 +128,9 @@ const Tracking = (props: TrackingProps) => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  let updateInterval: Timer | null = null;
   let activeInterval: Timer | null = null;
+
+  const [updateInterval, setUpdateInterval] = useState<Timer | null>(null);
 
   // List of modem objects fetched from '/api/meta/modems'
   const [modemList, setModemList] = React.useState<Array<RedactedModem>>([]);
@@ -297,11 +298,12 @@ const Tracking = (props: TrackingProps) => {
       let selected = firstPoint;
       if (updateInterval) {
         clearInterval(updateInterval);
+        setUpdateInterval(null);
       }
       if (durationSince.asHours() < 5) {
         active = true;
         selected = lastPoint;
-        updateInterval = setInterval(fetchUpdates, UPDATE_DELAY);
+        setUpdateInterval(setInterval(fetchUpdates, UPDATE_DELAY));
         console.log('Enabled updating');
       }
 
