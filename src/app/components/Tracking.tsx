@@ -334,7 +334,6 @@ const Tracking = (props: TrackingProps) => {
       // Load pin states log
       for (const point of pinStates) {
         pinLogPrint!(point.input, point.output, point.timestamp, point.altitude);
-        console.log("pin log print");
       }
 
       // Needed to differentiate behavior from when fetchUpdates() updates the selected flight

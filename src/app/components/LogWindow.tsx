@@ -183,7 +183,7 @@ const LogWindow = (props: LogWindowProps) => {
       altitude
     );
     setItems([...items, logItem]);
-    console.log("pin log: added an item");
+    console.log(`pin log: added an item: #${items.length}`);
   };
 
   //[lastInputPins, lastOutputPins, items]
