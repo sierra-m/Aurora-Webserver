@@ -508,6 +508,9 @@ const Tracking = (props: TrackingProps) => {
   const initialSetup = React.useCallback(async () => {
     await fetchIDList();
     await fetchActive();
+    if (activeInterval) {
+      clearInterval(activeInterval);
+    }
     activeInterval = setInterval(fetchActive, ACTIVE_DELAY);
     const uid = searchParams.get('uid');
 
