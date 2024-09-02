@@ -159,7 +159,7 @@ const LogWindow = (props: LogWindowProps) => {
     }
   }, [])
 
-  const print = React.useCallback((input: number, output: number, timestamp: UnixTimestamp, altitude: number) => {
+  const print = (input: number, output: number, timestamp: UnixTimestamp, altitude: number) => {
     let newIn;
     let newOut;
     let inChanged = false;
@@ -183,13 +183,17 @@ const LogWindow = (props: LogWindowProps) => {
       altitude
     );
     setItems([...items, logItem]);
-  }, [lastInputPins, lastOutputPins, items]);
+  };
 
-  const clear = React.useCallback(() => {
+  //[lastInputPins, lastOutputPins, items]
+
+  const clear = () => {
     lastInputPins = null;
     lastOutputPins = null;
     setItems([]);
-  }, [lastInputPins, lastInputPins]);
+  };
+
+  //[lastInputPins, lastInputPins]
 
   const handleStatusFilterChange = React.useCallback((option: StatusSelectOption | null, actionMeta: ActionMeta<StatusSelectOption>) => {
     setFilterStatusOption(option);
