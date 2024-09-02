@@ -331,6 +331,7 @@ const Tracking = (props: TrackingProps) => {
 
   React.useEffect(() => {
     if (selectedFlight && newFlightLoaded) {
+      console.log("Loading pin states");
       // Pin log loaded after flight loaded to speed up render of main page when
       // selecting a new flight
       const pinStates = selectedFlight.pinStates();
