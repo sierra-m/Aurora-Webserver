@@ -232,6 +232,7 @@ const LogWindow = (props: LogWindowProps) => {
   React.useEffect(() => {
     if (props.registerControls !== null) {
       props.registerControls(print, clear);
+      console.log("pin log: registered controls")
     }
     if (props.autoscroll) scrollToBottom();
     setAutoscroll(props.autoscroll);
