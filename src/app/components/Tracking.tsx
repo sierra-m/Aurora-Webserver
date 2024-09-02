@@ -42,11 +42,13 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import timezone from "dayjs/plugin/timezone";
 import {Buffer} from "buffer";
 
 dayjs.extend(utc);
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
+dayjs.extend(timezone);
 
 import TrackerMap from './TrackerMap'
 import AltitudeChart from './AltitudeChart'
@@ -480,6 +482,11 @@ const Tracking = (props: TrackingProps) => {
   const handleDragCoefficient = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setDragCoefficient(parseFloat(event.target.value));
   }, []);
+
+  // Propagate preferred tz
+  React.useEffect(() => {
+    dayjs.tz.setDefault(props.pagePreferences.timeZone);
+  }, [props.pagePreferences])
 
   const initialSetup = React.useCallback(async () => {
     await fetchIDList();
