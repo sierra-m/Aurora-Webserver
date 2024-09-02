@@ -22,7 +22,7 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-import React, {useState} from 'react'
+import React, {type EffectCallback, useState} from 'react'
 import '../custom.scss'
 import '../style/tracking.css'
 import Column from 'react-bootstrap/Col'
@@ -123,6 +123,23 @@ interface TrackingProps {
   pagePreferences: PagePreferences;
 }
 
+// Per https://stackoverflow.com/a/62975048
+function useEffectAllDepsChange(fn: EffectCallback, deps: Array<any>) {
+  const [changeTarget, setChangeTarget] = useState(deps);
+
+  React.useEffect(() => {
+    setChangeTarget(prev => {
+      if (prev.every((dep, i) => dep !== deps[i])) {
+        return deps;
+      }
+
+      return prev;
+    });
+  }, [deps]);
+
+  React.useEffect(fn, changeTarget);
+}
+
 const Tracking = (props: TrackingProps) => {
 
   const navigate = useNavigate();
@@ -192,7 +209,7 @@ const Tracking = (props: TrackingProps) => {
   const [groundElevation, setGroundElevation] = React.useState<number | null>(null);
 
   // Indicates whether new flight load steps should take place
-  let newFlightLoaded: boolean = false;
+  const [newFlightLoaded, setNewFlightLoaded] = React.useState<boolean>(false);
 
   // Indicates whether a new flight update interval should be created
   let enableUpdates: boolean = false;
@@ -312,7 +329,7 @@ const Tracking = (props: TrackingProps) => {
       pinLogClear!();
 
       // Needed to differentiate behavior from when fetchUpdates() updates the selected flight
-      newFlightLoaded = true;
+      setNewFlightLoaded(true);
       setSelectedFlight(flight);
       setSelectedPoint(selected);
       setChartRedrawKey(Math.random());
@@ -329,7 +346,10 @@ const Tracking = (props: TrackingProps) => {
     }
   }, [updateInterval, pinLogClear]);
 
-  const finishFlightLoad = React.useCallback(() => {
+
+  //React.useEffect(finishFlightLoad, [selectedFlight]);
+
+  useEffectAllDepsChange(() => {
     if (selectedFlight && newFlightLoaded) {
       console.log("Loading pin states");
       // Pin log loaded after flight loaded to speed up render of main page when
@@ -339,16 +359,14 @@ const Tracking = (props: TrackingProps) => {
       for (const point of pinStates) {
         pinLogPrint!(point.input, point.output, point.timestamp, point.altitude);
       }
-      newFlightLoaded = false;
       if (enableUpdates) {
         setUpdateInterval(setInterval(fetchUpdates, UPDATE_DELAY));
         console.log('Enabled updating');
         enableUpdates = false;
       }
+      setNewFlightLoaded(false);
     }
-  }, [selectedFlight, newFlightLoaded]);
-
-  React.useEffect(finishFlightLoad, [selectedFlight]);
+  }, [selectedFlight, newFlightLoaded])
 
   const fetchModemsByDate = React.useCallback(async (formattedDate: string) => {
     try {
