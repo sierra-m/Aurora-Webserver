@@ -31,6 +31,7 @@ import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 import Select, {type ActionMeta, type MultiValue, type Theme} from 'react-select'
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Dropdown from "react-bootstrap/Dropdown";
@@ -41,6 +42,7 @@ import type {FlightPoint} from "../util/flight.ts";
 import {selectDarkTheme} from "../util/themes.ts";
 
 
+dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 
 type UnixTimestamp = number;
