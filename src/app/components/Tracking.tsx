@@ -265,6 +265,8 @@ const Tracking = (props: TrackingProps) => {
           setGroundElevation(elevation);
           setSelectedPoint(updateFlight.lastPoint());
         }
+      } else {
+        console.log('Update failed - flight not selected');
       }
     } catch (e) {
       console.log(e);
