@@ -25,6 +25,7 @@
 import express from 'express'
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 
 import {query} from '../util/pg'
 import ElevationAPI from '../util/elevation'
@@ -34,6 +35,7 @@ import type {UpdatePoint, UpdateResponse} from "../types/routes.ts";
 import type {FlightsQuery} from "../types/db.ts";
 
 
+dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 
 const elevationAPI = new ElevationAPI();
