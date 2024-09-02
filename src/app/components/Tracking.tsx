@@ -221,13 +221,13 @@ const Tracking = (props: TrackingProps) => {
     return getVelocity(altitude, mass, diameter, drag);
   };
 
-  let pinLogPrint: LogPrintFunc | null = null;
+  const [pinLogPrint, setPinLogPrint] = React.useState<LogPrintFunc | null>(null);
 
-  let pinLogClear: LogClearFunc | null = null;
+  const [pinLogClear, setPinLogClear] = React.useState<LogClearFunc | null>(null);
 
   const registerControls = (printFunc: LogPrintFunc, clearFunc: LogClearFunc) => {
-    pinLogPrint = printFunc;
-    pinLogClear = clearFunc;
+    setPinLogPrint(() => printFunc);
+    setPinLogClear(() => clearFunc);
   };
 
   // Modem Select Dropdown Callback
