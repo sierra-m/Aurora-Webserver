@@ -329,7 +329,7 @@ const Tracking = (props: TrackingProps) => {
     }
   }, [updateInterval, pinLogClear]);
 
-  React.useEffect(() => {
+  const finishFlightLoad = React.useCallback(() => {
     if (selectedFlight && newFlightLoaded) {
       console.log("Loading pin states");
       // Pin log loaded after flight loaded to speed up render of main page when
@@ -346,7 +346,9 @@ const Tracking = (props: TrackingProps) => {
         enableUpdates = false;
       }
     }
-  }, [selectedFlight])
+  }, [selectedFlight, newFlightLoaded]);
+
+  React.useEffect(finishFlightLoad, [selectedFlight]);
 
   const fetchModemsByDate = React.useCallback(async (formattedDate: string) => {
     try {
