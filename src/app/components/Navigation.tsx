@@ -261,7 +261,7 @@ const Navigation = (props: NavigationProps) => {
           Contact
         </Modal.Header>
         <Modal.Body>
-          For questions, issues and suggestions, please email:
+          For questions, issues and suggestions, please email: <br/>
           <a href={"mailto:borealis-support@montana.edu"}>borealis-support@montana.edu</a>
         </Modal.Body>
         <Modal.Footer>
