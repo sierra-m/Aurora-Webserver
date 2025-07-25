@@ -24,7 +24,7 @@
 
 import Card from 'react-bootstrap/Card'
 import Form from 'react-bootstrap/Form'
-import type {FormControl} from "react-bootstrap";
+import {type FormControl, Spinner} from "react-bootstrap";
 import Button from 'react-bootstrap/Button'
 import Table from 'react-bootstrap/Table'
 import InputGroup from 'react-bootstrap/InputGroup'
@@ -74,14 +74,15 @@ export interface SelectedFlightDataProps {
 
 export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) => {
 
-  const locationControlRef = React.useRef<HTMLInputElement & typeof FormControl>(null);
+  const coordsFormatted = `${props.latitude.toFixed(4)}, ${props.longitude.toFixed(4)}`;
 
-  const copyLocation = React.useCallback(() => {
-      if (locationControlRef.current) {
-          locationControlRef.current.select();
-          document.execCommand('copy')
+  const copyLocation = React.useCallback(async () => {
+      try {
+        await navigator.clipboard.writeText(coordsFormatted);
+      } catch (err) {
+        console.error(err);
       }
-  }, []);
+  }, [coordsFormatted]);
 
   const selectDownload = React.useCallback((eventKey: string | null, e: React.SyntheticEvent<unknown>) => {
     if (eventKey) {
@@ -91,11 +92,14 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
 
   return (
     <div>
-      {props.isActive &&
-        <Badge bg={'success'}>Active Flight</Badge>}
-      {!props.isActive &&
-        <Badge bg={'primary'}>Past Flight</Badge>}
       <Card.Text className={'pt-1'}>
+        {props.isActive &&
+          <div>
+            <Badge bg={'success'}>Active Flight</Badge>
+            <Spinner animation={"border"} size="sm"/>
+          </div>}
+        {!props.isActive &&
+          <Badge bg={'primary'}>Past Flight</Badge>}
         <Table borderless>
           <tr>
             <td className={'pt-0 pb-1'}><strong>Modem:</strong></td>
@@ -126,8 +130,7 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
             <Form.Control
               type={'input'}
               readOnly={true}
-              value={`${props.latitude.toFixed(4)}, ${props.longitude.toFixed(4)}`}
-              ref={locationControlRef}
+              value={coordsFormatted}
             />
             <Button onClick={copyLocation}>
               Copy
