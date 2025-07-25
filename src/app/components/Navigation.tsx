@@ -266,6 +266,7 @@ const Navigation = (props: NavigationProps) => {
                 isClearable={true}
                 theme={selectThemeChanger}
               />
+              <br/>
               <OverlayTrigger
                 placement={"left"}
                 delay={{ show: 250, hide: 400 }}
