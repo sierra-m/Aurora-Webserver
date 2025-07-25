@@ -30,6 +30,12 @@ To install dependencies:
 bun install
 ```
 
+To build the app for production:
+
+```bash
+vite build
+```
+
 To run:
 
 ```bash
