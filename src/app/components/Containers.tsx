@@ -24,7 +24,7 @@
 
 import Card from 'react-bootstrap/Card'
 import Form from 'react-bootstrap/Form'
-import {type FormControl, Spinner} from "react-bootstrap";
+import {type FormControl, Spinner, type TooltipProps} from "react-bootstrap";
 import Button from 'react-bootstrap/Button'
 import Table from 'react-bootstrap/Table'
 import InputGroup from 'react-bootstrap/InputGroup'
@@ -42,6 +42,8 @@ import Badge from "react-bootstrap/Badge";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import type {RedactedModem} from "../../server/types/util";
 import type {PagePreferences} from "./Navigation.tsx";
+import Tooltip from "react-bootstrap/Tooltip";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 
 
 dayjs.extend(duration);
@@ -76,9 +78,15 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
 
   const coordsFormatted = `${props.latitude.toFixed(4)}, ${props.longitude.toFixed(4)}`;
 
+  const [showCopiedTooltip, setShowCopiedTooltip] = React.useState<boolean>(false);
+
   const copyLocation = React.useCallback(async () => {
       try {
         await navigator.clipboard.writeText(coordsFormatted);
+        setShowCopiedTooltip(true);
+        setTimeout(() => {
+          setShowCopiedTooltip(false);
+        }, 2000);
       } catch (err) {
         console.error(err);
       }
@@ -90,6 +98,12 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
     }
   }, [props.downloadFlight])
 
+  const renderCopiedTooltip = React.useCallback((props: TooltipProps) => (
+    <Tooltip id="copy-tooltip" {...props}>
+      Copied!
+    </Tooltip>
+  ), []);
+
   return (
     <div>
       <Card.Text className={'pt-1'}>
@@ -100,7 +114,7 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
           </div>}
         {!props.isActive &&
           <Badge bg={'primary'}>Past Flight</Badge>}
-        <Table borderless>
+        <Table borderless className={'pt-2'}>
           <tr>
             <td className={'pt-0 pb-1'}><strong>Modem:</strong></td>
             <td className={'pt-0 pb-1'} align={'right'}>{props.modem.name}</td>
@@ -132,9 +146,15 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
               readOnly={true}
               value={coordsFormatted}
             />
-            <Button onClick={copyLocation}>
-              Copy
-            </Button>
+            <OverlayTrigger
+              placement={"bottom"}
+              show={showCopiedTooltip}
+              overlay={renderCopiedTooltip}
+            >
+              <Button onClick={copyLocation}>
+                Copy
+              </Button>
+            </OverlayTrigger>
           </InputGroup>
         </Form.Group>
         <Button size={'sm'} variant={'outline-success'} onClick={() => openGoogleMaps(props.latitude, props.longitude)}>

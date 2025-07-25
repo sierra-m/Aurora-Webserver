@@ -136,6 +136,7 @@ const Navigation = (props: NavigationProps) => {
     }
     setTimeZoneOption(defaultTimeZone);
     setPagePreferences(newPreferences);
+    localStorage.setItem('pagePreferences', JSON.stringify(newPreferences));
   }, [pagePreferences]);
 
   const handleShowContact = React.useCallback(() => {
@@ -189,12 +190,6 @@ const Navigation = (props: NavigationProps) => {
       ...selectDarkTheme
     },
   } : theme), [darkModeEnabled])
-
-  const renderLocateTooltip = React.useCallback(() => (
-    <Tooltip id={"reset-timezone-button-tooltip"}>
-      Use default timezone
-    </Tooltip>
-  ), []);
 
   return (
     <>
@@ -254,6 +249,18 @@ const Navigation = (props: NavigationProps) => {
               Time Zone
             </Column>
             <Column style={{display: 'flex', justifyContent: 'right'}}>
+              <OverlayTrigger
+                placement={"left"}
+                overlay={
+                  <Tooltip id={"reset-timezone-button-tooltip"}>
+                    Use default timezone
+                  </Tooltip>
+                }
+              >
+                <Button variant={"outline-primary"} onClick={handleResetTimeZone}>
+                  <i className="bi bi-crosshair"></i>
+                </Button>
+              </OverlayTrigger>
               <Select<TimezoneSelectOption>
                 value={timeZoneOption}
                 onChange={timeZonePrefChange}
@@ -266,16 +273,6 @@ const Navigation = (props: NavigationProps) => {
                 isClearable={true}
                 theme={selectThemeChanger}
               />
-              <br/>
-              <OverlayTrigger
-                placement={"left"}
-                delay={{ show: 250, hide: 400 }}
-                overlay={renderLocateTooltip}
-              >
-                <Button variant={"outline-primary"} onClick={handleResetTimeZone}>
-                  <i className="bi bi-crosshair"></i>
-                </Button>
-              </OverlayTrigger>
             </Column>
           </Row>
         </Modal.Body>
