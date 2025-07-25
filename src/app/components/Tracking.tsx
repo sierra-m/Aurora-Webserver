@@ -772,7 +772,7 @@ const Tracking = (props: TrackingProps) => {
                 title={'Pin States Log'}
                 autoscroll={true}
                 selectedPoint={selectedPoint}
-                isDisabled={!!selectedFlight}
+                isDisabled={!selectedFlight}
                 darkModeEnabled={props.darkModeEnabled}
               />
             </Card.Body>
