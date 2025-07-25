@@ -37,6 +37,8 @@ import Button from "react-bootstrap/Button";
 import Toggle from "./Toggle.tsx";
 import Column from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 import Select, {type ActionMeta, type Theme, type ThemeConfig} from "react-select";
 import {selectDarkTheme} from "../util/themes.ts";
 
@@ -188,6 +190,12 @@ const Navigation = (props: NavigationProps) => {
     },
   } : theme), [darkModeEnabled])
 
+  const renderLocateTooltip = React.useCallback(() => (
+    <Tooltip id={"reset-timezone-button-tooltip"}>
+      Use default timezone
+    </Tooltip>
+  ), []);
+
   return (
     <>
       <Navbar expand="lg" sticky="top" onToggle={navExpandedToggle} expanded={navExpanded} className={"bg-body-secondary"}>
@@ -223,7 +231,7 @@ const Navigation = (props: NavigationProps) => {
       </Navbar>
       <Modal show={showPreferences} onHide={handleClosePreferences} centered>
         <Modal.Header>
-          <h3>Preferences</h3>
+          <Modal.Title>Preferences</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <h4>General</h4>
@@ -245,10 +253,7 @@ const Navigation = (props: NavigationProps) => {
             <Column xs={5}>
               Time Zone
             </Column>
-            <Column>
-              <Button variant={"outline-primary"} onClick={handleResetTimeZone}>
-                <i className="bi bi-crosshair"></i>
-              </Button>
+            <Column style={{display: 'flex', justifyContent: 'right'}}>
               <Select<TimezoneSelectOption>
                 value={timeZoneOption}
                 onChange={timeZonePrefChange}
@@ -261,6 +266,15 @@ const Navigation = (props: NavigationProps) => {
                 isClearable={true}
                 theme={selectThemeChanger}
               />
+              <OverlayTrigger
+                placement={"left"}
+                delay={{ show: 250, hide: 400 }}
+                overlay={renderLocateTooltip}
+              >
+                <Button variant={"outline-primary"} onClick={handleResetTimeZone}>
+                  <i className="bi bi-crosshair"></i>
+                </Button>
+              </OverlayTrigger>
             </Column>
           </Row>
         </Modal.Body>
@@ -270,7 +284,7 @@ const Navigation = (props: NavigationProps) => {
       </Modal>
       <Modal show={showContact} onHide={handleCloseContact} centered>
         <Modal.Header>
-          Contact
+          <Modal.Title>Contact</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           For questions, issues and suggestions, please email: <br/>
