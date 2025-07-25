@@ -77,6 +77,8 @@ const Navigation = (props: NavigationProps) => {
 
   const [showPreferences, setShowPreferences] = React.useState<boolean>(false);
 
+  const [showContact, setShowContact] = React.useState<boolean>(false);
+
   const [pagePreferences, setPagePreferences] = React.useState<PagePreferences>(defaultPreferences);
 
   const [timeZoneOption, setTimeZoneOption] = React.useState<TimezoneSelectOption | null>(defaultTimeZone);
@@ -119,11 +121,19 @@ const Navigation = (props: NavigationProps) => {
 
   const handleShowPreferences = React.useCallback(() => {
     setShowPreferences(true);
-  }, [])
+  }, []);
 
   const handleClosePreferences = React.useCallback(() => {
     setShowPreferences(false);
-  }, [])
+  }, []);
+
+  const handleShowContact = React.useCallback(() => {
+    setShowContact(true);
+  }, []);
+
+  const handleCloseContact = React.useCallback(() => {
+    setShowContact(false);
+  }, []);
 
   // Propagate page pref changes up
   React.useEffect(() => {
@@ -182,8 +192,8 @@ const Navigation = (props: NavigationProps) => {
               <LinkContainer to={'/'}>
                 <Nav.Link>Flight Tracking</Nav.Link>
               </LinkContainer>
-              <Nav.Link href={'#'}>About</Nav.Link>
-              <Nav.Link href={'#'}>Contact</Nav.Link>
+              <Nav.Link href={'https://spacegrant.montana.edu/borealis.html'} target={"_blank"}>About</Nav.Link>
+              <Nav.Link onClick={handleShowContact}>Contact</Nav.Link>
             </Nav>
             <Form className="d-flex pe-4 ms-auto">
               <Form.Check
@@ -245,6 +255,15 @@ const Navigation = (props: NavigationProps) => {
         <Modal.Footer>
           <Button variant={'secondary'} onClick={handleClosePreferences}>Close</Button>
         </Modal.Footer>
+      </Modal>
+      <Modal show={showContact} onHide={handleCloseContact} centered>
+        <Modal.Header>
+          Contact
+        </Modal.Header>
+        <Modal.Body>
+          For questions, issues and suggestions, please email: 
+          <a href={"mailto:borealis-support@montana.edu"}>borealis-support@montana.edu</a>
+        </Modal.Body>
       </Modal>
     </>
   )
