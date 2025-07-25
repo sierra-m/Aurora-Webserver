@@ -127,6 +127,15 @@ const Navigation = (props: NavigationProps) => {
     setShowPreferences(false);
   }, []);
 
+  const handleResetTimeZone = React.useCallback(() => {
+    const newPreferences = {
+      ...pagePreferences,
+      timeZone: guessedTz
+    }
+    setTimeZoneOption(defaultTimeZone);
+    setPagePreferences(newPreferences);
+  }, [pagePreferences]);
+
   const handleShowContact = React.useCallback(() => {
     setShowContact(true);
   }, []);
@@ -214,10 +223,10 @@ const Navigation = (props: NavigationProps) => {
       </Navbar>
       <Modal show={showPreferences} onHide={handleClosePreferences} centered>
         <Modal.Header>
-          Preferences
+          <h3>Preferences</h3>
         </Modal.Header>
         <Modal.Body>
-          <h3>General</h3>
+          <h4>General</h4>
           <Row>
             <Column xs={5}>
               Units
@@ -237,6 +246,9 @@ const Navigation = (props: NavigationProps) => {
               Time Zone
             </Column>
             <Column>
+              <Button variant={"outline-primary"} onClick={handleResetTimeZone}>
+                <i className="bi bi-crosshair"></i>
+              </Button>
               <Select<TimezoneSelectOption>
                 value={timeZoneOption}
                 onChange={timeZonePrefChange}
@@ -253,7 +265,7 @@ const Navigation = (props: NavigationProps) => {
           </Row>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant={'secondary'} onClick={handleClosePreferences}>Close</Button>
+          <Button variant={'secondary'} size={"sm"} onClick={handleClosePreferences}>Close</Button>
         </Modal.Footer>
       </Modal>
       <Modal show={showContact} onHide={handleCloseContact} centered>
@@ -265,7 +277,7 @@ const Navigation = (props: NavigationProps) => {
           <a href={"mailto:borealis-support@montana.edu"}>borealis-support@montana.edu</a>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant={'secondary'} onClick={handleCloseContact}>Close</Button>
+          <Button variant={'secondary'} size={"sm"} onClick={handleCloseContact}>Close</Button>
         </Modal.Footer>
       </Modal>
     </>
