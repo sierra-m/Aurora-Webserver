@@ -94,7 +94,7 @@ export default class UpdateRoute {
         let lastTime = dayjs.utc(req.body.datetime, 'X').format('YYYY-MM-DD HH:mm:ss');
 
         let result = await query<FlightsQuery>(
-            `SELECT * FROM public."flights" WHERE uid=$1 AND datetime>$2`,
+            `SELECT * FROM public."flights" WHERE uid=$1 AND datetime>$2 ORDER BY datetime ASC`,
             [uid, lastTime]
         );
 
