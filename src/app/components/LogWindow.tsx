@@ -102,9 +102,10 @@ const LogItemComponent = (props: LogItemComponentProps) => {
   const statusFormatted = props.item.changed ? 'changed' : 'unchanged';
   const statusVariant = props.item.changed ? 'success' : 'primary';
   const selectedColor = props.useDarkTheme ? '#423c45' : '#f8e8fd';
-  const backgroundStyle = props.selected ? { backgroundColor: selectedColor } : {};
+  const selectedStyle = { backgroundColor: selectedColor };
+  // Body color will take precedence, so remove this if selected, falling back to inline
   return (
-    <div style={backgroundStyle} className={'bg-body'}> {/* Use selected color if applicable, else fall back on body color */}
+    <div style={selectedStyle} className={props.selected ? '' : 'bg-body'}>
       <samp>[</samp>
       <ColorSamp color={'#d300a4'}>{dayjs.utc(props.item.timestamp, 'X').format('YYYY-MM-DD HH:mm:ss')}</ColorSamp>
       <samp>]</samp>
