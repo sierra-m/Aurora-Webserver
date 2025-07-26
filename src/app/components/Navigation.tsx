@@ -42,6 +42,7 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import Select, {type ActionMeta, type Theme, type ThemeConfig} from "react-select";
 import {selectDarkTheme} from "../util/themes.ts";
 import irisBalloon from "../images/IrisBalloon.png";
+import "../style/navigation.css";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -206,8 +207,8 @@ const Navigation = (props: NavigationProps) => {
             <Link to={'/'}>
               <img
                 src={irisBalloon}
-                width={30}
-                height={30}
+                width={40}
+                height={40}
                 className={"d-inline-block align-middle"}
                 alt={"MSU Borealis Tracker logo"}
               />
