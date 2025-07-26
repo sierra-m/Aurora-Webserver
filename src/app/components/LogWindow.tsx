@@ -105,7 +105,7 @@ const LogItemComponent = (props: LogItemComponentProps) => {
   const statusFormatted = props.item.changed ? 'changed' : 'unchanged';
   const statusVariant = props.item.changed ? 'success' : 'primary';
   const themeColors = props.useDarkTheme ? {
-    selected: '#534c57',
+    selected: '#423d45',
     time: '#fb02c4',
     altitude: '#e65201',
     pinStateNull: '#da8f03',
