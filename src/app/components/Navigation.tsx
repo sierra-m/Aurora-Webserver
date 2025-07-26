@@ -41,6 +41,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import Select, {type ActionMeta, type Theme, type ThemeConfig} from "react-select";
 import {selectDarkTheme} from "../util/themes.ts";
+import irisBalloon from "../images/irisBalloon.png";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -202,7 +203,16 @@ const Navigation = (props: NavigationProps) => {
       <Navbar expand="lg" sticky="top" onToggle={navExpandedToggle} expanded={navExpanded} className={"bg-body-secondary"}>
         <Container className={'page-width'}>
           <Navbar.Brand>
-            <Link to={'/'}>MSU Borealis</Link>
+            <Link to={'/'}>
+              <img
+                src={irisBalloon}
+                width={30}
+                height={30}
+                className={"d-inline-block align-middle"}
+                alt={"MSU Borealis Tracker logo"}
+              />
+              MSU Borealis
+            </Link>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav"/>
           <Navbar.Collapse id="basic-navbar-nav">
