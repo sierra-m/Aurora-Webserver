@@ -761,11 +761,12 @@ const Tracking = (props: TrackingProps) => {
               <Card.Title className={'mt-3'}>Pin States</Card.Title>
               <Card.Text>
                 <div className={'pb-3'}>This log shows NAL Modem pin states for each time stamp.</div>
-                <Alert variant={'info'}>
-                  <em>Note:</em> Flights before April 2024 do not have recorded pin states due to a storage error, this
-                  may be fixed
-                  in future updates
-                </Alert>
+                {(selectedFlight && selectedFlight.startDate?.isBefore(dayjs('2024-04-04'))) &&
+                  <Alert variant={'info'}>
+                    <em>Note:</em> Flights before April 2024 do not have recorded pin states due to a storage error,
+                    but this may be fixed in future updates
+                  </Alert>
+                }
               </Card.Text>
               <LogWindow
                 registerControls={registerControls}
@@ -774,6 +775,7 @@ const Tracking = (props: TrackingProps) => {
                 selectedPoint={selectedPoint}
                 isDisabled={!selectedFlight}
                 darkModeEnabled={props.darkModeEnabled}
+                pagePreferences={props.pagePreferences}
               />
             </Card.Body>
           </Card>

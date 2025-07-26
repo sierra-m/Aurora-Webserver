@@ -41,6 +41,8 @@ import Row from "react-bootstrap/Row";
 import { useIntersectionObserver } from 'usehooks-ts';
 import type {FlightPoint} from "../util/flight.ts";
 import {selectDarkTheme} from "../util/themes.ts";
+import {displayMetersFeet} from "../util/helpers.ts";
+import type {PagePreferences} from "./Navigation.tsx";
 
 
 dayjs.extend(customParseFormat);
@@ -96,24 +98,37 @@ interface LogItemComponentProps {
   item: LogItem;
   selected: boolean;
   useDarkTheme: boolean;
+  useMetric: boolean;
 }
 
 const LogItemComponent = (props: LogItemComponentProps) => {
   const statusFormatted = props.item.changed ? 'changed' : 'unchanged';
   const statusVariant = props.item.changed ? 'success' : 'primary';
-  const selectedColor = props.useDarkTheme ? '#423c45' : '#f8e8fd';
-  const selectedStyle = { backgroundColor: selectedColor };
-  // Body color will take precedence, so remove this if selected, falling back to inline
+  const themeColors = props.useDarkTheme ? {
+    selected: '#534c57',
+    time: '#fb02c4',
+    altitude: '#e65201',
+    pinStateNull: '#da8f03',
+    pinState: '#1b88d6'
+  } : {
+    selected: '#f8e8fd',
+    time: '#d300a4',
+    altitude: '#b03e00',
+    pinStateNull: '#7c5100',
+    pinState: '#006dbd'
+  };
+  // Body bg color will take precedence, so remove this if selected, falling back to inline
+  const selectedStyle = { backgroundColor: themeColors.selected };
   return (
     <div style={selectedStyle} className={props.selected ? '' : 'bg-body'}>
       <samp>[</samp>
-      <ColorSamp color={'#d300a4'}>{dayjs.utc(props.item.timestamp, 'X').format('YYYY-MM-DD HH:mm:ss')}</ColorSamp>
+      <ColorSamp color={themeColors.time}>{dayjs.utc(props.item.timestamp, 'X').format('YYYY-MM-DD HH:mm:ss')}</ColorSamp>
       <samp>]</samp>
-      <ColorSamp color={'#b03e00'} keepWhitespace={true}>{`${props.item.altitude}`.padStart(6, ' ')} meters</ColorSamp>
+      <ColorSamp color={themeColors.altitude} keepWhitespace={true}>{displayMetersFeet(props.item.altitude, props.useMetric, 6)}</ColorSamp>
       <samp> | Input: </samp>
-      <ColorSamp color={(props.item.inputPins === null) ? '#7c5100' : '#006dbd'}>{`${props.item.inputPins}`}</ColorSamp>
+      <ColorSamp color={(props.item.inputPins === null) ? themeColors.pinStateNull : themeColors.pinState}>{`${props.item.inputPins}`}</ColorSamp>
       <samp>, Output: </samp>
-      <ColorSamp color={(props.item.outputPins === null) ? '#7c5100' : '#006dbd'}>{`${props.item.outputPins} `}</ColorSamp>
+      <ColorSamp color={(props.item.outputPins === null) ? themeColors.pinStateNull : themeColors.pinState}>{`${props.item.outputPins} `}</ColorSamp>
       {/* First letter caps */}
       <Badge bg={statusVariant}>{statusFormatted.charAt(0).toUpperCase() + statusFormatted.slice(1)}</Badge>
       {'\n'}
@@ -132,6 +147,7 @@ interface LogWindowProps {
   selectedPoint: FlightPoint | null;
   isDisabled: boolean;
   darkModeEnabled: boolean;
+  pagePreferences: PagePreferences;
 }
 
 interface StatusSelectOption {
@@ -311,7 +327,6 @@ const LogWindow = (props: LogWindowProps) => {
       <Card.Header>{props.title}</Card.Header>
       <Card.Text>
         <Container className={'log-container'}>
-
           <Card className={'log-card'}>
             <Card.Text>
               <Container className={'log-container'}>
@@ -327,7 +342,12 @@ const LogWindow = (props: LogWindowProps) => {
                         selectedItemElementRef.current = el;
                       }
                     }} key={index}>
-                      <LogItemComponent item={item} selected={selected} useDarkTheme={props.darkModeEnabled}/>
+                      <LogItemComponent
+                        item={item}
+                        selected={selected}
+                        useDarkTheme={props.darkModeEnabled}
+                        useMetric={props.pagePreferences.useMetric}
+                      />
                     </div>
                   )
                 })}
