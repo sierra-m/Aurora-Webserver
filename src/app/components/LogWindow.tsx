@@ -38,6 +38,7 @@ import Dropdown from "react-bootstrap/Dropdown";
 import {createPortal} from "react-dom";
 import Column from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
+import { useIntersectionObserver } from 'usehooks-ts';
 import type {FlightPoint} from "../util/flight.ts";
 import {selectDarkTheme} from "../util/themes.ts";
 
@@ -133,6 +134,10 @@ const LogWindow = (props: LogWindowProps) => {
   // Defined as non-state as these need to update immediately
   let lastInputPins: number | null = null;
   let lastOutputPins: number | null = null;
+
+  const { isIntersecting, ref } = useIntersectionObserver({
+    threshold: 0.5
+  });
 
   // Array of log items
   const [items, setItems] = React.useState<Array<LogItem>>([]);
@@ -244,8 +249,8 @@ const LogWindow = (props: LogWindowProps) => {
     setAutoscroll(props.autoscroll);
   }, []);
 
-  React.useEffect(() => {
-    if (autoscroll) {
+  const handleAutoScroll = React.useCallback(() => {
+    if (autoscroll && isIntersecting) {
       if (props.selectedPoint) {
         if (selectedItemElementRef.current != null) {
           selectedItemElementRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
@@ -254,6 +259,10 @@ const LogWindow = (props: LogWindowProps) => {
         scrollToBottom();
       }
     }
+  }, [autoscroll, isIntersecting]);
+
+  React.useEffect(() => {
+    handleAutoScroll();
   }, [items]);
 
   const toggleAutoscroll = React.useCallback(
@@ -297,6 +306,8 @@ const LogWindow = (props: LogWindowProps) => {
                 <div ref={scrollToBottomRef}/>
               </Container>
             </Card.Text>
+            {/* Element used by intersection observer  */}
+            <div ref={ref}/>
           </Card>
         </Container>
       </Card.Text>
