@@ -41,7 +41,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import Select, {type ActionMeta, type Theme, type ThemeConfig} from "react-select";
 import {selectDarkTheme} from "../util/themes.ts";
-import irisBalloon from "../images/irisBalloon.png";
+import irisBalloon from "../images/IrisBalloon.png";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
