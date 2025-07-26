@@ -28,7 +28,7 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import '../custom.scss';
 import { Link } from "react-router-dom";
-import {Navbar, Nav, Modal} from "react-bootstrap";
+import {Navbar, Nav, Modal, type TooltipProps} from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import Container from 'react-bootstrap/Container'
 import Form from "react-bootstrap/Form";
@@ -191,6 +191,12 @@ const Navigation = (props: NavigationProps) => {
     },
   } : theme), [darkModeEnabled])
 
+  const renderTimezoneResetTooltip = React.useCallback((props: TooltipProps) => (
+    <Tooltip id={"reset-timezone-button-tooltip"} {...props}>
+      Use default timezone
+    </Tooltip>
+  ), []);
+
   return (
     <>
       <Navbar expand="lg" sticky="top" onToggle={navExpandedToggle} expanded={navExpanded} className={"bg-body-secondary"}>
@@ -251,11 +257,7 @@ const Navigation = (props: NavigationProps) => {
             <Column style={{display: 'flex', justifyContent: 'right'}}>
               <OverlayTrigger
                 placement={"left"}
-                overlay={
-                  <Tooltip id={"reset-timezone-button-tooltip"}>
-                    Use default timezone
-                  </Tooltip>
-                }
+                overlay={renderTimezoneResetTooltip}
               >
                 <Button variant={"outline-primary"} onClick={handleResetTimeZone}>
                   <i className="bi bi-crosshair"></i>

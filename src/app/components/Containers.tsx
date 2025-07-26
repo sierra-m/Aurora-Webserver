@@ -106,14 +106,14 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
 
   return (
     <div>
+      {props.isActive &&
+        <div className={"pb-2"}>
+          <Badge bg={'success'}>Active Flight</Badge>
+          <Spinner animation={"border"} size="sm"/>
+        </div>}
+      {!props.isActive &&
+        <Badge bg={'primary'} className={"pb-2"}>Past Flight</Badge>}
       <Card.Text className={'pt-1'}>
-        {props.isActive &&
-          <div>
-            <Badge bg={'success'}>Active Flight</Badge>
-            <Spinner animation={"border"} size="sm"/>
-          </div>}
-        {!props.isActive &&
-          <Badge bg={'primary'}>Past Flight</Badge>}
         <Table borderless className={'pt-2'}>
           <tr>
             <td className={'pt-0 pb-1'}><strong>Modem:</strong></td>
@@ -159,7 +159,7 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
         </Form.Group>
         <Button size={'sm'} variant={'outline-success'} onClick={() => openGoogleMaps(props.latitude, props.longitude)}>
           Open in Google Maps
-          <i className="bi bi-box-arrow-up-right pl-1"></i>
+          <i className="bi bi-box-arrow-up-right pl-3"></i>
         </Button>
       </Form>
       <Card.Text className={'my-1'} style={{fontSize: '10pt'}}><strong>Altitude:</strong> {displayMetersFeet(props.altitude, props.pagePreferences.useMetric)}
