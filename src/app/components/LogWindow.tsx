@@ -102,7 +102,7 @@ const LogItemComponent = (props: LogItemComponentProps) => {
   const statusFormatted = props.item.changed ? 'changed' : 'unchanged';
   const statusVariant = props.item.changed ? 'success' : 'primary';
   const selectedColor = props.useDarkTheme ? '#423c45' : '#f8e8fd';
-  const backgroundStyle = props.useDarkTheme ? { backgroundColor: selectedColor } : {};
+  const backgroundStyle = props.selected ? { backgroundColor: selectedColor } : {};
   return (
     <div style={backgroundStyle} className={'bg-body'}> {/* Use selected color if applicable, else fall back on body color */}
       <samp>[</samp>
@@ -242,19 +242,19 @@ const LogWindow = (props: LogWindowProps) => {
     setFilterOutputOptions(options);
   }, []);
 
-  const statusFilterActive = () => {
-    return filterStatusOption !== null && filterStatusOption.value !== 'any';
-  }
+  const statusFilterActive = React.useCallback(() => {
+    return (filterStatusOption !== null) && (filterStatusOption.value !== 'any');
+  }, [filterStatusOption]);
 
-  const inputFilterActive = () => {
-    return filterInputOptions !== null && filterInputOptions.length > 0;
-  }
+  const inputFilterActive = React.useCallback(() => {
+    return (filterInputOptions !== null) && (filterInputOptions.length > 0);
+  }, [filterInputOptions]);
 
-  const outputFilterActive = () => {
-    return filterOutputOptions !== null && filterOutputOptions.length > 0;
-  }
+  const outputFilterActive = React.useCallback(() => {
+    return (filterOutputOptions !== null) && (filterOutputOptions.length > 0);
+  }, [filterOutputOptions]);
 
-  const applyFilters = () => {
+  const applyFilters = React.useCallback(() => {
     let filteredItems: Array<LogItem> = [...items];
     if (statusFilterActive()) {
       filteredItems = filteredItems.filter(item => item.status === filterStatusOption!.value);
@@ -266,7 +266,7 @@ const LogWindow = (props: LogWindowProps) => {
       filteredItems = filteredItems.filter(item => filterOutputOptions!.find(option => option.value === item.outputPins));
     }
     return filteredItems;
-  }
+  }, [items])
 
   React.useEffect(() => {
     if (props.registerControls !== null) {

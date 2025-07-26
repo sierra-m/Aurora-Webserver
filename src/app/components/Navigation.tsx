@@ -237,7 +237,7 @@ const Navigation = (props: NavigationProps) => {
         <Modal.Body>
           <h4>General</h4>
           <Row>
-            <Column xs={5}>
+            <Column xs={5} sm={3}>
               Units
             </Column>
             <Column style={{display: 'flex', justifyContent: 'right'}}>
@@ -251,7 +251,7 @@ const Navigation = (props: NavigationProps) => {
             </Column>
           </Row>
           <Row className={'pt-2'}>
-            <Column xs={5}>
+            <Column xs={5} sm={3}>
               Time Zone
             </Column>
             <Column style={{display: 'flex', justifyContent: 'right'}}>
