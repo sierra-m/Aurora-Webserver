@@ -571,8 +571,8 @@ const Tracking = (props: TrackingProps) => {
           <Accordion defaultActiveKey={'flight-select'}>
             <Accordion.Item eventKey={'flight-select'}>
               <Accordion.Header>
-                <Image src={threeBarIcon} className={'icon-bar me-2'}/>
-                Flight Select
+                <i className="bi bi-clock-history me-2"></i>
+                Past Flights
               </Accordion.Header>
               <Accordion.Body>
                 <FlightSelect
@@ -591,7 +591,7 @@ const Tracking = (props: TrackingProps) => {
             </Accordion.Item>
             <Accordion.Item eventKey={'payload-details'}>
               <Accordion.Header>
-                <Image src={balloonIcon} className={'icon-balloon me-2'}/>
+                <i className="bi bi-box-seam me-2"></i>
                 Payload Details
               </Accordion.Header>
               <Accordion.Body className={'custom-curve-window'}>
@@ -664,7 +664,7 @@ const Tracking = (props: TrackingProps) => {
             </Accordion.Item>
             <Accordion.Item eventKey={'active-flights'}>
               <Accordion.Header>
-                <Image src={clockIcon} className={'icon-bar me-2'}/>
+                <i className="bi bi-calendar2-check me-2"></i>
                 Active Flights
               </Accordion.Header>
               <Accordion.Body style={{overflowY: 'auto', maxHeight: '20rem'}}>
@@ -687,7 +687,7 @@ const Tracking = (props: TrackingProps) => {
             </Accordion.Item>
             <Accordion.Item eventKey={'flight-data'}>
               <Accordion.Header>
-                <Image src={chartIcon} className={'icon-bar me-2'}/>
+                <i className="bi bi-graph-up-arrow me-2"></i>
                 Flight Data
               </Accordion.Header>
               <Accordion.Body style={{overflowY: 'auto', height: '45vh', maxHeight: '280px'}}>
