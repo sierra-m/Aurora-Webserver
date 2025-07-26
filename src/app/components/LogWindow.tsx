@@ -92,6 +92,34 @@ class LogItem {
   }
 }
 
+interface LogItemComponentProps {
+  item: LogItem;
+  selected: boolean;
+  useDarkTheme: boolean;
+}
+
+const LogItemComponent = (props: LogItemComponentProps) => {
+  const statusFormatted = props.item.changed ? 'changed' : 'unchanged';
+  const statusVariant = props.item.changed ? 'success' : 'primary';
+  const selectedColor = props.useDarkTheme ? '#423c45' : '#f8e8fd';
+  const backgroundStyle = props.useDarkTheme ? { backgroundColor: selectedColor } : {};
+  return (
+    <div style={backgroundStyle} className={'bg-body'}> {/* Use selected color if applicable, else fall back on body color */}
+      <samp>[</samp>
+      <ColorSamp color={'#d300a4'}>{dayjs.utc(props.item.timestamp, 'X').format('YYYY-MM-DD HH:mm:ss')}</ColorSamp>
+      <samp>]</samp>
+      <ColorSamp color={'#b03e00'} keepWhitespace={true}>{`${props.item.altitude}`.padStart(6, ' ')} meters</ColorSamp>
+      <samp> | Input: </samp>
+      <ColorSamp color={(props.item.inputPins === null) ? '#7c5100' : '#006dbd'}>{`${props.item.inputPins}`}</ColorSamp>
+      <samp>, Output: </samp>
+      <ColorSamp color={(props.item.outputPins === null) ? '#7c5100' : '#006dbd'}>{`${props.item.outputPins} `}</ColorSamp>
+      {/* First letter caps */}
+      <Badge bg={statusVariant}>{statusFormatted.charAt(0).toUpperCase() + statusFormatted.slice(1)}</Badge>
+      {'\n'}
+    </div>
+  );
+}
+
 export type LogPrintFunc = (input: number, output: number, timestamp: UnixTimestamp, altitude: number) => void;
 
 export type LogClearFunc = () => void;
@@ -262,7 +290,7 @@ const LogWindow = (props: LogWindowProps) => {
 
   React.useEffect(() => {
     handleAutoScroll();
-  }, [items, isIntersecting]);  // Scroll when items change or ref moves into view
+  }, [items, props.selectedPoint]);  // Scroll when items or selected point change
 
   const toggleAutoscroll = React.useCallback(
     () => setAutoscroll(!autoscroll),
@@ -298,7 +326,7 @@ const LogWindow = (props: LogWindowProps) => {
                         selectedItemElementRef.current = el;
                       }
                     }} key={index}>
-                      {item.toComponent(selected)}
+                      <LogItemComponent item={item} selected={selected} useDarkTheme={props.darkModeEnabled}/>
                     </div>
                   )
                 })}
