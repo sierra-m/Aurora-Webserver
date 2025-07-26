@@ -305,11 +305,11 @@ const LogWindow = (props: LogWindowProps) => {
                 <div ref={scrollToBottomRef}/>
               </Container>
             </Card.Text>
-            {/* Element used by intersection observer  */}
-            <div ref={ref}/>
           </Card>
         </Container>
       </Card.Text>
+      {/* Element used by intersection observer  */}
+      <div ref={ref}/>
       <Card.Footer>
         <Row>
           <Column xs={"auto"}>
