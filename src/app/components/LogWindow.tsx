@@ -245,7 +245,6 @@ const LogWindow = (props: LogWindowProps) => {
       props.registerControls(print, clear);
       console.log("pin log: registered controls")
     }
-    if (props.autoscroll) scrollToBottom();
     setAutoscroll(props.autoscroll);
   }, []);
 
@@ -263,7 +262,7 @@ const LogWindow = (props: LogWindowProps) => {
 
   React.useEffect(() => {
     handleAutoScroll();
-  }, [items]);
+  }, [items, isIntersecting]);  // Scroll when items change or ref moves into view
 
   const toggleAutoscroll = React.useCallback(
     () => setAutoscroll(!autoscroll),
