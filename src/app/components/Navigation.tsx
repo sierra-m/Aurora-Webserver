@@ -227,7 +227,12 @@ const Navigation = (props: NavigationProps) => {
               <Nav.Link href={'https://spacegrant.montana.edu/borealis.html'} target={"_blank"}>About</Nav.Link>
               <Nav.Link onClick={handleShowContact}>Contact</Nav.Link>
               <Nav.Link href={'https://github.com/sierra-m/Aurora-Webserver'} target={"_blank"}>
-                <img src={darkModeEnabled ? githubMarkWhite : githubMark} alt={"GitHub Logo"}/>
+                <img
+                  src={darkModeEnabled ? githubMarkWhite : githubMark}
+                  alt={"GitHub Logo"}
+                  width={16}
+                  height={16}
+                />
               </Nav.Link>
             </Nav>
             <Form className="d-flex pe-4 ms-auto">
