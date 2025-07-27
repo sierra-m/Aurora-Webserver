@@ -81,7 +81,7 @@ class LogItem {
         <samp>[</samp>
         <ColorSamp color={'#d300a4'}>{dayjs.utc(this.timestamp, 'X').format('YYYY-MM-DD HH:mm:ss')}</ColorSamp>
         <samp>]</samp>
-        <ColorSamp color={'#b03e00'} keepWhitespace={true}>{`${this.altitude}`.padStart(6, ' ')} meters</ColorSamp>
+        <ColorSamp color={'#b03e00'}>{`${this.altitude}`.padStart(6, ' ')} meters</ColorSamp>
         <samp> | Input: </samp>
         <ColorSamp color={(this.inputPins === null) ? '#7c5100' : '#006dbd'}>{`${this.inputPins}`}</ColorSamp>
         <samp>, Output: </samp>
@@ -124,7 +124,7 @@ const LogItemComponent = (props: LogItemComponentProps) => {
       <samp>[</samp>
       <ColorSamp color={themeColors.time}>{dayjs.utc(props.item.timestamp, 'X').format('YYYY-MM-DD HH:mm:ss')}</ColorSamp>
       <samp>]</samp>
-      <ColorSamp color={themeColors.altitude} keepWhitespace={true}>{displayMetersFeet(props.item.altitude, props.useMetric, 6)}</ColorSamp>
+      <ColorSamp color={themeColors.altitude}>{displayMetersFeet(props.item.altitude, props.useMetric, 6)}</ColorSamp>
       <samp> | Input: </samp>
       <ColorSamp color={(props.item.inputPins === null) ? themeColors.pinStateNull : themeColors.pinState}>{`${props.item.inputPins}`}</ColorSamp>
       <samp>, Output: </samp>
@@ -307,7 +307,7 @@ const LogWindow = (props: LogWindowProps) => {
 
   React.useEffect(() => {
     handleAutoScroll();
-  }, [items, props.selectedPoint]);  // Scroll when items or selected point change
+  }, [items, props.selectedPoint, isIntersecting]);  // Scroll when items or selected point change
 
   const toggleAutoscroll = React.useCallback(
     () => setAutoscroll(!autoscroll),
@@ -444,12 +444,11 @@ export default React.memo(LogWindow);
 
 interface ColorSampProps {
   color: string;
-  keepWhitespace?: boolean;
   children: React.ReactNode;
 }
 
 const ColorSamp = (props: ColorSampProps) => (
-  <samp style={{color: props.color, whiteSpace: props.keepWhitespace ? 'pre': 'normal'}}>{props.children}</samp>
+  <samp style={{color: props.color}}>{props.children}</samp>
 );
 
 export {LogItem}

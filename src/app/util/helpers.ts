@@ -33,9 +33,10 @@ export const mpsToFps = (value: number) => (
 export const kphToMph = (value: number) => value * 0.621371;
 
 export const displayMetersFeet = (value: number, useMetric: boolean, padStart: number = -1) => {
-  const converted = useMetric ? value : metersToFeet(value).toFixed(2);
-  const valueStr = (padStart > -1) ? `${converted}`.padStart(padStart, ' ') : `${converted}`;
-  return useMetric ? `${valueStr} m` : `${valueStr} ft`;
+  const useVal: number = useMetric ? value : metersToFeet(value);
+  const formatted = useVal.toFixed(2);
+  const padded = (padStart > -1) ? formatted.padStart(padStart, ' ') : formatted;
+  return useMetric ? `${padded} m` : `${padded} ft`;
 }
 
 export const displayMpsFps = (value: number, useMetric: boolean) => useMetric ? `${value} m/s` : `${metersToFeet(value).toFixed(2)} f/s`;

@@ -19,3 +19,7 @@
 .react-select > div {
     margin: -1px;
 }
+
+samp {
+    white-space: pre;
+}
