@@ -253,6 +253,7 @@ const FlightSelect = (props: FlightSelectProps) => {
         // Handle "choose by modem" case
         await props.fetchFlightsFrom(modem.name);
         setSelectedModem(modem);
+        props.clearSelectedFlight();  // Ensure no flight selected
       } else {
         // Handle "choose by date" case
         for (const flightRecord of props.modemsByDateList) {

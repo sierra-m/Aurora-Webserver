@@ -473,6 +473,7 @@ const Tracking = (props: TrackingProps) => {
   const clearSelectedFlight = React.useCallback(() => {
     setSelectedFlight(null);
     setSelectedPoint(null);
+    pinLogClear!();
   }, [])
 
   // TODO: move these into sub-component
