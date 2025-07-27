@@ -266,7 +266,7 @@ const LogWindow = (props: LogWindowProps) => {
       filteredItems = filteredItems.filter(item => filterOutputOptions!.find(option => option.value === item.outputPins));
     }
     return filteredItems;
-  }, [items])
+  }, [items, statusFilterActive, inputFilterActive, outputFilterActive])
 
   React.useEffect(() => {
     if (props.registerControls !== null) {
@@ -311,7 +311,7 @@ const LogWindow = (props: LogWindowProps) => {
 
   const selectLastPoint = React.useCallback(() => {
     props.selectPoint(items.length - 1);
-  }, [items]);
+  }, [props.selectPoint, items]);
 
   return (
     <Card className={'bg-body-secondary'}>
@@ -424,15 +424,23 @@ const LogWindow = (props: LogWindowProps) => {
             </Form>
           </Column>
           <Column style={{display: 'flex', justifyContent: 'right'}}>
-            Select Line:
-            <Button onClick={selectFirstPoint} variant={'primary'} className={'pl-5'}>
-              First
-              <i className="bi bi-arrow-up pl-3"></i>
-            </Button>
-            <Button onClick={selectLastPoint} variant={'primary'} className={'pl-5'}>
-              Last
-              <i className="bi bi-arrow-down pl-3"></i>
-            </Button>
+            <Row className={'align-items-center'}>
+              <Column xs={'auto'}>
+                Select Line:
+              </Column>
+              <Column xs={'auto'}>
+                <Button onClick={selectFirstPoint} variant={'primary'} className={'pl-3'}>
+                  First
+                  <i className="bi bi-arrow-up pl-3"></i>
+                </Button>
+              </Column>
+              <Column xs={'auto'}>
+                <Button onClick={selectLastPoint} variant={'primary'} className={'pl-3'}>
+                  Last
+                  <i className="bi bi-arrow-down pl-3"></i>
+                </Button>
+              </Column>
+            </Row>
           </Column>
         </Row>
       </Card.Footer>
