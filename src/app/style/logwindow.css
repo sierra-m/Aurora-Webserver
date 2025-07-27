@@ -22,4 +22,5 @@
 
 samp {
     white-space: pre;
+    overflow-x: scroll;
 }

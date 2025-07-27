@@ -44,6 +44,9 @@ import {selectDarkTheme} from "../util/themes.ts";
 import irisBalloon from "../images/IrisBalloon.png";
 import "../style/navigation.css";
 
+import githubMark from "../images/github-mark.svg";
+import githubMarkWhite from "../images/github-mark-white.svg";
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -223,6 +226,9 @@ const Navigation = (props: NavigationProps) => {
               </LinkContainer>
               <Nav.Link href={'https://spacegrant.montana.edu/borealis.html'} target={"_blank"}>About</Nav.Link>
               <Nav.Link onClick={handleShowContact}>Contact</Nav.Link>
+              <Nav.Link href={'https://github.com/sierra-m/Aurora-Webserver'} target={"_blank"}>
+                <img src={darkModeEnabled ? githubMarkWhite : githubMark} alt={"GitHub Logo"}/>
+              </Nav.Link>
             </Nav>
             <Form className="d-flex pe-4 ms-auto">
               <Form.Check
