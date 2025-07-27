@@ -349,7 +349,7 @@ const LogWindow = (props: LogWindowProps) => {
         </Container>
       </Card.Text>
       <Card.Footer>
-        <Row>
+        <Row className={'align-items-center'}>
           <Column xs={"auto"}>
             <Dropdown drop={'up'}>
               <Dropdown.Toggle
@@ -425,11 +425,11 @@ const LogWindow = (props: LogWindowProps) => {
           </Column>
           <Column style={{display: 'flex', justifyContent: 'right'}}>
             Select Line:
-            <Button onClick={selectFirstPoint} variant={'primary'}>
+            <Button onClick={selectFirstPoint} variant={'primary'} className={'pl-5'}>
               First
               <i className="bi bi-arrow-up pl-3"></i>
             </Button>
-            <Button onClick={selectLastPoint} variant={'primary'}>
+            <Button onClick={selectLastPoint} variant={'primary'} className={'pl-5'}>
               Last
               <i className="bi bi-arrow-down pl-3"></i>
             </Button>

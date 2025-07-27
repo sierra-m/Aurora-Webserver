@@ -106,14 +106,16 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
 
   return (
     <div>
-      {props.isActive &&
-        <div className={"pb-4"}>
-          <Badge bg={'success'}>Active Flight</Badge>
-          <Spinner animation={"border"} size="sm"/>
-        </div>}
-      {!props.isActive &&
-        <Badge bg={'primary'} className={"pb-4"}>Past Flight</Badge>}
       <Card.Text className={'pt-1'}>
+        {props.isActive &&
+          <div className={"pb-2"}>
+            <Badge bg={'success'}>Active Flight</Badge>
+            <Spinner animation={"border"} size="sm"/>
+          </div>}
+        {!props.isActive &&
+          <div className={"pb-2"}>
+            <Badge bg={'primary'}>Past Flight</Badge>
+          </div>}
         <Table borderless className={'pt-2'}>
           <tr>
             <td className={'pt-0 pb-1'}><strong>Modem:</strong></td>
