@@ -59,11 +59,7 @@ import FlightSelect from "./FlightSelect";
 
 import {Flight, FlightPoint, type FlightUid, type Position} from '../util/flight'
 import { getVelocity } from "../util/velocity";
-
-import balloonIcon from '../images/balloonIcon.png'
-import threeBarIcon from '../images/threeBarIcon.png'
-import clockIcon from '../images/clockIcon.png'
-import chartIcon from '../images/chartIcon.png'
+import useCheckMobileScreen from "../util/check-mobile.ts";
 
 import type {
   ActiveFlightRecord, FlightsResponse,
@@ -144,6 +140,8 @@ const Tracking = (props: TrackingProps) => {
 
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const isMobileScreen = useCheckMobileScreen();
 
   let activeInterval: Timer | null = null;
 
@@ -722,7 +720,7 @@ const Tracking = (props: TrackingProps) => {
       </Row>
       <Row>
         <Column lg={12} xl={12} md={12} sm={12} xs={12}>
-          <Card className={'my-3'} style={{height: '36rem'}}>
+          <Card className={'my-3'} style={{height: isMobileScreen ? '40rem' : '36rem'}}>
             <Card.Body style={{maxHeight: '530px'}}>
               <Tabs defaultActiveKey={'altitude'} id={'data-tabs'} variant={'pills'} fill>
                 <Tab eventKey={'altitude'} title={'Altitude'}>
@@ -776,6 +774,7 @@ const Tracking = (props: TrackingProps) => {
                 isDisabled={!selectedFlight}
                 darkModeEnabled={props.darkModeEnabled}
                 pagePreferences={props.pagePreferences}
+                selectPoint={selectPointByIndex}
               />
             </Card.Body>
           </Card>

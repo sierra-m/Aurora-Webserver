@@ -43,6 +43,7 @@ import type {FlightPoint} from "../util/flight.ts";
 import {selectDarkTheme} from "../util/themes.ts";
 import {displayMetersFeet} from "../util/helpers.ts";
 import type {PagePreferences} from "./Navigation.tsx";
+import Button from "react-bootstrap/Button";
 
 
 dayjs.extend(customParseFormat);
@@ -130,7 +131,9 @@ const LogItemComponent = (props: LogItemComponentProps) => {
       <samp>, Output: </samp>
       <ColorSamp color={(props.item.outputPins === null) ? themeColors.pinStateNull : themeColors.pinState}>{`${props.item.outputPins} `}</ColorSamp>
       {/* First letter caps */}
-      <Badge bg={statusVariant}>{statusFormatted.charAt(0).toUpperCase() + statusFormatted.slice(1)}</Badge>
+      <Badge bg={statusVariant} style={{whiteSpace: "nowrap", overflowX: "scroll"}}>
+        {statusFormatted.charAt(0).toUpperCase() + statusFormatted.slice(1)}
+      </Badge>
       {'\n'}
     </div>
   );
@@ -148,6 +151,7 @@ interface LogWindowProps {
   isDisabled: boolean;
   darkModeEnabled: boolean;
   pagePreferences: PagePreferences;
+  selectPoint: (index: number) => void;
 }
 
 interface StatusSelectOption {
@@ -303,7 +307,7 @@ const LogWindow = (props: LogWindowProps) => {
         scrollToBottom();
       }
     }
-  }, [autoscroll, isIntersecting]);
+  }, [autoscroll, isIntersecting, props.selectedPoint]);
 
   React.useEffect(() => {
     handleAutoScroll();
@@ -321,6 +325,14 @@ const LogWindow = (props: LogWindowProps) => {
       ...selectDarkTheme
     },
   } : theme), [props.darkModeEnabled])
+
+  const selectFirstPoint = React.useCallback(() => {
+    props.selectPoint(0);
+  }, [props.selectPoint]);
+
+  const selectLastPoint = React.useCallback(() => {
+    props.selectPoint(items.length - 1);
+  }, [items]);
 
   return (
     <Card className={'bg-body-secondary'}>
@@ -357,15 +369,13 @@ const LogWindow = (props: LogWindowProps) => {
           </Card>
         </Container>
       </Card.Text>
-      {/* Element used by intersection observer  */}
-      <div ref={ref}/>
       <Card.Footer>
         <Row>
           <Column xs={"auto"}>
             <Dropdown drop={'up'}>
               <Dropdown.Toggle
                 disabled={props.isDisabled}
-                variant="outline-primary"
+                variant="primary"
                 id="log-window-filter-dropdown"
                 size={'sm'}
                 className={'pr-1'}
@@ -423,7 +433,7 @@ const LogWindow = (props: LogWindowProps) => {
               )}
             </Dropdown>
           </Column>
-          <Column>
+          <Column xs={"auto"}>
             <Form className={'align-middle'}>
               <Form.Check
                 type={"checkbox"}
@@ -434,8 +444,21 @@ const LogWindow = (props: LogWindowProps) => {
               />
             </Form>
           </Column>
+          <Column style={{display: 'flex', justifyContent: 'right'}}>
+            Select Line:
+            <Button onClick={selectFirstPoint} variant={'primary'}>
+              First
+              <i className="bi bi-arrow-up pl-3"></i>
+            </Button>
+            <Button onClick={selectLastPoint} variant={'primary'}>
+              Last
+              <i className="bi bi-arrow-down pl-3"></i>
+            </Button>
+          </Column>
         </Row>
       </Card.Footer>
+      {/* Element used by intersection observer  */}
+      <div ref={ref}/>
     </Card>
   )
 }
