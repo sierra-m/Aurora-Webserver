@@ -278,7 +278,7 @@ const Navigation = (props: NavigationProps) => {
             </Column>
             <Column style={{display: 'flex', justifyContent: 'right'}}>
               <OverlayTrigger
-                placement={"left"}
+                placement={"bottom-start"}
                 overlay={renderTimezoneResetTooltip}
               >
                 <Button variant={"outline-primary"} onClick={handleResetTimeZone}>
