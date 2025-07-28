@@ -21,6 +21,6 @@
 }
 
 .stats-view {
-    max-height: 20rem;
+    max-height: 15rem;
     overflow-y: auto;
 }

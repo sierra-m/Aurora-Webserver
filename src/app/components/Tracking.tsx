@@ -616,7 +616,7 @@ const Tracking = (props: TrackingProps) => {
                 <i className="bi bi-graph-up-arrow me-2"></i>
                 Flight Data
               </Accordion.Header>
-              <Accordion.Body style={{overflowY: 'auto', height: '45vh', maxHeight: '280px'}}>
+              <Accordion.Body style={{overflowY: 'auto', height: '55vh', maxHeight: '20rem'}}>
                 <h2 className={'mb-1'}>Selected Flight</h2>
                 {selectedFlight === null && <Card.Text>Please select a flight.</Card.Text>}
                 {(selectedFlight && selectedPoint) &&

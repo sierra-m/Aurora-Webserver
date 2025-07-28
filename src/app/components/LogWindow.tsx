@@ -98,9 +98,11 @@ const LogItemComponent = (props: LogItemComponentProps) => {
     pinState: '#006dbd'
   };
   // Body bg color will take precedence, so remove this if selected, falling back to inline
-  const selectedStyle = { backgroundColor: themeColors.selected };
   return (
-    <div style={selectedStyle} className={props.selected ? '' : 'bg-body'}>
+    <div
+      style={{ backgroundColor: themeColors.selected, whiteSpace: "nowrap"}}
+      className={props.selected ? '' : 'bg-body'}
+    >
       <samp>[</samp>
       <ColorSamp color={themeColors.time}>{dayjs.utc(props.item.timestamp, 'X').format('YYYY-MM-DD HH:mm:ss')}</ColorSamp>
       <samp>]</samp>
@@ -320,7 +322,7 @@ const LogWindow = (props: LogWindowProps) => {
         <Container className={'log-container'}>
           <Card className={'log-card'}>
             <Card.Text>
-              <Container className={'log-container'}>
+              <Container className={'log-container'} style={{overflowX: 'scroll'}}>
                 {((statusFilterActive() || inputFilterActive() || outputFilterActive())
                   ? applyFilters()
                   : items).map((item, index) => {
