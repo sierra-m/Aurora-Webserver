@@ -429,13 +429,23 @@ const LogWindow = (props: LogWindowProps) => {
                 Select Line:
               </Column>
               <Column xs={'auto'}>
-                <Button onClick={selectFirstPoint} variant={'primary'} className={'pl-3'}>
+                <Button
+                  disabled={props.isDisabled}
+                  onClick={selectFirstPoint}
+                  variant={'primary'}
+                  className={'pl-3'}
+                >
                   First
                   <i className="bi bi-arrow-up pl-3"></i>
                 </Button>
               </Column>
               <Column xs={'auto'}>
-                <Button onClick={selectLastPoint} variant={'primary'} className={'pl-3'}>
+                <Button
+                  disabled={props.isDisabled}
+                  onClick={selectLastPoint}
+                  variant={'primary'}
+                  className={'pl-3'}
+                >
                   Last
                   <i className="bi bi-arrow-down pl-3"></i>
                 </Button>
