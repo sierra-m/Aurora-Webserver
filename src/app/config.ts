@@ -32,3 +32,6 @@ export const MINIMUM_SATELLITES = 5;
 export const UPDATE_DELAY = 5000;
 
 export const ACTIVE_DELAY = 30000;
+
+// Center over middle of U.S.
+export const DEFAULT_MAP_CENTER = {lat: 39.833333, lng: -98.583333};

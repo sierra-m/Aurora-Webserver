@@ -50,6 +50,8 @@ import {mapDarkTheme} from "../util/themes.ts";
 import Image from "react-bootstrap/Image";
 import Badge from "react-bootstrap/Badge";
 
+import {DEFAULT_MAP_CENTER} from "../config.ts";
+
 
 const balloonColors = [
   '#0000FF',
@@ -169,25 +171,27 @@ const MapController = React.memo((props: MapControllerProps) => {
 
   React.useEffect(() => {
     if (!map) return;
-
     console.log(`Captured map!`);
   }, [map]);
 
-  // Pan map when selected point changes
-  React.useEffect(() => {
-    if (props.selectedPoint) {
-      if (map) {
-        map.panTo(props.selectedPoint.coords());
-      }
+  const handlePointChange = React.useCallback(() => {
+    if (map) {
+      map.panTo(props.selectedPoint ? props.selectedPoint.coords() : DEFAULT_MAP_CENTER);
     }
-  }, [props.selectedPoint]);
+  }, [map, props.selectedPoint]);
+
+  // Pan map when selected point changes
+  React.useEffect(handlePointChange, [props.selectedPoint]);
+
+  const handleFlightChange = React.useCallback(() => {
+    if (map) {
+      map.setZoom(props.selectedFlight ? 12 : 4);
+    }
+  }, [map, props.selectedFlight]);
 
   // Zoom map when flight selection changes
-  React.useEffect(() => {
-    if (map) {
-      map.setZoom(12);
-    }
-  }, [props.selectedFlight]);
+  React.useEffect(handleFlightChange, [props.selectedFlight]);
+
   return <></>
 });
 
@@ -208,43 +212,8 @@ interface TrackerMapProps {
 
 function TrackerMap (props: TrackerMapProps) {
 
-  // const { isLoaded } = useJsApiLoader({
-  //   id: 'google-map-script',
-  //   googleMapsApiKey: GOOGLE_MAPS_KEY as string
-  // })
-
-  // local map object created in render
-  //const [map, setMap] = React.useState<google.maps.Map | null>(null);
-
-  //const map = useMap('tracker-google-map');
-
   // holds close function for last opened info window
   const [lastWindowCloser, setLastWindowCloser] = React.useState<CloseMarkerFunc | null>(null);
-
-  // React.useEffect(() => {
-  //   if (!map) return;
-  //
-  //   console.log(`Captured map!`);
-  // }, [map]);
-
-  // Map load callback
-  // const onLoad = React.useCallback(function callback(map: google.maps.Map) {
-  //   map.panTo({lat: 39.833333, lng: -98.583333});
-  //
-  //   setMap(map); // save created map in local hook object
-  // }, [])
-
-  // React.useEffect(() => {
-  //   if (props.selectedPoint) {
-  //     map?.panTo(props.selectedPoint.coords());
-  //     map?.setZoom(4);
-  //   }
-  // }, [props.selectedPoint]);
-
-  // Map unmount callback
-  // const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
-  //   setMap(null)
-  // }, [])
 
   /*
   *   [ Closes Last Opened InfoWindow ]
@@ -290,8 +259,7 @@ function TrackerMap (props: TrackerMapProps) {
         mapId={props.darkModeEnabled ? GOOGLE_MAP_NIGHT_ID : GOOGLE_MAP_ID}
         defaultZoom={(props.defaultCenter && 11) || 4}
         style={{height: '85vh', maxHeight: '530px'}}
-        //styles={props.darkModeEnabled ? mapDarkTheme : []}
-        defaultCenter={{lat: 39.833333, lng: -98.583333}}
+        defaultCenter={DEFAULT_MAP_CENTER}
       >
         {props.startPosition &&
           <InfoMarker
