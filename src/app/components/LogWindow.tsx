@@ -88,7 +88,6 @@ interface LogItemComponentProps {
   selected: boolean;
   useDarkTheme: boolean;
   useMetric: boolean;
-  selectPoint: (index: number) => void;
 }
 
 const LogItemComponent = (props: LogItemComponentProps) => {
@@ -109,16 +108,11 @@ const LogItemComponent = (props: LogItemComponentProps) => {
   };
   const indexFormatted = `${props.item.index}`.padStart(5);
 
-  const handleClick = React.useCallback(() => {
-    props.selectPoint(props.item.index);
-  }, [props.selectPoint, props.item]);
-
   // Body bg color will take precedence, so remove this if selected, falling back to inline
   return (
     <div
       style={{ backgroundColor: themeColors.selected, whiteSpace: "nowrap"}}
       className={props.selected ? '' : 'bg-body'}
-      onClick={handleClick}
     >
       <samp>{indexFormatted} [</samp>
       <ColorSamp color={themeColors.time}>{dayjs.utc(props.item.timestamp, 'X').format('YYYY-MM-DD HH:mm:ss')}</ColorSamp>
@@ -229,15 +223,17 @@ const LogWindow = (props: LogWindowProps) => {
     outChanged = (lastOutputPins !== newOut);
     lastOutputPins = newOut;
 
-    const logItem = new LogItem(
-      items.length,
-      timestamp,
-      (inChanged || outChanged),
-      newIn,
-      newOut,
-      altitude
-    );
-    setItems((items) => ([...items, logItem]));
+    setItems((items) => {
+      const logItem = new LogItem(
+        items.length,
+        timestamp,
+        (inChanged || outChanged),
+        newIn,
+        newOut,
+        altitude
+      );
+      return [...items, logItem];
+    });
   };
 
   //[lastInputPins, lastOutputPins, items]
@@ -348,17 +344,20 @@ const LogWindow = (props: LogWindowProps) => {
                     ? props.selectedPoint.timestamp === item.timestamp
                     : false;
                   return (
-                    <div ref={el => {
-                      if (selected) {
-                        selectedItemElementRef.current = el;
-                      }
-                    }} key={index}>
+                    <div
+                      ref={el => {
+                        if (selected) {
+                          selectedItemElementRef.current = el;
+                        }
+                      }}
+                      key={index}
+                      onClick={() => props.selectPoint(item.index)}
+                    >
                       <LogItemComponent
                         item={item}
                         selected={selected}
                         useDarkTheme={props.darkModeEnabled}
                         useMetric={props.pagePreferences.useMetric}
-                        selectPoint={props.selectPoint}
                       />
                     </div>
                   )
