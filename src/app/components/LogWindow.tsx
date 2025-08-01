@@ -52,6 +52,7 @@ dayjs.extend(utc);
 type UnixTimestamp = number;
 
 class LogItem {
+  index: number;
   timestamp: UnixTimestamp;
   status: string;
   changed: boolean;
@@ -59,7 +60,15 @@ class LogItem {
   outputPins: number;
   altitude: number;
 
-  constructor (timestamp: UnixTimestamp, changed: boolean, inputPins: number, outputPins: number, altitude: number) {
+  constructor (
+    index: number,
+    timestamp: UnixTimestamp,
+    changed: boolean,
+    inputPins: number,
+    outputPins: number,
+    altitude: number
+  ) {
+    this.index = index;
     this.timestamp = timestamp;
     this.changed = changed;
     this.status = changed ? "changed" : "unchanged";
@@ -79,6 +88,7 @@ interface LogItemComponentProps {
   selected: boolean;
   useDarkTheme: boolean;
   useMetric: boolean;
+  selectPoint: (index: number) => void;
 }
 
 const LogItemComponent = (props: LogItemComponentProps) => {
@@ -97,16 +107,23 @@ const LogItemComponent = (props: LogItemComponentProps) => {
     pinStateNull: '#7c5100',
     pinState: '#006dbd'
   };
+  const indexFormatted = `${props.item.index}`.padStart(5);
+
+  const handleClick = React.useCallback(() => {
+    props.selectPoint(props.item.index);
+  }, [props.selectPoint, props.item]);
+
   // Body bg color will take precedence, so remove this if selected, falling back to inline
   return (
     <div
       style={{ backgroundColor: themeColors.selected, whiteSpace: "nowrap"}}
       className={props.selected ? '' : 'bg-body'}
+      onClick={handleClick}
     >
-      <samp>[</samp>
+      <samp>{indexFormatted} [</samp>
       <ColorSamp color={themeColors.time}>{dayjs.utc(props.item.timestamp, 'X').format('YYYY-MM-DD HH:mm:ss')}</ColorSamp>
       <samp>]</samp>
-      <ColorSamp color={themeColors.altitude}>{displayMetersFeet(props.item.altitude, props.useMetric, 6)}</ColorSamp>
+      <ColorSamp color={themeColors.altitude}>{displayMetersFeet(props.item.altitude, props.useMetric, 10)}</ColorSamp>
       <samp> | Input: </samp>
       <ColorSamp color={(props.item.inputPins === null) ? themeColors.pinStateNull : themeColors.pinState}>{`${props.item.inputPins}`}</ColorSamp>
       <samp>, Output: </samp>
@@ -213,6 +230,7 @@ const LogWindow = (props: LogWindowProps) => {
     lastOutputPins = newOut;
 
     const logItem = new LogItem(
+      items.length,
       timestamp,
       (inChanged || outChanged),
       newIn,
@@ -340,6 +358,7 @@ const LogWindow = (props: LogWindowProps) => {
                         selected={selected}
                         useDarkTheme={props.darkModeEnabled}
                         useMetric={props.pagePreferences.useMetric}
+                        selectPoint={props.selectPoint}
                       />
                     </div>
                   )
