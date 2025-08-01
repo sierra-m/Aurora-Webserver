@@ -74,8 +74,12 @@ const AltitudeChart = (props: AltitudeChartProps) => {
     (context.dataIndex === props.selectedPointIndex) ? selectedPointBorderColor : defaultPointBorderColor
   ), [props.selectedPointIndex]);
 
+  const getPointBorderWidth = React.useCallback((context: ScriptableContext<'line'>) => (
+    (context.dataIndex === props.selectedPointIndex) ? 1 : 4
+  ), [props.selectedPointIndex]);
+
   const getPointRadius = React.useCallback((context: ScriptableContext<'line'>) => (
-    (context.dataIndex === props.selectedPointIndex) ? 10 : 1
+    (context.dataIndex === props.selectedPointIndex) ? 8 : 1
   ), [props.selectedPointIndex]);
 
   const [lineData, setLineData] = useState<ChartData<'line'>>({
@@ -93,7 +97,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
         borderJoinStyle: "miter",
         pointBorderColor: getPointBorderColor,
         pointBackgroundColor: "rgb(255,232,247)",
-        pointBorderWidth: 4,
+        pointBorderWidth: getPointBorderWidth,
         pointHoverRadius: 2,
         pointHoverBackgroundColor: "rgb(53, 166, 232)",
         pointHoverBorderColor: "rgba(188, 216, 220, 1)",
@@ -211,8 +215,8 @@ const AltitudeChart = (props: AltitudeChartProps) => {
           borderDashOffset: 0.0,
           borderJoinStyle: "miter",
           pointBorderColor: getPointBorderColor,
-          pointBackgroundColor: "rgb(255,232,247)",
-          pointBorderWidth: 4,
+          pointBackgroundColor: "rgba(255,232,247, 0.5)",
+          pointBorderWidth: getPointBorderWidth,
           pointHoverRadius: 2,
           pointHoverBackgroundColor: "rgb(53, 166, 232)",
           pointHoverBorderColor: "rgba(188, 216, 220, 1)",
