@@ -175,6 +175,8 @@ const Tracking = (props: TrackingProps) => {
   // Selected point in a flight, represented by a balloon icon when in flight view
   const [selectedPoint, setSelectedPoint] = React.useState<FlightPoint | null>(null);
 
+  const [selectedPointIndex, setSelectedPointIndex] = React.useState<number>(0);
+
   // Change this to anything to redraw the altitude chart
   // TODO: is this even needed??
   const [chartRedrawKey, setChartRedrawKey] = React.useState<number | null>(null);
@@ -283,6 +285,7 @@ const Tracking = (props: TrackingProps) => {
           setAnimateAltitudeChart(false);
           setGroundElevation(elevation);
           setSelectedPoint(updateFlight.lastPoint());
+          setSelectedPointIndex(updateFlight.data.length - 1);
         }
       }
     } catch (e) {
@@ -338,6 +341,7 @@ const Tracking = (props: TrackingProps) => {
       setNewFlightLoaded(true);
       setSelectedFlight(flight);
       setSelectedPoint(selected);
+      setSelectedPointIndex(0);
       setChartRedrawKey(Math.random());
       setLandingPrediction(prediction);
       setSelectedFlightIsActive(active);
@@ -447,6 +451,7 @@ const Tracking = (props: TrackingProps) => {
         //console.log(zone);
       }
       setSelectedPoint(point);
+      setSelectedPointIndex(index);
       setLandingZone(zone);
     }
   }, [selectedFlight, calcLandingPrediction, landingPrediction]);
@@ -473,6 +478,7 @@ const Tracking = (props: TrackingProps) => {
   const clearSelectedFlight = React.useCallback(() => {
     setSelectedFlight(null);
     setSelectedPoint(null);
+    setSelectedPointIndex(0);
     pinLogClear!();
   }, [])
 
@@ -668,6 +674,7 @@ const Tracking = (props: TrackingProps) => {
                     selectPoint={selectPointByIndex}
                     useAnimation={animateAltitudeChart}
                     pagePreferences={props.pagePreferences}
+                    selectedPointIndex={selectedPointIndex}
                   />
                 </Tab>
                 <Tab eventKey={'wind-layers'} title={'Wind Layers'}>

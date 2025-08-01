@@ -28,7 +28,7 @@ import { MDBContainer } from 'mdbreact'
 import zoomPlugin from 'chartjs-plugin-zoom'
 import Button from 'react-bootstrap/Button'
 import Chart, {
-  type PluginOptionsByType
+  type PluginOptionsByType, type ScriptableContext
 } from "chart.js/auto";
 import {CategoryScale, type ChartData, type TooltipItem, type ChartOptions} from "chart.js";
 import type {PagePreferences} from "./Navigation.tsx";
@@ -60,11 +60,19 @@ interface AltitudeChartProps {
   selectPoint: (index: number) => void;
   useAnimation: boolean;
   pagePreferences: PagePreferences;
+  selectedPointIndex: number;
 }
 
 const AltitudeChart = (props: AltitudeChartProps) => {
 
   const isMobileScreen = useCheckMobileScreen();
+
+  const defaultPointBorderColor = "rgb(73,46,57)";
+  const selectedPointBorderColor = "rgb(255,0,105)";
+
+  const getPointBorderColor = React.useCallback((context: ScriptableContext<'line'>) => (
+    (context.dataIndex === props.selectedPointIndex) ? selectedPointBorderColor : defaultPointBorderColor
+  ), [props.selectedPointIndex]);
 
   const [lineData, setLineData] = useState<ChartData<'line'>>({
     labels: props.labels,
@@ -79,7 +87,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
         borderDash: [],
         borderDashOffset: 0.0,
         borderJoinStyle: "miter",
-        pointBorderColor: "rgb(205, 130,1 58)",
+        pointBorderColor: getPointBorderColor,
         pointBackgroundColor: "rgb(255,232,247)",
         pointBorderWidth: 4,
         pointHoverRadius: 2,
@@ -198,7 +206,7 @@ const AltitudeChart = (props: AltitudeChartProps) => {
           borderDash: [],
           borderDashOffset: 0.0,
           borderJoinStyle: "miter",
-          pointBorderColor: "rgb(205, 130,1 58)",
+          pointBorderColor: getPointBorderColor,
           pointBackgroundColor: "rgb(255,232,247)",
           pointBorderWidth: 4,
           pointHoverRadius: 2,
