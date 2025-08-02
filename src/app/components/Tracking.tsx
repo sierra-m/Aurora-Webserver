@@ -77,6 +77,7 @@ import {UPDATE_DELAY, ACTIVE_DELAY} from "../config.ts";
 import type {PagePreferences} from "./Navigation.tsx";
 import {metersToFeet} from "../util/helpers.ts";
 import Badge from "react-bootstrap/Badge";
+import type {AccordionEventKey} from "react-bootstrap/AccordionContext";
 
 // @ts-ignore
 window.Buffer = Buffer;
@@ -212,6 +213,8 @@ const Tracking = (props: TrackingProps) => {
 
   // Indicates whether new flight load steps should take place
   const [newFlightLoaded, setNewFlightLoaded] = React.useState<boolean>(false);
+
+  const [accordionActiveKey, setAccordionActiveKey] = React.useState<AccordionEventKey>('active-flights');
 
   // Indicates whether a new flight update interval should be created
   let enableUpdates: boolean = false;
@@ -506,6 +509,17 @@ const Tracking = (props: TrackingProps) => {
     setDragCoefficient(parseFloat(event.target.value));
   }, []);
 
+  const onAccordionSelect = React.useCallback((eventKey: AccordionEventKey, e: React.SyntheticEvent<unknown>) => {
+    setAccordionActiveKey(eventKey);
+  }, []);
+
+  // Open flight data in accordion when selected flight changes
+  React.useEffect(() => {
+    if (selectedFlight) {
+      setAccordionActiveKey('flight-data');
+    }
+  }, [selectedFlight]);
+
   // Propagate preferred tz
   React.useEffect(() => {
     dayjs.tz.setDefault(props.pagePreferences.timeZone);
@@ -540,16 +554,17 @@ const Tracking = (props: TrackingProps) => {
   return (
     <Container>
       <Row className={'mt-3'}>
-        <Column>
+        <Column className={'d-inline-block align-bottom'}>
           <h1 className={'d-inline-block align-bottom'}>
             Aurora Tracker
           </h1>
+          {'  '}
           <img
             src={irisBalloon}
             height={50}
             width={50}
             alt={'Aurora Flight Tracker Icon'}
-            className={'d-inline-block ml-3 align-bottom'}
+            className={'d-inline-block align-bottom'}
           />
         </Column>
       </Row>
@@ -584,27 +599,7 @@ const Tracking = (props: TrackingProps) => {
             </>}
         </Column>
         <Column className={'my-2'}>
-          <Accordion defaultActiveKey={'flight-select'}>
-            <Accordion.Item eventKey={'flight-select'}>
-              <Accordion.Header>
-                <i className="bi bi-clock-history me-2"></i>
-                Past Flights
-              </Accordion.Header>
-              <Accordion.Body>
-                <FlightSelect
-                  modemList={modemList}
-                  flightDateList={flightList}
-                  modemsByDateList={modemsByDateList}
-                  fetchFlightsFrom={fetchFlightsFrom}
-                  fetchModemsByDate={fetchModemsByDate}
-                  fetchFlight={fetchFlight}
-                  clearFlightDateList={clearFlightDateList}
-                  clearModemsByDateList={clearModemsByDateList}
-                  clearSelectedFlight={clearSelectedFlight}
-                  darkModeEnabled={props.darkModeEnabled}
-                />
-              </Accordion.Body>
-            </Accordion.Item>
+          <Accordion activeKey={accordionActiveKey} onSelect={onAccordionSelect}>
             <Accordion.Item eventKey={'active-flights'}>
               <Accordion.Header>
                 <i className="bi bi-calendar2-check me-2"></i>
@@ -628,12 +623,32 @@ const Tracking = (props: TrackingProps) => {
                 }
               </Accordion.Body>
             </Accordion.Item>
+            <Accordion.Item eventKey={'flight-select'}>
+              <Accordion.Header>
+                <i className="bi bi-clock-history me-2"></i>
+                Past Flights
+              </Accordion.Header>
+              <Accordion.Body>
+                <FlightSelect
+                  modemList={modemList}
+                  flightDateList={flightList}
+                  modemsByDateList={modemsByDateList}
+                  fetchFlightsFrom={fetchFlightsFrom}
+                  fetchModemsByDate={fetchModemsByDate}
+                  fetchFlight={fetchFlight}
+                  clearFlightDateList={clearFlightDateList}
+                  clearModemsByDateList={clearModemsByDateList}
+                  clearSelectedFlight={clearSelectedFlight}
+                  darkModeEnabled={props.darkModeEnabled}
+                />
+              </Accordion.Body>
+            </Accordion.Item>
             <Accordion.Item eventKey={'flight-data'}>
               <Accordion.Header>
                 <i className="bi bi-graph-up-arrow me-2"></i>
                 Flight Data
               </Accordion.Header>
-              <Accordion.Body style={{overflowY: 'auto', height: '55vh', maxHeight: '25rem'}}>
+              <Accordion.Body style={{overflowY: 'auto', height: '55vh', maxHeight: '26rem'}}>
                 <h2 className={'mb-1'}>Selected Flight</h2>
                 {selectedFlight === null && <Card.Text>Please select a flight.</Card.Text>}
                 {(selectedFlight && selectedPoint) &&

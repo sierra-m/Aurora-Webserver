@@ -214,7 +214,7 @@ const Navigation = (props: NavigationProps) => {
                 alt={"MSU Borealis Tracker logo"}
               />
             </Link>
-            {' '}
+            {'  '}
             <Link to={'/'}>
               MSU Borealis
             </Link>
