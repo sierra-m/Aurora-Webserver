@@ -237,6 +237,7 @@ const Navigation = (props: NavigationProps) => {
               </LinkContainer>
               <Nav.Link href={'https://spacegrant.montana.edu/borealis.html'} target={"_blank"}>About</Nav.Link>
               <Nav.Link onClick={handleShowContact}>Contact</Nav.Link>
+              <Nav.Link onClick={handleShowHelp}>Help</Nav.Link>
               <Nav.Link href={'https://github.com/sierra-m/Aurora-Webserver'} target={"_blank"}>
                 <img
                   src={darkModeEnabled ? githubMarkWhite : githubMark}
@@ -245,7 +246,6 @@ const Navigation = (props: NavigationProps) => {
                   height={16}
                 />
               </Nav.Link>
-              <Nav.Link onClick={handleShowHelp}>Help</Nav.Link>
             </Nav>
             <Form className="d-flex pe-4 ms-auto">
               <Form.Check

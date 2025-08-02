@@ -553,7 +553,7 @@ const Tracking = (props: TrackingProps) => {
 
   return (
     <Container>
-      <Row className={'mt-3 d-flex align-items-end'}>
+      <Row className={'mt-3'}>
         <Column>
           <h1>
             Aurora Flight Tracker
