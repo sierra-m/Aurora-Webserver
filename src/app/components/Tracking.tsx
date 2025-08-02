@@ -541,14 +541,16 @@ const Tracking = (props: TrackingProps) => {
     <Container>
       <Row className={'mt-3'}>
         <Column>
-          <h1>Aurora Tracker</h1>
-          <img
-            src={irisBalloon}
-            height={40}
-            width={40}
-            alt={'Aurora Flight Tracker Icon'}
-            className={'pl-2'}
-          />
+          <h1>
+            Aurora Tracker
+            <img
+              src={irisBalloon}
+              height={40}
+              width={40}
+              alt={'Aurora Flight Tracker Icon'}
+              className={'ml-2'}
+            />
+          </h1>
         </Column>
       </Row>
       <Row>
@@ -573,7 +575,7 @@ const Tracking = (props: TrackingProps) => {
           {selectedFlight &&
             <>
               <Alert variant={'secondary'} className={'mt-1'}>
-                Clicking a marker will show its position. Clicking a point on the line changes the selected point
+                Clicking a marker will show its position. Clicking a point on the line changes the selected point.
               </Alert>
               <a href={'/'}
                  className={'text-secondary link-offset-2 link-underline-opacity-50 link-underline-opacity-100-hover'}>
