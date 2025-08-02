@@ -210,9 +210,9 @@ const Navigation = (props: NavigationProps) => {
             <Link to={'/'}>
               <img
                 src={msgcIcon}
-                className={"d-inline-block align-middle"}
+                className={"d-inline-block align-middle mr-3"}
                 alt={"MSU Borealis Tracker logo"}
-              />{' '}
+              />
               MSU Borealis
             </Link>
           </Navbar.Brand>

@@ -545,10 +545,10 @@ const Tracking = (props: TrackingProps) => {
             Aurora Tracker
             <img
               src={irisBalloon}
-              height={40}
-              width={40}
+              height={60}
+              width={60}
               alt={'Aurora Flight Tracker Icon'}
-              className={'ml-2'}
+              className={'ml-5 align-top'}
             />
           </h1>
         </Column>
