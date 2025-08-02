@@ -213,6 +213,9 @@ const Navigation = (props: NavigationProps) => {
                 className={"d-inline-block align-middle mr-3"}
                 alt={"MSU Borealis Tracker logo"}
               />
+            </Link>
+            {' '}
+            <Link to={'/'}>
               MSU Borealis
             </Link>
           </Navbar.Brand>
