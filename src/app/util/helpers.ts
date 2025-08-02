@@ -39,9 +39,15 @@ export const displayMetersFeet = (value: number, useMetric: boolean, padStart: n
   return useMetric ? `${padded} m` : `${padded} ft`;
 }
 
-export const displayMpsFps = (value: number, useMetric: boolean) => useMetric ? `${value} m/s` : `${metersToFeet(value).toFixed(2)} f/s`;
+export const displayMpsFps = (value: number, useMetric: boolean) => {
+  const useValue = (useMetric ? value : metersToFeet(value)).toFixed(2);
+  return useMetric ? `${useValue} m/s` : `${useValue} f/s`;
+};
 
-export const displayKphMph = (value: number, useMetric: boolean) => useMetric ? `${value} kph` : `${kphToMph(value).toFixed(2)} mph`;
+export const displayKphMph = (value: number, useMetric: boolean) => {
+  const useValue = (useMetric ? value : kphToMph(value)).toFixed(2);
+  return useMetric ? `${useValue} kph` : `${useValue} mph`;
+}
 
 // Calculates the weighted average
 export const weightedAverage = (current: number, count: number, toAdd: number) => {

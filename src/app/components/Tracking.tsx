@@ -555,17 +555,17 @@ const Tracking = (props: TrackingProps) => {
     <Container>
       <Row className={'mt-3 d-flex align-items-end'}>
         <Column>
-          <h1 className={'d-inline-block align-bottom'}>
+          <h1>
             Aurora Flight Tracker
+            {'  '}
+            <img
+              src={irisBalloon}
+              height={50}
+              width={50}
+              alt={'Aurora Flight Tracker Icon'}
+              className={'d-inline-block align-text-bottom'}
+            />
           </h1>
-          {'  '}
-          <img
-            src={irisBalloon}
-            height={50}
-            width={50}
-            alt={'Aurora Flight Tracker Icon'}
-            className={'d-inline-block align-bottom'}
-          />
         </Column>
       </Row>
       <Row>

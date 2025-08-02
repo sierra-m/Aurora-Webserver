@@ -90,6 +90,8 @@ const Navigation = (props: NavigationProps) => {
 
   const [timeZoneOption, setTimeZoneOption] = React.useState<TimezoneSelectOption | null>(defaultTimeZone);
 
+  const [showHelp, setShowHelp] = React.useState<boolean>(false);
+
   const navExpandedToggle = React.useCallback((expanded: boolean) => {
     setNavExpanded(expanded);
   }, []);
@@ -150,6 +152,14 @@ const Navigation = (props: NavigationProps) => {
 
   const handleCloseContact = React.useCallback(() => {
     setShowContact(false);
+  }, []);
+
+  const handleShowHelp = React.useCallback(() => {
+    setShowHelp(true);
+  }, []);
+
+  const handleCloseHelp = React.useCallback(() => {
+    setShowHelp(false);
   }, []);
 
   // Propagate page pref changes up
@@ -235,6 +245,7 @@ const Navigation = (props: NavigationProps) => {
                   height={16}
                 />
               </Nav.Link>
+              <Nav.Link onClick={handleShowHelp}>Help</Nav.Link>
             </Nav>
             <Form className="d-flex pe-4 ms-auto">
               <Form.Check
@@ -316,6 +327,14 @@ const Navigation = (props: NavigationProps) => {
         <Modal.Footer>
           <Button variant={'secondary'} size={"sm"} onClick={handleCloseContact}>Close</Button>
         </Modal.Footer>
+      </Modal>
+      <Modal show={showHelp} onHide={handleCloseHelp} centered>
+        <Modal.Header>
+          <Modal.Title>Help</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          help
+        </Modal.Body>
       </Modal>
     </>
   )
