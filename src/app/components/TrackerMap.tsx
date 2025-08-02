@@ -35,7 +35,6 @@ import {
 import {Polyline} from "./Polyline.tsx";
 import {Circle} from "./Circle.tsx";
 
-import greenBalloon from '../images/greenBalloon.png'
 import parachuteIcon from '../images/parachuteIcon45.png'
 import greenIcon from '../images/greenIcon.png'
 import orangeIcon from '../images/orangeIcon.png'

@@ -29,9 +29,7 @@ import {BrowserRouter as Router, Link, Route, Routes} from "react-router-dom"
 import Navigation, {defaultPreferences, type PagePreferences} from "./components/Navigation.jsx"
 import Tracking from './components/Tracking.jsx'
 
-import MainPage from './components/MainPage'
 import Error404 from './components/Error404'
-
 
 const App = () => {
 
