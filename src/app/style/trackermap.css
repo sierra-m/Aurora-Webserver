@@ -1,0 +1,16 @@
+
+.bobbing-element:hover {
+    animation: gentleBob 2s infinite alternate ease-in-out;
+}
+
+@keyframes gentleBob {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px); /* Adjust this value for desired bobbing height */
+    }
+    100% {
+        transform: translateY(0);
+    }
+}

@@ -51,6 +51,8 @@ import Badge from "react-bootstrap/Badge";
 
 import {DEFAULT_MAP_CENTER} from "../config.ts";
 
+import '../style/trackermap.css'
+
 
 const balloonColors = [
   '#0000FF',
@@ -155,7 +157,7 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
           <strong>Altitude:</strong> {props.altitude}
         </p>
       </InfoWindow>}
-      <Image src={props.icon} width={props.width || 34} height={props.height || 48}/>
+      <Image src={props.icon} width={props.width || 34} height={props.height || 48} className={'bobbing-element'}/>
     </AdvancedMarker>
   );
 })
@@ -315,6 +317,7 @@ function TrackerMap (props: TrackerMapProps) {
               //   scaledSize: new google.maps.Size(34, 48)
               // }}
               onClick={partial.callback}
+              className={'bobbing-element'}
               //modemName={partial.modem.name}
             >
               <div className={'text-center'}>
@@ -335,6 +338,7 @@ function TrackerMap (props: TrackerMapProps) {
               //   scaledSize: new google.maps.Size(34, 48)
               // }}
               onClick={flight.callback}
+              className={'bobbing-element'}
             >
               <div className={'text-center'}>
                 <h6>
