@@ -61,6 +61,8 @@ import {Flight, FlightPoint, type FlightUid, type Position} from '../util/flight
 import { getVelocity } from "../util/velocity";
 import useCheckMobileScreen from "../util/check-mobile.ts";
 
+import irisBalloon from "../images/IrisBalloon.png";
+
 import type {
   ActiveFlightRecord, FlightsResponse,
   RecentActiveFlightsResponse,
@@ -539,7 +541,14 @@ const Tracking = (props: TrackingProps) => {
     <Container>
       <Row className={'mt-3'}>
         <Column>
-          <h1>Flight Tracker</h1>
+          <h1>Aurora Tracker</h1>
+          <img
+            src={irisBalloon}
+            height={40}
+            width={40}
+            alt={'Aurora Flight Tracker Icon'}
+            className={'pl-2'}
+          />
         </Column>
       </Row>
       <Row>
@@ -622,7 +631,7 @@ const Tracking = (props: TrackingProps) => {
                 <i className="bi bi-graph-up-arrow me-2"></i>
                 Flight Data
               </Accordion.Header>
-              <Accordion.Body style={{overflowY: 'auto', height: '55vh', maxHeight: '20rem'}}>
+              <Accordion.Body style={{overflowY: 'auto', height: '55vh', maxHeight: '25rem'}}>
                 <h2 className={'mb-1'}>Selected Flight</h2>
                 {selectedFlight === null && <Card.Text>Please select a flight.</Card.Text>}
                 {(selectedFlight && selectedPoint) &&

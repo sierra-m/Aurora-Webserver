@@ -41,11 +41,11 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import Select, {type ActionMeta, type Theme, type ThemeConfig} from "react-select";
 import {selectDarkTheme} from "../util/themes.ts";
-import irisBalloon from "../images/IrisBalloon.png";
 import "../style/navigation.css";
 
 import githubMark from "../images/github-mark.svg";
 import githubMarkWhite from "../images/github-mark-white.svg";
+import msgcIcon from "../images/msgc-logo.png";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -209,10 +209,8 @@ const Navigation = (props: NavigationProps) => {
           <Navbar.Brand>
             <Link to={'/'}>
               <img
-                src={irisBalloon}
-                width={40}
-                height={40}
-                className={"d-inline-block align-middle"}
+                src={msgcIcon}
+                className={"d-inline-block align-middle pr-2"}
                 alt={"MSU Borealis Tracker logo"}
               />
               MSU Borealis
