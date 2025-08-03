@@ -59,7 +59,7 @@ const Help = () => {
                 <tr>
                   <td>IMEI</td>
                   <td>
-                    The <a ref={'https://en.wikipedia.org/wiki/International_Mobile_Equipment_Identity'}>
+                    The <a href={'https://en.wikipedia.org/wiki/International_Mobile_Equipment_Identity'}>
                     International Mobile Equipment Identity</a> is a unique modem identifier that is used by the
                     webserver to differentiate and categorize each connected modem. Each participating
                     organization will have at least one modem, but often several. For security, the full IMEIs
@@ -72,7 +72,7 @@ const Help = () => {
                   <td>
                     The Unique Identifier of a flight, used by the application to easily categorize and fetch flights
                     from the database. Each flight as a unique UID, and in fact, this field is actually a
-                    <a ref={'https://en.wikipedia.org/wiki/Universally_unique_identifier'}>
+                    <a href={'https://en.wikipedia.org/wiki/Universally_unique_identifier'}>
                       Universally Unique Identifier
                     </a>. Using UUID algorithms, each new flight is guaranteed a unique identifier, which will be
                     permanently associated with the dataset.
