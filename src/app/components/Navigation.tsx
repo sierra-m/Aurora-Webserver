@@ -40,8 +40,11 @@ import Row from "react-bootstrap/Row";
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import Select, {type ActionMeta, type Theme, type ThemeConfig} from "react-select";
+
 import {selectDarkTheme} from "../util/themes.ts";
 import "../style/navigation.css";
+
+import Help from './Help.tsx';
 
 import githubMark from "../images/github-mark.svg";
 import githubMarkWhite from "../images/github-mark-white.svg";
@@ -333,7 +336,7 @@ const Navigation = (props: NavigationProps) => {
           <Modal.Title>Help</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          help
+          <Help/>
         </Modal.Body>
       </Modal>
     </>

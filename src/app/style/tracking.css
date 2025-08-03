@@ -24,3 +24,7 @@
     max-height: 15rem;
     overflow-y: auto;
 }
+
+h1 img {
+    vertical-align: text-bottom;
+}

@@ -563,7 +563,6 @@ const Tracking = (props: TrackingProps) => {
               height={50}
               width={50}
               alt={'Aurora Flight Tracker Icon'}
-              className={'d-inline-block align-text-bottom'}
             />
           </h1>
         </Column>
