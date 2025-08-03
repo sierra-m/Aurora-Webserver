@@ -272,7 +272,9 @@ const Tracking = (props: TrackingProps) => {
           const newData = data.result.filter(point => point.timestamp > mostRecent.timestamp);
 
           if (newData.length === 0) {
-            console.log(`Warning: Server sent invalid updates for most recent timestamp ${mostRecent.timestamp}`)
+            console.log(
+              `Warning: Server sent ${data.result.length} invalid updates for most recent timestamp ${mostRecent.timestamp}`
+            )
             return;
           }
           // `Flight.add()` returns index added. Map the adds to an array and use the first
