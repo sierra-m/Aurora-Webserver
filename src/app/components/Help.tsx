@@ -7,14 +7,16 @@ import Table from "react-bootstrap/Table";
 const Help = () => {
 
   return (
-    <div>
+    <div style={{width: '60vw'}}>
       The Aurora Flight Tracker is a tool hosted by MSU Borealis that provides real-time tracking and past flight
       display of high-altitude research balloons launched by Space-Grant-affiliated schools and organizations
-      across the country. Data from active balloon modems is streamed into the underlying Aurora Webserver,
-      processed and catalogued in a database. It is then publicly available to view and download through this user
-      interface and the webserver API.
+      across the country.<br/>
 
-      Below, you'll find several helpful tips and tricks for using this app.
+      Data from active balloon modems is streamed into the underlying Aurora Webserver,
+      processed and catalogued in a database. It is then publicly available to view and download through this user
+      interface and the webserver API.<br/>
+
+      Below, you'll find several helpful tips and tricks for using this app.<br/>
 
       <Accordion>
         <Accordion.Item eventKey={'definitions'}>
@@ -22,7 +24,7 @@ const Help = () => {
             Definitions
           </Accordion.Header>
           <Accordion.Body>
-            Below are common terms you will see across the app:
+            Below are common terms you will see across the app:<br/>
             <Table>
               <thead>
                 <tr>
@@ -59,7 +61,7 @@ const Help = () => {
                 <tr>
                   <td>IMEI</td>
                   <td>
-                    The <a href={'https://en.wikipedia.org/wiki/International_Mobile_Equipment_Identity'}>
+                    The <a href={'https://en.wikipedia.org/wiki/International_Mobile_Equipment_Identity'} target={"_blank"}>
                     International Mobile Equipment Identity</a> is a unique modem identifier that is used by the
                     webserver to differentiate and categorize each connected modem. Each participating
                     organization will have at least one modem, but often several. For security, the full IMEIs
@@ -71,10 +73,10 @@ const Help = () => {
                   <td>UID</td>
                   <td>
                     The Unique Identifier of a flight, used by the application to easily categorize and fetch flights
-                    from the database. Each flight as a unique UID, and in fact, this field is actually a
-                    <a href={'https://en.wikipedia.org/wiki/Universally_unique_identifier'}>
+                    from the database. Each flight has a unique UID, and in fact, this field is actually
+                    a <a href={'https://en.wikipedia.org/wiki/Universally_unique_identifier'} target={"_blank"}>
                       Universally Unique Identifier
-                    </a>. Using UUID algorithms, each new flight is guaranteed a unique identifier, which will be
+                    </a> (UUID). Using UUID algorithms, each new flight is guaranteed a unique identifier, which will be
                     permanently associated with the dataset.
                   </td>
                 </tr>
@@ -98,8 +100,8 @@ const Help = () => {
                     The currently selected flight point. When the current flight is Active, the latest data point
                     available will be selected by default, allowing real-time tracking of the modem. When a past
                     flight is selected, the current point will be the flight start point by default, but can be
-                    changed by selecting different points on the <strong>Map</strong>, the
-                    <strong>Altitude Chart</strong>, or the <strong>Pin States Log</strong>.
+                    changed by selecting different points on the <strong>Map</strong>,
+                    the <strong>Altitude Chart</strong>, or the <strong>Pin States Log</strong>.
                   </td>
                 </tr>
                 <tr>
@@ -107,13 +109,16 @@ const Help = () => {
                   <td>
                     Each NAL modem provides a set of input and output hardware pins for a custom (yet fairly limited)
                     telemetry scheme between any third party devices also present on the balloon and the ground station
-                    teams. There are 4 input pins and 3 output pins, allowing for 16 unique input codes (from third
+                    teams. <br/>
+
+                    There are 4 input pins and 3 output pins, allowing for 16 unique input codes (from third
                     party controllers on the balloon) and 8 unique output codes (from ground station teams). The
                     direction of the pins is relative to the modem, so input pins are used to convey balloon status
                     to ground teams, while output pins are driven by commands sent from ground teams to provide
-                    control over the balloon systems. Each arriving flight data point will contain the binary state
-                    of both sets of pins, recorded as decimal numbers. These are displayed in the
-                    <strong>Pin States Log</strong>
+                    control over the balloon systems. <br/>
+
+                    Each arriving flight data point will contain the binary state of both sets of pins, recorded
+                    as decimal numbers. These are displayed in the <strong>Pin States Log</strong>.
                   </td>
                 </tr>
               </tbody>
@@ -140,7 +145,7 @@ const Help = () => {
                 by flight date
               </li>
               <li>
-                the <strong>Selected Flight</strong> panel, which provides statistics about the current flight
+                the <strong>Flight Data</strong> panel, which provides statistics about the current flight
                 and selected flight point
               </li>
               <li>
@@ -150,12 +155,12 @@ const Help = () => {
                 the <strong>Pin States Log</strong>, which provides Pin State data for each flight point received
               </li>
             </ul>
-            When a flight has been selected, it's flight path will be displayed in the <strong>Map</strong> with
-            a balloon icon marking the selected point. This point is synced across the<strong>Altitude Chart</strong>
-            and <strong>Pin States Log</strong> as well, with the selected altitude point marked by a pink circle,
-            and selected log line highlighted in pink. Changing the selected point on the Map will also change it
-            on the other two views, making it simple to see how Pin State telemetry affected the balloon's altitude
-            and flight path at key points.
+            When a flight has been selected, its flight path will be displayed in the Map with
+            a balloon icon marking the selected point. This point is synced across the
+            Altitude Chart and Pin States Log as well, with the selected altitude
+            point marked by a pink circle, and selected log line highlighted in pink. Changing the selected point on
+            the Map will also change it on the other two views, making it simple to see how
+            Pin State telemetry affected the balloon's altitude and flight path at key points.<br/>
 
             The Pin States Log can also be filtered to display only the times at least one pin set changed, highlighting
             key transition periods in the flight.
