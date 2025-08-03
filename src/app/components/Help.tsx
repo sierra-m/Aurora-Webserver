@@ -130,7 +130,7 @@ const Help = () => {
             Basic Usage
           </Accordion.Header>
           <Accordion.Body>
-            This app is divided into several key views:
+            This app is divided into several key views:<br/><br/>
             <ul>
               <li>
                 the <strong>Map</strong>, which displays active flights (by default), search results, and

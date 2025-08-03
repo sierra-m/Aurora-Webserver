@@ -110,7 +110,7 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
         {props.isActive &&
           <div className={"pb-2"}>
             <Badge bg={'success'}>Active Flight</Badge>
-            <Spinner animation={"border"} size="sm"/>
+            <Spinner animation={"border"} size="sm" className={'mr-2'}/>
           </div>}
         {!props.isActive &&
           <div className={"pb-2"}>

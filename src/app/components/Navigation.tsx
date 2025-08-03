@@ -338,6 +338,9 @@ const Navigation = (props: NavigationProps) => {
         <Modal.Body>
           <Help/>
         </Modal.Body>
+        <Modal.Footer>
+          <Button variant={'secondary'} size={"sm"} onClick={handleCloseHelp}>Close</Button>
+        </Modal.Footer>
       </Modal>
     </>
   )
