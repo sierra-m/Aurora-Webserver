@@ -331,7 +331,7 @@ const Navigation = (props: NavigationProps) => {
           <Button variant={'secondary'} size={"sm"} onClick={handleCloseContact}>Close</Button>
         </Modal.Footer>
       </Modal>
-      <Modal show={showHelp} onHide={handleCloseHelp} centered scrollable style={{width: '60vw'}}>
+      <Modal show={showHelp} onHide={handleCloseHelp} centered scrollable size={'lg'}>
         <Modal.Header>
           <Modal.Title>Help</Modal.Title>
         </Modal.Header>
