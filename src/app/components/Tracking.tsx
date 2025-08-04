@@ -216,6 +216,10 @@ const Tracking = (props: TrackingProps) => {
 
   const [accordionActiveKey, setAccordionActiveKey] = React.useState<AccordionEventKey>('active-flights');
 
+  const [pinLogPrint, setPinLogPrint] = React.useState<LogPrintFunc | null>(null);
+
+  const [pinLogClear, setPinLogClear] = React.useState<LogClearFunc | null>(null);
+
   // Indicates whether a new flight update interval should be created
   let enableUpdates: boolean = false;
 
@@ -226,13 +230,9 @@ const Tracking = (props: TrackingProps) => {
     return getVelocity(altitude, mass, diameter, drag);
   };
 
-  let pinLogPrint: LogPrintFunc | null = null;
-
-  let pinLogClear: LogClearFunc | null = null;
-
   const registerControls = (printFunc: LogPrintFunc, clearFunc: LogClearFunc) => {
-    pinLogPrint = printFunc;
-    pinLogClear = clearFunc;
+    setPinLogPrint(printFunc);
+    setPinLogClear(clearFunc);
   };
 
   // Modem Select Dropdown Callback
