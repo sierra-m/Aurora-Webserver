@@ -449,7 +449,7 @@ const Tracking = (props: TrackingProps) => {
       });
       setActiveFlights(activeFlights);
     }
-  }, [fetchFlight]);
+  }, [fetchFlight, pinLogClear]);
 
   const onVelocityProfileChange = React.useCallback((change: string) => {
     setChosenVelocityRadio(change);
@@ -554,10 +554,15 @@ const Tracking = (props: TrackingProps) => {
         await fetchFlight(standardUid);
       }
     }
-  }, [activeInterval])
+  }, [activeInterval, fetchActive])
 
   React.useEffect(() => {
-    initialSetup();
+    if (pinLogClear) {
+      initialSetup();
+    }
+  }, [pinLogClear])
+
+  React.useEffect(() => {
     return () => {
       if (activeInterval) {
         clearInterval(activeInterval);
