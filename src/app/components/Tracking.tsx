@@ -236,6 +236,10 @@ const Tracking = (props: TrackingProps) => {
     setPinLogClear(() => clearFunc);
   };
 
+  React.useEffect(() => {
+    console.log(`Pin log clear was changed to ${pinLogClear}`);
+  }, [pinLogClear]);
+
   // Modem Select Dropdown Callback
   // Fetches all flights associated with a given modem.
   const fetchFlightsFrom = React.useCallback(async (modemName: string) => {
@@ -340,6 +344,7 @@ const Tracking = (props: TrackingProps) => {
         console.log('Enabled updating');
       }
 
+      console.log(pinLogClear);
       pinLogClear!();
 
 
@@ -367,7 +372,7 @@ const Tracking = (props: TrackingProps) => {
     } catch (e) {
       console.log(e);
     }
-  }, [updateInterval, pinLogClear, pinLogPrint]);
+  }, [updateInterval, pinLogPrint, pinLogClear]);
 
   const fetchModemsByDate = React.useCallback(async (formattedDate: string) => {
     try {
