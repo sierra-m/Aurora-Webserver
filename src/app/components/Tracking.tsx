@@ -233,6 +233,10 @@ const Tracking = (props: TrackingProps) => {
   const registerControls = (printFunc: LogPrintFunc, clearFunc: LogClearFunc) => {
     setPinLogPrint(printFunc);
     setPinLogClear(clearFunc);
+    console.log('print func:');
+    console.log(printFunc);
+    console.log('clear func:');
+    console.log(clearFunc);
   };
 
   // Modem Select Dropdown Callback
@@ -491,8 +495,6 @@ const Tracking = (props: TrackingProps) => {
     setSelectedFlight(null);
     setSelectedPoint(null);
     setSelectedPointIndex(0);
-    console.log('Pin log clear:');
-    console.log(pinLogClear);
     pinLogClear!();
   }, [pinLogClear])
 
