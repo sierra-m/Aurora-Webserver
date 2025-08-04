@@ -251,10 +251,10 @@ const Tracking = (props: TrackingProps) => {
     }
   }, []);
 
-  const fetchUpdates = React.useCallback(async (flight: Flight | null) => {
+  const fetchUpdates = React.useCallback(async () => {
     try {
-      if (flight) {
-        const mostRecent = flight.lastPoint();
+      if (selectedFlight) {
+        const mostRecent = selectedFlight.lastPoint();
         let result = await fetch('/api/update', {
           method: 'POST',
           headers: {
@@ -280,7 +280,7 @@ const Tracking = (props: TrackingProps) => {
           }
           // `Flight.add()` returns index added. Map the adds to an array and use the first
           // index as the entry for updating the altitude profile
-          const updateFlight = flight.copy();
+          const updateFlight = selectedFlight.copy();
           console.log(`Updating flight with data size ${data.result.length}`)
           const updateIndices = data.result.map(point => updateFlight.add(point));
           await landingPrediction?.updateAltitudeProfile(updateIndices[0], updateIndices[updateIndices.length - 1]);
@@ -336,7 +336,7 @@ const Tracking = (props: TrackingProps) => {
       if (durationSince.asHours() < 5) {
         active = true;
         selected = lastPoint;
-        setUpdateInterval(setInterval(() => fetchUpdates(flight), UPDATE_DELAY));
+        setUpdateInterval(setInterval(() => fetchUpdates(), UPDATE_DELAY));
         console.log('Enabled updating');
       }
 
