@@ -253,7 +253,7 @@ const Tracking = (props: TrackingProps) => {
     }
   }, []);
 
-  const fetchUpdates = React.useCallback(async () => {
+  const fetchUpdates = async () => {
     console.log(`Running fetch updates, selected flight: ${!!selectedFlight}`);
     try {
       if (selectedFlight) {
@@ -306,11 +306,11 @@ const Tracking = (props: TrackingProps) => {
     } catch (e) {
       console.log(e);
     }
-  }, [pinLogPrint, selectedFlight]);
+  };
 
-  React.useEffect(() => {
-    updateFlightRef.current = fetchUpdates;
-  }, [fetchUpdates, selectedFlight]);
+  // React.useEffect(() => {
+  //   updateFlightRef.current = fetchUpdates;
+  // }, [fetchUpdates, selectedFlight]);
 
   // Flight selection callback
   const fetchFlight = React.useCallback(async (uid: FlightUid) => {
@@ -340,11 +340,10 @@ const Tracking = (props: TrackingProps) => {
         clearInterval(updateInterval);
         setUpdateInterval(null);
       }
-      updateFlightRef.current = fetchUpdates;
       if (durationSince.asHours() < 5) {
         active = true;
         selected = lastPoint;
-        setUpdateInterval(setInterval(() => updateFlightRef.current!(), UPDATE_DELAY));
+        setUpdateInterval(setInterval(fetchUpdates, UPDATE_DELAY));
         console.log('Enabled updating');
       }
 
@@ -374,7 +373,7 @@ const Tracking = (props: TrackingProps) => {
     } catch (e) {
       console.log(e);
     }
-  }, [updateInterval, pinLogPrint, pinLogClear, fetchUpdates]);
+  }, [updateInterval, pinLogPrint, pinLogClear]);
 
   const fetchModemsByDate = React.useCallback(async (formattedDate: string) => {
     try {
