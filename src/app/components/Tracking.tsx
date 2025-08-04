@@ -449,7 +449,7 @@ const Tracking = (props: TrackingProps) => {
       });
       setActiveFlights(activeFlights);
     }
-  }, []);
+  }, [fetchFlight]);
 
   const onVelocityProfileChange = React.useCallback((change: string) => {
     setChosenVelocityRadio(change);
