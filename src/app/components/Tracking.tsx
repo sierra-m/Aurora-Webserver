@@ -307,7 +307,7 @@ const Tracking = (props: TrackingProps) => {
     } catch (e) {
       console.log(e);
     }
-  }, [pinLogPrint]);
+  }, [pinLogPrint, selectedFlight]);
 
   // Flight selection callback
   const fetchFlight = React.useCallback(async (uid: FlightUid) => {
