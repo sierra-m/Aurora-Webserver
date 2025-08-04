@@ -253,7 +253,7 @@ const Tracking = (props: TrackingProps) => {
     }
   }, []);
 
-  const fetchUpdates = async () => {
+  const fetchUpdates = React.useCallback(async () => {
     console.log(`Running fetch updates, selected flight: ${!!selectedFlight}`);
     try {
       if (selectedFlight) {
@@ -285,8 +285,12 @@ const Tracking = (props: TrackingProps) => {
           // index as the entry for updating the altitude profile
           const updateFlight = selectedFlight.copy();
           console.log(`Updating flight with data size ${data.result.length}`)
+          console.log("update flight is:");
+          console.log(updateFlight);
           const updateIndices = data.result.map(point => updateFlight.add(point));
+          console.log('add to alt prof');
           await landingPrediction?.updateAltitudeProfile(updateIndices[0], updateIndices[updateIndices.length - 1]);
+          console.log('time to print to log');
 
           for (const point of data.result) {
             pinLogPrint!(point.inputPins, point.outputPins, point.timestamp, point.altitude);
@@ -306,11 +310,11 @@ const Tracking = (props: TrackingProps) => {
     } catch (e) {
       console.log(e);
     }
-  };
+  }, [pinLogPrint, selectedFlight]);
 
-  // React.useEffect(() => {
-  //   updateFlightRef.current = fetchUpdates;
-  // }, [fetchUpdates, selectedFlight]);
+  React.useEffect(() => {
+    updateFlightRef.current = fetchUpdates;
+  }, [fetchUpdates, selectedFlight]);
 
   // Flight selection callback
   const fetchFlight = React.useCallback(async (uid: FlightUid) => {
@@ -340,10 +344,11 @@ const Tracking = (props: TrackingProps) => {
         clearInterval(updateInterval);
         setUpdateInterval(null);
       }
+      updateFlightRef.current = fetchUpdates;
       if (durationSince.asHours() < 5) {
         active = true;
         selected = lastPoint;
-        setUpdateInterval(setInterval(fetchUpdates, UPDATE_DELAY));
+        setUpdateInterval(setInterval(() => updateFlightRef.current!(), UPDATE_DELAY));
         console.log('Enabled updating');
       }
 
@@ -373,7 +378,7 @@ const Tracking = (props: TrackingProps) => {
     } catch (e) {
       console.log(e);
     }
-  }, [updateInterval, pinLogPrint, pinLogClear]);
+  }, [updateInterval, pinLogPrint, pinLogClear, fetchUpdates]);
 
   const fetchModemsByDate = React.useCallback(async (formattedDate: string) => {
     try {
