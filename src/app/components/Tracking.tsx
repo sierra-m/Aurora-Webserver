@@ -233,7 +233,6 @@ const Tracking = (props: TrackingProps) => {
   const registerControls = (printFunc: LogPrintFunc, clearFunc: LogClearFunc) => {
     setPinLogPrint(printFunc);
     setPinLogClear(clearFunc);
-    console.log("registered controls!");
   };
 
   // Modem Select Dropdown Callback
@@ -341,6 +340,7 @@ const Tracking = (props: TrackingProps) => {
       }
 
       pinLogClear!();
+
 
       // TODO: improve speed of this/place it elsewhere
       const pinStates = flight.pinStates();
@@ -492,7 +492,7 @@ const Tracking = (props: TrackingProps) => {
     setSelectedPoint(null);
     setSelectedPointIndex(0);
     pinLogClear!();
-  }, [])
+  }, [pinLogClear])
 
   // TODO: move these into sub-component
 
