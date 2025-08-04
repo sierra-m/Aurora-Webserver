@@ -344,9 +344,7 @@ const Tracking = (props: TrackingProps) => {
         console.log('Enabled updating');
       }
 
-      console.log(pinLogClear);
       pinLogClear!();
-
 
       // TODO: improve speed of this/place it elsewhere
       const pinStates = flight.pinStates();
@@ -372,7 +370,7 @@ const Tracking = (props: TrackingProps) => {
     } catch (e) {
       console.log(e);
     }
-  }, [updateInterval, pinLogPrint, pinLogClear]);
+  }, [updateInterval, pinLogPrint, pinLogClear, fetchUpdates]);
 
   const fetchModemsByDate = React.useCallback(async (formattedDate: string) => {
     try {
