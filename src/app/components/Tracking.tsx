@@ -231,12 +231,9 @@ const Tracking = (props: TrackingProps) => {
   };
 
   const registerControls = (printFunc: LogPrintFunc, clearFunc: LogClearFunc) => {
-    setPinLogPrint(printFunc);
-    setPinLogClear(clearFunc);
-    console.log('print func:');
-    console.log(printFunc);
-    console.log('clear func:');
-    console.log(clearFunc);
+    // Wrap assigns in function calls so they are not immediately executed by the hook
+    setPinLogPrint(() => printFunc);
+    setPinLogClear(() => clearFunc);
   };
 
   // Modem Select Dropdown Callback
