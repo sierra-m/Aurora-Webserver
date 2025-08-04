@@ -256,6 +256,7 @@ const Tracking = (props: TrackingProps) => {
   }, []);
 
   const fetchUpdates = React.useCallback(async () => {
+    console.log(`Running fetch updates, selected flight: ${selectedFlight}`);
     try {
       if (selectedFlight) {
         const mostRecent = selectedFlight.lastPoint();
