@@ -344,7 +344,7 @@ const Tracking = (props: TrackingProps) => {
       if (durationSince.asHours() < 5) {
         active = true;
         selected = lastPoint;
-        setUpdateInterval(setInterval(updateFlightRef.current, UPDATE_DELAY));
+        setUpdateInterval(setInterval(() => updateFlightRef.current!(), UPDATE_DELAY));
         console.log('Enabled updating');
       }
 
