@@ -340,7 +340,7 @@ const Tracking = (props: TrackingProps) => {
       if (durationSince.asHours() < 5) {
         active = true;
         selected = lastPoint;
-        setUpdateInterval(setInterval(() => fetchUpdates(), UPDATE_DELAY));
+        setUpdateInterval(setInterval(fetchUpdates, UPDATE_DELAY));
         console.log('Enabled updating');
       }
 
