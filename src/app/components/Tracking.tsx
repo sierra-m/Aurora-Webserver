@@ -220,6 +220,8 @@ const Tracking = (props: TrackingProps) => {
 
   const [pinLogClear, setPinLogClear] = React.useState<LogClearFunc | null>(null);
 
+  const updateFlightRef = React.useRef<(() => Promise<void>) | null>(null);
+
   // Indicates whether a new flight update interval should be created
   let enableUpdates: boolean = false;
 
@@ -235,10 +237,6 @@ const Tracking = (props: TrackingProps) => {
     setPinLogPrint(() => printFunc);
     setPinLogClear(() => clearFunc);
   };
-
-  React.useEffect(() => {
-    console.log(`Pin log clear was changed to ${pinLogClear}`);
-  }, [pinLogClear]);
 
   // Modem Select Dropdown Callback
   // Fetches all flights associated with a given modem.
@@ -256,7 +254,7 @@ const Tracking = (props: TrackingProps) => {
   }, []);
 
   const fetchUpdates = React.useCallback(async () => {
-    console.log(`Running fetch updates, selected flight: ${selectedFlight}`);
+    console.log(`Running fetch updates, selected flight: ${!!selectedFlight}`);
     try {
       if (selectedFlight) {
         const mostRecent = selectedFlight.lastPoint();
@@ -310,6 +308,10 @@ const Tracking = (props: TrackingProps) => {
     }
   }, [pinLogPrint, selectedFlight]);
 
+  React.useEffect(() => {
+    updateFlightRef.current = fetchUpdates;
+  }, [fetchUpdates])
+
   // Flight selection callback
   const fetchFlight = React.useCallback(async (uid: FlightUid) => {
     try {
@@ -338,10 +340,11 @@ const Tracking = (props: TrackingProps) => {
         clearInterval(updateInterval);
         setUpdateInterval(null);
       }
+      updateFlightRef.current = fetchUpdates;
       if (durationSince.asHours() < 5) {
         active = true;
         selected = lastPoint;
-        setUpdateInterval(setInterval(fetchUpdates, UPDATE_DELAY));
+        setUpdateInterval(setInterval(updateFlightRef.current, UPDATE_DELAY));
         console.log('Enabled updating');
       }
 
