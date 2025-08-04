@@ -497,6 +497,7 @@ const Tracking = (props: TrackingProps) => {
     setSelectedFlight(null);
     setSelectedPoint(null);
     setSelectedPointIndex(0);
+    console.log(`Pin log clear in the non async function is ${pinLogClear}`);
     pinLogClear!();
   }, [pinLogClear])
 
