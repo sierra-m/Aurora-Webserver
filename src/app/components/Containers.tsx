@@ -116,7 +116,7 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
           <div className={"pb-2"}>
             <Badge bg={'primary'}>Past Flight</Badge>
           </div>}
-        <Table hover className={'pt-2 border-bottom-0'}>
+        <Table hover className={'pt-2'}>
           <tbody>
             <tr>
               <td className={'pt-0 pb-1'}><strong>Modem:</strong></td>
@@ -130,7 +130,7 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
               <td className={'pt-0 pb-1'}><strong>Date:</strong></td>
               <td className={'pt-0 pb-1'} align={'right'}>{props.formattedDate}</td>
             </tr>
-            <tr>
+            <tr className={'border-bottom-0'}>
               <td className={'pt-0 pb-1'}><strong>Organization:</strong></td>
               <td className={'pt-0 pb-1'} align={'right'}>{props.modem.org}</td>
             </tr>
@@ -244,11 +244,11 @@ export const ActiveFlightCard = React.memo((props: ActiveFlightCardProps) => {
       <Card className="card-item quick-shadow">
         <Card.Body>
           <Card.Title>
-            Modem: <strong className={'text-primary'}>{props.modem.name}</strong> {`(IMEI ${props.modem.partialImei})`}
+            Modem: <div className={'text-primary'}>{props.modem.name}</div> {`(IMEI ${props.modem.partialImei})`}
           </Card.Title>
           <Card.Subtitle className="mb-2 text-muted">Org: {props.modem.org}</Card.Subtitle>
           <Card.Text>
-            <Table className={'border-bottom-0'}>
+            <Table size={'sm'}>
               <tbody>
                 <tr>
                   <td>UID</td>
@@ -256,12 +256,13 @@ export const ActiveFlightCard = React.memo((props: ActiveFlightCardProps) => {
                 </tr>
               <tr>
                 <td>Start Date</td>
-                <td>{props.startDate.format('MMMM Do[,] YYYY')} UTC</td>
+                <td>{props.startDate.format('MMMM D, YYYY')} UTC</td>
               </tr>
-              <tr>
+              <tr className={'border-bottom-0'}>
                 <td>Last Updated</td>
                 <td>
-                  {props.lastDatetime.format('YYYY-MM-DD HH:mm:ss')} UTC (<div className={'text-info'}>{props.lastDatetime.fromNow()}</div>)
+                  {props.lastDatetime.format('YYYY-MM-DD HH:mm:ss')} UTC <br/>
+                  (<div className={'text-warning-emphasis'}>{props.lastDatetime.fromNow()}</div>)
                 </td>
               </tr>
               </tbody>
