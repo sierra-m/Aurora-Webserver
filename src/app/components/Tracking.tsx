@@ -281,18 +281,23 @@ const Tracking = (props: TrackingProps) => {
             )
             return;
           }
+          if (newData.length !== data.result.length) {
+            console.log(`Warning: Server sent ${data.result.length} updates, but only ${newData.length} are valid`);
+            console.log(`Timestamp: ${mostRecent.timestamp}, data sent:`);
+            console.log(data.result);
+          }
           // `Flight.add()` returns index added. Map the adds to an array and use the first
           // index as the entry for updating the altitude profile
           const updateFlight = selectedFlight.copy();
-          console.log(`Updating flight with data size ${data.result.length}`)
+          console.log(`Updating flight with data size ${newData.length}`)
           console.log("update flight is:");
           console.log(updateFlight);
-          const updateIndices = data.result.map(point => updateFlight.add(point));
+          const updateIndices = newData.map(point => updateFlight.add(point));
           console.log(`add to alt prof ${updateIndices}`);
           await landingPrediction?.updateAltitudeProfile(updateIndices[0], updateIndices[updateIndices.length - 1]);
           console.log('time to print to log');
 
-          for (const point of data.result) {
+          for (const point of newData) {
             pinLogPrint!(point.inputPins, point.outputPins, point.timestamp, point.altitude);
           }
 
