@@ -22,3 +22,7 @@
 .invisible-bottom-border {
     border-bottom: 0 solid transparent;
 }
+
+.card:hover {
+    background-color: var(--bs-secondary-bg); /* A subtle dark background */
+}
