@@ -255,7 +255,6 @@ const Tracking = (props: TrackingProps) => {
 
   const fetchUpdates = React.useCallback(async () => {
     console.log(`Running fetch updates, selected flight: ${!!selectedFlight}`);
-    console.log(selectedFlight);
     try {
       if (selectedFlight) {
         const mostRecent = selectedFlight.lastPoint();
@@ -290,12 +289,9 @@ const Tracking = (props: TrackingProps) => {
           // `Flight.add()` returns index added. Map the adds to an array and use the first
           // index as the entry for updating the altitude profile
           const updateFlight = selectedFlight.copy();
-          console.log(`Updating flight with data size ${newData.length}`)
-          console.log("update flight is:");
-          console.log(updateFlight);
           const updateIndices = newData.map(point => updateFlight.add(point));
-          console.log(`add to alt prof ${updateIndices}`);
-          await landingPrediction?.updateAltitudeProfile(updateIndices[0], updateIndices[updateIndices.length - 1]);
+          // TODO: Add landing prediction
+          //await landingPrediction?.updateAltitudeProfile(updateIndices[0], updateIndices[updateIndices.length - 1]);
           console.log('time to print to log');
 
           for (const point of newData) {
