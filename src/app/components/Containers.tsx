@@ -109,7 +109,7 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
       <Card.Text className={'pt-1'}>
         {props.isActive &&
           <div className={"pb-2"}>
-            <Badge bg={'success'} className={'mr-2'}>Active Flight</Badge>
+            <Badge bg={'success'} className={'me-2'}>Active Flight</Badge>
             <Spinner animation={"border"} size="sm"/>
           </div>}
         {!props.isActive &&
@@ -137,9 +137,8 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
           </tbody>
         </Table>
       </Card.Text>
-      <hr/>
 
-      <Card.Subtitle><h5>Current Point</h5></Card.Subtitle>
+      <Card.Subtitle className={'mt-1'}><h5>Current Point</h5></Card.Subtitle>
       <hr/>
       <Form className={'my-1'}>
         <Form.Group>
