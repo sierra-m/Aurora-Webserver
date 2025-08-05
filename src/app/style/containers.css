@@ -15,7 +15,10 @@
     opacity: 1;
 }
 
-
 .spinner-border {
     animation-duration: 2s;
+}
+
+.invisible-bottom-border {
+    border-bottom: 0 solid transparent;
 }
