@@ -109,30 +109,32 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
       <Card.Text className={'pt-1'}>
         {props.isActive &&
           <div className={"pb-2"}>
-            <Badge bg={'success'}>Active Flight</Badge>
-            <Spinner animation={"border"} size="sm" className={'ml-2'}/>
+            <Badge bg={'success'} className={'mr-2'}>Active Flight</Badge>
+            <Spinner animation={"border"} size="sm"/>
           </div>}
         {!props.isActive &&
           <div className={"pb-2"}>
             <Badge bg={'primary'}>Past Flight</Badge>
           </div>}
         <Table hover className={'pt-2'}>
-          <tr>
-            <td className={'pt-0 pb-1'}><strong>Modem:</strong></td>
-            <td className={'pt-0 pb-1'} align={'right'}>{props.modem.name}</td>
-          </tr>
-          <tr>
-            <td className={'pt-0 pb-1'}><strong>IMEI:</strong></td>
-            <td className={'pt-0 pb-1'} align={'right'}>{'*'.repeat(10) + props.modem.partialImei}</td>
-          </tr>
-          <tr>
-            <td className={'pt-0 pb-1'}><strong>Date:</strong></td>
-            <td className={'pt-0 pb-1'} align={'right'}>{props.formattedDate}</td>
-          </tr>
-          <tr>
-            <td className={'pt-0 pb-1'}><strong>Organization:</strong></td>
-            <td className={'pt-0 pb-1'} align={'right'}>{props.modem.org}</td>
-          </tr>
+          <tbody>
+            <tr>
+              <td className={'pt-0 pb-1'}><strong>Modem:</strong></td>
+              <td className={'pt-0 pb-1'} align={'right'}>{props.modem.name}</td>
+            </tr>
+            <tr>
+              <td className={'pt-0 pb-1'}><strong>IMEI:</strong></td>
+              <td className={'pt-0 pb-1'} align={'right'}>{'*'.repeat(10) + props.modem.partialImei}</td>
+            </tr>
+            <tr>
+              <td className={'pt-0 pb-1'}><strong>Date:</strong></td>
+              <td className={'pt-0 pb-1'} align={'right'}>{props.formattedDate}</td>
+            </tr>
+            <tr>
+              <td className={'pt-0 pb-1'}><strong>Organization:</strong></td>
+              <td className={'pt-0 pb-1'} align={'right'}>{props.modem.org}</td>
+            </tr>
+          </tbody>
         </Table>
       </Card.Text>
       <hr/>
