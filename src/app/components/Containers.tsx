@@ -258,7 +258,7 @@ export const ActiveFlightCard = React.memo((props: ActiveFlightCardProps) => {
                   <td>Last Updated</td>
                   <td>
                     {props.lastDatetime.format('YYYY-MM-DD HH:mm:ss')} UTC <br/>
-                    (<span style={{color: '#7b00ba'}}>{props.lastDatetime.fromNow()}</span>)
+                    (<span style={{color: 'rgb(191, 0, 161)'}}>{props.lastDatetime.fromNow()}</span>)
                   </td>
                 </tr>
               </tbody>

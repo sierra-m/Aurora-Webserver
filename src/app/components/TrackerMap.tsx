@@ -149,9 +149,12 @@ const InfoMarker = React.memo((props: InfoMarkerProps) => {
       onClick={onMarkerClicked}
       zIndex={props.zIndex}
     >
-      {isInfoShown && <InfoWindow onCloseClick={handleWindowClose} anchor={marker}>
+      {isInfoShown && <InfoWindow
+        onCloseClick={handleWindowClose}
+        anchor={marker}
+        headerContent={props.title ? <h5>{props.title}</h5> : <></>}
+      >
         <p className={'info-window-p'}>
-          {props.title ? <h5>{props.title}</h5> : <></>}
           <strong>Latitude:</strong> {props.position.lat.toFixed(8)}<br/>
           <strong>Longitude:</strong> {props.position.lng.toFixed(8)}<br/>
           <strong>Altitude:</strong> {props.altitude}
