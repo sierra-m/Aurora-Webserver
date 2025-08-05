@@ -24,5 +24,9 @@
 }
 
 .card:hover {
-    background-color: var(--bs-secondary-bg); /* A subtle dark background */
+    background-color: var(--bs-secondary-bg);
+}
+
+.table:hover {
+    background-color: var(--bs-secondary-bg);
 }

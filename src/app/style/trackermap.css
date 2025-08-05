@@ -14,3 +14,9 @@
         transform: translateY(0);
     }
 }
+
+.info-window {
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border-color: var(--bs-border-color);
+}
