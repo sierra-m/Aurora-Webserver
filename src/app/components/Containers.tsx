@@ -116,7 +116,7 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
           <div className={"pb-2"}>
             <Badge bg={'primary'}>Past Flight</Badge>
           </div>}
-        <Table hover className={'pt-2'}>
+        <Table hover className={'pt-2 border-bottom-0'}>
           <tbody>
             <tr>
               <td className={'pt-0 pb-1'}><strong>Modem:</strong></td>
@@ -243,12 +243,29 @@ export const ActiveFlightCard = React.memo((props: ActiveFlightCardProps) => {
     <a style={{cursor: 'pointer'}} onClick={props.callback}>
       <Card className="card-item quick-shadow">
         <Card.Body>
-          <Card.Title>Modem: {`${props.modem.name} (${props.modem.partialImei})`}</Card.Title>
-          <Card.Subtitle>Org: {props.modem.org}</Card.Subtitle>
+          <Card.Title>
+            Modem: <strong className={'text-primary'}>{props.modem.name}</strong> {`(IMEI ${props.modem.partialImei})`}
+          </Card.Title>
+          <Card.Subtitle className="mb-2 text-muted">Org: {props.modem.org}</Card.Subtitle>
           <Card.Text>
-            UID: {props.compressedUid}<br/>
-            Start Date: {props.startDate.format('MMMM Do[,] YYYY')} UTC<br/>
-            Last Updated: {props.lastDatetime.format('YYYY-MM-DD HH:mm:ss')} UTC ({props.lastDatetime.fromNow()})
+            <Table className={'border-bottom-0'}>
+              <tbody>
+                <tr>
+                  <td>UID</td>
+                  <td>{props.compressedUid}</td>
+                </tr>
+              <tr>
+                <td>Start Date</td>
+                <td>{props.startDate.format('MMMM Do[,] YYYY')} UTC</td>
+              </tr>
+              <tr>
+                <td>Last Updated</td>
+                <td>
+                  {props.lastDatetime.format('YYYY-MM-DD HH:mm:ss')} UTC (<div className={'text-info'}>{props.lastDatetime.fromNow()}</div>)
+                </td>
+              </tr>
+              </tbody>
+            </Table>
           </Card.Text>
         </Card.Body>
       </Card>
