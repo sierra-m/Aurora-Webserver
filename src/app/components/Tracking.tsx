@@ -320,7 +320,13 @@ const Tracking = (props: TrackingProps) => {
 
   React.useEffect(() => {
     updateFlightRef.current = fetchUpdates;
-  }, [fetchUpdates, selectedFlight]);
+    console.log(`Reassigned fetchUpdates`);
+  }, [fetchUpdates]);
+
+  React.useEffect(() => {
+    console.log('Selected flight updated to:');
+    console.log(selectedFlight);
+  }, [selectedFlight])
 
   // Flight selection callback
   const fetchFlight = React.useCallback(async (uid: FlightUid) => {
