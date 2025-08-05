@@ -110,13 +110,13 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
         {props.isActive &&
           <div className={"pb-2"}>
             <Badge bg={'success'}>Active Flight</Badge>
-            <Spinner animation={"border"} size="sm" className={'mr-2'}/>
+            <Spinner animation={"border"} size="sm" className={'ml-2'}/>
           </div>}
         {!props.isActive &&
           <div className={"pb-2"}>
             <Badge bg={'primary'}>Past Flight</Badge>
           </div>}
-        <Table borderless className={'pt-2'}>
+        <Table hover className={'pt-2'}>
           <tr>
             <td className={'pt-0 pb-1'}><strong>Modem:</strong></td>
             <td className={'pt-0 pb-1'} align={'right'}>{props.modem.name}</td>
@@ -130,7 +130,7 @@ export const SelectedFlightData = React.memo((props: SelectedFlightDataProps) =>
             <td className={'pt-0 pb-1'} align={'right'}>{props.formattedDate}</td>
           </tr>
           <tr>
-            <td className={'pt-0 pb-1'}><strong>Org:</strong></td>
+            <td className={'pt-0 pb-1'}><strong>Organization:</strong></td>
             <td className={'pt-0 pb-1'} align={'right'}>{props.modem.org}</td>
           </tr>
         </Table>

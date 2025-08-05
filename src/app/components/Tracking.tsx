@@ -254,7 +254,6 @@ const Tracking = (props: TrackingProps) => {
   }, []);
 
   const fetchUpdates = React.useCallback(async () => {
-    console.log(`Running fetch updates, selected flight: ${!!selectedFlight}`);
     try {
       if (selectedFlight) {
         const mostRecent = selectedFlight.lastPoint();
@@ -316,13 +315,7 @@ const Tracking = (props: TrackingProps) => {
 
   React.useEffect(() => {
     updateFlightRef.current = fetchUpdates;
-    console.log(`Reassigned fetchUpdates`);
   }, [fetchUpdates]);
-
-  React.useEffect(() => {
-    console.log('Selected flight updated to:');
-    console.log(selectedFlight);
-  }, [selectedFlight])
 
   // Flight selection callback
   const fetchFlight = React.useCallback(async (uid: FlightUid) => {
@@ -597,7 +590,7 @@ const Tracking = (props: TrackingProps) => {
                 height={50}
                 width={50}
                 alt={'Aurora Flight Tracker Icon'}
-                className={'d-inline-block align-baseline'}
+                className={'d-inline-block align-middle bobbing-element'}
               />
             </h1>
           </div>
