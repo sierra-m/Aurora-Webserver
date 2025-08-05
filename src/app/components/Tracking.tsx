@@ -288,7 +288,7 @@ const Tracking = (props: TrackingProps) => {
           console.log("update flight is:");
           console.log(updateFlight);
           const updateIndices = data.result.map(point => updateFlight.add(point));
-          console.log('add to alt prof');
+          console.log(`add to alt prof ${updateIndices}`);
           await landingPrediction?.updateAltitudeProfile(updateIndices[0], updateIndices[updateIndices.length - 1]);
           console.log('time to print to log');
 
