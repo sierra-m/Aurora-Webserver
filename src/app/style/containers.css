@@ -23,7 +23,7 @@
     border-bottom: 0 solid transparent;
 }
 
-.card:hover {
+.active-flight-card:hover {
     background-color: var(--bs-secondary-bg);
 }
 

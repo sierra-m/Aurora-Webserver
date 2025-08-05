@@ -241,7 +241,7 @@ export interface ActiveFlightCardProps {
 export const ActiveFlightCard = React.memo((props: ActiveFlightCardProps) => {
   return (
     <a style={{cursor: 'pointer'}} onClick={props.callback}>
-      <Card border="primary-subtle" className="card-item quick-shadow">
+      <Card border="primary-subtle" className="card-item quick-shadow active-flight-card">
         <Card.Body>
           <Card.Title>
             Modem: <span className={'text-primary'}>{props.modem.name}</span> {`(IMEI ${props.modem.partialImei})`}
@@ -258,7 +258,7 @@ export const ActiveFlightCard = React.memo((props: ActiveFlightCardProps) => {
                   <td>Last Updated</td>
                   <td>
                     {props.lastDatetime.format('YYYY-MM-DD HH:mm:ss')} UTC <br/>
-                    (<span style={{color: 'rgb(191, 0, 161)'}}>{props.lastDatetime.fromNow()}</span>)
+                    ( <span style={{color: 'rgb(191, 0, 161)'}}>{props.lastDatetime.fromNow()}</span> )
                   </td>
                 </tr>
               </tbody>
