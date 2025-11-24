@@ -19,8 +19,8 @@ const RecentFlightCard = (props: RecentFlightCardProps) => {
   return (
     <a style={{cursor: 'pointer'}} onClick={props.callback}>
       <Card className={'quick-shadow recent-flight-card'} border={'primary'}>
-        <Card.Body className={'d-flex align-items-center'}>
-          <Row>
+        <Card.Body>
+          <Row className="align-items-center">
             <Col xs={3}>
               <Image width={40} height={40} src={chooseRandomIcon(props.uid)} alt={'Recent Flight Balloon Icon'}/>
             </Col>
