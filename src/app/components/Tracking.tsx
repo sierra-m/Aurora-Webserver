@@ -675,7 +675,7 @@ const Tracking = (props: TrackingProps) => {
                 <i className="bi bi-clock-history me-2"></i>
                 Recent Flights
               </Accordion.Header>
-              <Accordion.Body>
+              <Accordion.Body style={{overflowY: 'auto', maxHeight: '20rem'}}>
                 {recentFlights.length > 0 &&
                   recentFlights.map(recentFlight => (
                     <RecentFlightCard
