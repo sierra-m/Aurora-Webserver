@@ -24,7 +24,7 @@ const RecentFlightCard = (props: RecentFlightCardProps) => {
             <Col xs={2}>
               <Image width={40} height={40} src={chooseRandomIcon(props.uid)} alt={'Recent Flight Balloon Icon'}/>
             </Col>
-            <Col xs={4}>
+            <Col xs={5}>
               <strong>{props.modem.name}</strong>
             </Col>
             <Col>
