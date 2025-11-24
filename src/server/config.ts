@@ -24,29 +24,21 @@
 
 // API keys
 
-const GOOGLE_MAPS_KEY = process.env.GOOGLE_MAPS_API_KEY;
+export const GOOGLE_MAPS_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
 // Constants
 
 // Minimum satellites required for a flight point to be considered valid
-const MIN_SATELLITES = 6;
+export const MIN_SATELLITES = 6;
 // Number of IMEI digits to expose to a requesting client
-const EXPOSED_IMEI_DIGITS = 5;
+export const EXPOSED_IMEI_DIGITS = 5;
 // Number of hours a flight will show up in active flights list
-const ACTIVE_FLIGHT_DELTA_HRS = 12;
+export const ACTIVE_FLIGHT_DELTA_HRS = 12;
 // Minimum required time delta between contiguous points in a flight
-const CONTIG_FLIGHT_DELTA_HRS = 2;
+export const CONTIG_FLIGHT_DELTA_HRS = 2;
  // Minimum allowed altitude for flight point assignment
-const MIN_ALTITUDE = -86;
+export const MIN_ALTITUDE = -86;
 // Maximum allowed altitude for flight point assignment
-const MAX_ALTITUDE = 60_000;
-
-export {
-    GOOGLE_MAPS_KEY,
-    MIN_SATELLITES,
-    EXPOSED_IMEI_DIGITS,
-    ACTIVE_FLIGHT_DELTA_HRS,
-    CONTIG_FLIGHT_DELTA_HRS,
-    MIN_ALTITUDE,
-    MAX_ALTITUDE
-}
+export const MAX_ALTITUDE = 60_000;
+// Number of flights to fetch for `recent` endpoint  // TODO: replace with lazy loading scheme
+export const RECENT_FLIGHTS_COUNT = 10;

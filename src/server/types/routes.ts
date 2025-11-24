@@ -112,6 +112,16 @@ export interface RecentActiveFlightsResponse {
   points?: Array<ActiveFlightRecord>;
 }
 
+export interface RecentFlightRecord {
+  uid: string;
+  modem: RedactedModem;
+  startDate: string;
+}
+
+export interface RecentFlightsResponse {
+  recent: RecentFlightRecord[];
+}
+
 // Update endpoint
 //-----------------------------------------------------
 export interface UpdatePoint {

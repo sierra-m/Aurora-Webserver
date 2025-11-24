@@ -33,7 +33,8 @@ import ModemList from "../util/modems.ts";
 
 import type {
     FlightsResponse, SearchRecord, SearchResponse,
-    ActiveFlightsQuery, ActiveFlightRecord, RecentActiveFlightsResponse
+    ActiveFlightsQuery, ActiveFlightRecord, RecentActiveFlightsResponse,
+    RecentFlightRecord, RecentFlightsResponse
 } from "../types/routes.ts";
 import type {FlightRegistryQuery} from "../types/db.ts";
 
@@ -51,6 +52,7 @@ export default class MetaRoute {
         this.router.get('/flights', this.handleFlights.bind(this));
         this.router.get('/search', this.handleSearch.bind(this));
         this.router.get('/active', this.handleActive.bind(this));
+        this.router.get('/recent', this.handleRecent.bind(this));
     }
 
     async handleModems (req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -263,6 +265,30 @@ export default class MetaRoute {
             } else {
                 res.json({status: 'none'} as RecentActiveFlightsResponse)
             }
+        } catch (e) {
+            console.log(e);
+            next(e);
+        }
+    }
+
+    async handleRecent (req: express.Request, res: express.Response, next: express.NextFunction) {
+        try {
+            const recentResult = await query<FlightRegistryQuery>(
+              `WITH RecentFlightPoints AS (` +
+              `SELECT uid, MAX(datetime) AS max_datetime FROM flights GROUP BY uid ORDER BY max_datetime DESC LIMIT ${config.RECENT_FLIGHTS_COUNT}` +
+              `) SELECT t1.* FROM public."flight-registry" t1 INNER JOIN RecentFlightPoints t2 ON t1.uid = t2.uid`
+            );
+            if (recentResult.length == 0) {
+                throw new Error('No recent flights found!');
+            }
+            const recentFlights: RecentFlightRecord[] = recentResult.map(item => ({
+                uid: item.uid,
+                modem: this.modemList.get(item.imei)!.getRedacted(),
+                startDate: item.start_date
+            }));
+            res.json({
+                recent: recentFlights
+            } as RecentFlightsResponse);
         } catch (e) {
             console.log(e);
             next(e);
