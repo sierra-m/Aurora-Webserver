@@ -276,7 +276,7 @@ export default class MetaRoute {
             const recentResult = await query<FlightRegistryQuery>(
               `WITH RecentFlightPoints AS (` +
               `SELECT uid, MAX(datetime) AS max_datetime FROM flights GROUP BY uid ORDER BY max_datetime DESC LIMIT ${config.RECENT_FLIGHTS_COUNT}` +
-              `) SELECT t1.* FROM public."flight-registry" t1 INNER JOIN RecentFlightPoints t2 ON t1.uid = t2.uid`
+              `) SELECT t1.* FROM public."flight-registry" t1 INNER JOIN RecentFlightPoints t2 ON t1.uid = t2.uid ORDER BY t1.start_date DESC`
             );
             if (recentResult.length == 0) {
                 throw new Error('No recent flights found!');
