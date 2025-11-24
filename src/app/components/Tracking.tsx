@@ -56,6 +56,7 @@ import LandingPrediction from '../util/landing'
 import LogWindow, {type LogClearFunc, type LogPrintFunc} from './LogWindow'
 import { SelectedFlightData, ActiveFlightCard } from "./Containers";
 import FlightSelect from "./FlightSelect";
+import RecentFlightCard from "./RecentFlightCard.tsx";
 
 import {Flight, FlightPoint, type FlightUid, type Position} from '../util/flight'
 import { getVelocity } from "../util/velocity";
@@ -69,7 +70,9 @@ import type {
   SearchRecord,
   SearchResponse,
   JsvFormat, Vector,
-  UpdateResponse
+  UpdateResponse,
+  RecentFlightRecord,
+  RecentFlightsResponse
 } from "../../server/types/routes.ts";
 import type {RedactedModem} from "../../server/types/util.ts";
 import {useNavigate, useSearchParams} from "react-router-dom";
@@ -174,6 +177,9 @@ const Tracking = (props: TrackingProps) => {
 
   // Active flights tab data
   const [activeFlights, setActiveFlights] = React.useState<Array<ActiveFlight>>([]);
+
+  // Recent flights (e.g. 10 most recent flights)
+  const [recentFlights, setRecentFlights] = React.useState<RecentFlightRecord[]>([]);
 
   // Selected point in a flight, represented by a balloon icon when in flight view
   const [selectedPoint, setSelectedPoint] = React.useState<FlightPoint | null>(null);
@@ -458,6 +464,18 @@ const Tracking = (props: TrackingProps) => {
     }
   }, [fetchFlight, pinLogClear]);
 
+  const fetchRecent = React.useCallback(async () => {
+    const res = await fetch('/api/meta/recent');
+    const data: RecentFlightsResponse = await res.json();
+    if (res.status !== 200) {
+      console.log(`Error fetching recent flights: ${data}`);
+      return;
+    }
+    if ('recent' in data) {
+      setRecentFlights(data.recent);
+    }
+  }, []);
+
   const onVelocityProfileChange = React.useCallback((change: string) => {
     setChosenVelocityRadio(change);
     console.log(`Velocity Profile: ${change}`)
@@ -549,6 +567,7 @@ const Tracking = (props: TrackingProps) => {
   const initialSetup = React.useCallback(async () => {
     await fetchIDList();
     await fetchActive();
+    await fetchRecent();
     if (activeInterval) {
       clearInterval(activeInterval);
     }
@@ -651,10 +670,30 @@ const Tracking = (props: TrackingProps) => {
                 }
               </Accordion.Body>
             </Accordion.Item>
-            <Accordion.Item eventKey={'flight-select'}>
+            <Accordion.Item eventKey={'recent-flights'}>
               <Accordion.Header>
                 <i className="bi bi-clock-history me-2"></i>
-                Past Flights
+                Recent Flights
+              </Accordion.Header>
+              <Accordion.Body>
+                {recentFlights.length > 0 &&
+                  recentFlights.map(recentFlight => (
+                    <RecentFlightCard
+                      uid={recentFlight.uid}
+                      modem={recentFlight.modem}
+                      startDate={dayjs.utc(recentFlight.startDate, 'YYYY-MM-DD')}
+                      callback={() => {
+                        fetchFlight(recentFlight.uid);
+                      }}
+                      key={recentFlight.uid}
+                    />
+                  ))}
+              </Accordion.Body>
+            </Accordion.Item>
+            <Accordion.Item eventKey={'flight-lookup'}>
+              <Accordion.Header>
+                <i className="bi bi-search me-2"></i>
+                Flight Lookup
               </Accordion.Header>
               <Accordion.Body>
                 <FlightSelect

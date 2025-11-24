@@ -1,0 +1,7 @@
+.quick-shadow:hover::after {
+    opacity: 1;
+}
+
+.recent-flight-card:hover {
+    background-color: var(--bs-secondary-bg);
+}
