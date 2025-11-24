@@ -21,14 +21,14 @@ const RecentFlightCard = (props: RecentFlightCardProps) => {
       <Card className={'quick-shadow recent-flight-card'} border={'primary'}>
         <Card.Body>
           <Row className="align-items-center">
-            <Col xs={3}>
+            <Col xs={2}>
               <Image width={40} height={40} src={chooseRandomIcon(props.uid)} alt={'Recent Flight Balloon Icon'}/>
             </Col>
             <Col xs={4}>
               <strong>{props.modem.name}</strong>
             </Col>
             <Col>
-              <p className={'text-primary'}>{props.startDate.format("YYYY-MM-DD")}</p>
+              <p className={'text-primary mb-0'}>{props.startDate.format("YYYY-MM-DD")}</p>
             </Col>
           </Row>
         </Card.Body>
