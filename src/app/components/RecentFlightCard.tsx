@@ -27,7 +27,7 @@ const RecentFlightCard = (props: RecentFlightCardProps) => {
             <Col xs={5}>
               <strong>{props.modem.name}</strong>
             </Col>
-            <Col>
+            <Col className="text-end">
               <p className={'text-primary mb-0'}>{props.startDate.format("YYYY-MM-DD")}</p>
             </Col>
           </Row>
